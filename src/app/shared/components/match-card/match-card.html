@@ -1,0 +1,107 @@
+<div
+  class="group relative flex items-center justify-between gap-2 md:gap-4 rounded-[1.8rem] border border-slate-200 bg-white p-4 md:p-5 shadow-sm hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 overflow-hidden min-h-[100px]"
+>
+  <!-- Columna Grupo (Badge Lateral) -->
+  <div
+    class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500 opacity-20 transition-all group-hover:opacity-100"
+  ></div>
+
+  <div
+    class="shrink-0 w-14 flex flex-col items-center justify-center border-r border-slate-100 ml-1 py-1 pr-3"
+  >
+    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Grupo</p>
+    <span class="text-2xl font-black text-slate-900 leading-none tracking-tighter">{{
+      group() || '-'
+    }}</span>
+  </div>
+
+  <!-- Equipo Local -->
+  <div
+    class="flex items-center gap-3 w-[30%] min-w-0 transition-transform duration-300 group-hover:scale-[1.02]"
+  >
+    <!-- Banderas -->
+    <div class="shrink-0 flex -space-x-5 hover:space-x-1 transition-all h-12 items-center">
+      @if (homeData()?.repechageFlagUrl && homeData()!.repechageFlagUrl!.length > 0) {
+        @for (url of homeData()?.repechageFlagUrl; track url) {
+          <img
+            [src]="url"
+            (error)="$any($event.target).src = 'https://flagcdn.com/unknown.svg'"
+            class="w-12 h-12 aspect-square object-cover rounded-full border-[3px] border-white shadow-lg relative"
+            [style.zIndex]="10 - $index"
+          />
+        }
+      } @else {
+        <img
+          [src]="homeData()?.flagUrl || 'https://flagcdn.com/unknown.svg'"
+          (error)="$any($event.target).src = 'https://flagcdn.com/unknown.svg'"
+          class="w-12 h-12 aspect-square object-cover rounded-full shadow-lg border-[3px] border-white"
+        />
+      }
+    </div>
+    <!-- Nombre -->
+    <div class="flex flex-col min-w-0">
+      <span
+        class="text-xs md:text-sm font-black text-slate-800 uppercase tracking-tighter leading-tight truncate"
+        >{{ homeData()?.name }}</span
+      >
+    </div>
+  </div>
+
+  <!-- Zona Central (Marcadores + Fecha/Hora destacada) -->
+  <div class="shrink-0 flex flex-col items-center justify-center gap-3">
+    <div
+      class="flex flex-col items-center bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100/50 shadow-sm"
+    >
+      <span class="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none">
+        {{ formattedDate() | date: 'dd/MM' }} • {{ formattedDate() | date: 'HH:mm' }}hs
+      </span>
+    </div>
+
+    <div
+      class="flex items-center justify-center gap-2 bg-white px-4 py-3 rounded-[1.5rem] border border-slate-200 shadow-xl shadow-slate-200/40"
+    >
+      <ng-content select="[scores]"></ng-content>
+    </div>
+
+    <div class="transform scale-90 opacity-40 -mt-1">
+      <ng-content select="[info]"></ng-content>
+    </div>
+  </div>
+
+  <!-- Equipo Visitante -->
+  <div
+    class="flex flex-row-reverse items-center gap-3 w-[30%] min-w-0 transition-transform duration-300 group-hover:scale-[1.02]"
+  >
+    <!-- Banderas -->
+    <div class="shrink-0 flex -space-x-5 hover:space-x-1 transition-all h-12 items-center">
+      @if (awayData()?.repechageFlagUrl && awayData()!.repechageFlagUrl!.length > 0) {
+        @for (url of awayData()?.repechageFlagUrl; track url) {
+          <img
+            [src]="url"
+            (error)="$any($event.target).src = 'https://flagcdn.com/unknown.svg'"
+            class="w-12 h-12 aspect-square object-cover rounded-full border-[3px] border-white shadow-lg relative"
+            [style.zIndex]="10 - $index"
+          />
+        }
+      } @else {
+        <img
+          [src]="awayData()?.flagUrl || 'https://flagcdn.com/unknown.svg'"
+          (error)="$any($event.target).src = 'https://flagcdn.com/unknown.svg'"
+          class="w-12 h-12 aspect-square object-cover rounded-full shadow-lg border-[3px] border-white"
+        />
+      }
+    </div>
+    <!-- Nombre -->
+    <div class="flex flex-col min-w-0 text-right">
+      <span
+        class="text-xs md:text-sm font-black text-slate-800 uppercase tracking-tighter leading-tight truncate"
+        >{{ awayData()?.name }}</span
+      >
+    </div>
+  </div>
+
+  <!-- Acción -->
+  <div class="shrink-0">
+    <ng-content select="[action]"></ng-content>
+  </div>
+</div>

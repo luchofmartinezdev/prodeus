@@ -1,1 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
+/* src/styles.css */
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+}
+
+/* Efecto Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Estilo de Inputs global */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

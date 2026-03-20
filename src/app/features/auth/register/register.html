@@ -1,0 +1,96 @@
+<div class="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+    <div class="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white p-10 shadow-xl">
+
+        <div class="mb-8 text-center">
+            <div
+                class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 font-black text-white">
+                M</div>
+            <h2 class="text-3xl font-black text-slate-800 tracking-tight">
+                {{ registerMode() === 'user' ? 'Únete como Empleado' : 'Registra tu Empresa' }}
+            </h2>
+            <p class="text-slate-400">
+                {{ registerMode() === 'user' ? 'Participa en el prode de tu empresa' : 'Crea un espacio para tus empleados' }}
+            </p>
+        </div>
+
+        <!-- Toggle selector -->
+        <div class="mb-8 flex p-1 bg-slate-100 rounded-2xl border border-slate-200">
+            <button (click)="setMode('user')"
+                class="flex-1 py-2 text-sm font-bold rounded-xl transition-all"
+                [class.bg-white.text-indigo-600.shadow-sm]="registerMode() === 'user'"
+                [class.text-slate-400]="registerMode() === 'company'">
+                Soy Empleado
+            </button>
+            <button (click)="setMode('company')"
+                class="flex-1 py-2 text-sm font-bold rounded-xl transition-all"
+                [class.bg-white.text-indigo-600.shadow-sm]="registerMode() === 'company'"
+                [class.text-slate-400]="registerMode() === 'user'">
+                Soy Empresa
+            </button>
+        </div>
+
+        @if (errorMessage()) {
+        <div class="mb-6 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-600 border border-red-100">
+            {{ errorMessage() }}
+        </div>
+        }
+
+        <form (submit)="onRegister()" class="space-y-5">
+            @if (registerMode() === 'company') {
+                <div>
+                    <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">Nombre de la Empresa</label>
+                    <input type="text" [(ngModel)]="companyName" name="companyName" required
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                        placeholder="Ej. Acme Corp">
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">WhatsApp de la Empresa</label>
+                    <input type="tel" [(ngModel)]="whatsapp" name="whatsapp" required
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                        placeholder="Ej. 54911...">
+                    <p class="mt-1 text-[10px] text-slate-400">Sin +, espacios ni guiones. Ej: 5491155555555</p>
+                </div>
+            }
+
+            <div>
+                <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">Tu Nombre</label>
+                <input type="text" [(ngModel)]="name" name="name" required
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                    placeholder="Ej. Alex Smith">
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">Correo @empresa.com</label>
+                <input type="email" [(ngModel)]="email" name="email" required
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                    placeholder="alex@empresa.com">
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">Contraseña</label>
+                <input type="password" [(ngModel)]="password" name="password" required
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                    placeholder="••••••••">
+            </div>
+
+            @if (registerMode() === 'user') {
+            <div class="pt-2">
+                <label class="mb-1.5 block text-xs font-bold uppercase text-indigo-600">Código de Invitación</label>
+                <input type="text" [(ngModel)]="companyCode" name="companyCode"
+                    class="w-full rounded-xl border-2 border-indigo-100 bg-indigo-50/30 px-4 py-3.5 font-bold text-indigo-700 outline-none transition-all focus:border-indigo-500 focus:ring-0"
+                    placeholder="CÓDIGO-2026">
+            </div>
+            }
+
+            <button type="submit" [disabled]="loading()"
+                class="w-full mt-4 rounded-2xl bg-slate-900 py-4 text-lg font-bold text-white shadow-xl shadow-slate-200 transition-all active:scale-95 hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed">
+                {{ loading() ? 'Creando cuenta...' : 'Registrarme' }}
+            </button>
+        </form>
+
+        <p class="mt-8 text-center text-sm font-medium text-slate-400">
+            ¿Ya tienes cuenta? <a routerLink="/login" class="font-bold text-indigo-600">Inicia sesión</a>
+        </p>
+    </div>
+</div>

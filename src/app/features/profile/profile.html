@@ -1,0 +1,14 @@
+<div class="max-w-2xl mx-auto rounded-3xl bg-white p-8 border border-slate-200">
+    <h2 class="text-2xl font-bold mb-6">Mi Perfil</h2>
+    <div class="flex items-center gap-6 mb-8">
+        <div class="h-20 w-20 rounded-full bg-indigo-100 flex items-center justify-center text-3xl">👤</div>
+        <div>
+            <p class="text-xl font-bold text-slate-800">{{ auth.user()?.displayName }}</p>
+            <p class="text-slate-500">{{ auth.user()?.email }}</p>
+        </div>
+    </div>
+    <button (click)="auth.logout()"
+        class="w-full py-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors">
+        Cerrar Sesión Segura
+    </button>
+</div>

@@ -1,0 +1,43 @@
+<div class="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+    <div class="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white p-10 shadow-xl">
+        <div class="mb-10 text-center">
+            <div
+                class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 font-black text-white text-xl">
+                M</div>
+            <h2 class="text-3xl font-black text-slate-800">Bienvenido</h2>
+            <p class="text-slate-400">Ingresa tus credenciales corporativas</p>
+        </div>
+
+        @if (errorMessage()) {
+        <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium border border-red-100">
+            {{ errorMessage() }}
+        </div>
+        }
+
+        <form (ngSubmit)="login()" #loginForm="ngForm" class="space-y-6">
+            <div>
+                <label class="mb-2 block text-xs font-bold uppercase text-slate-500">Email de la empresa</label>
+                <input type="email" name="email" [(ngModel)]="email" required placeholder="nombre@empresa.com"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 font-medium text-slate-800 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50">
+            </div>
+
+            <div>
+                <div class="mb-2 flex items-center justify-between">
+                    <label class="block text-xs font-bold uppercase text-slate-500">Contraseña</label>
+                    <a href="#" class="text-xs font-bold text-indigo-600 hover:underline">¿Olvidaste tu contraseña?</a>
+                </div>
+                <input type="password" name="password" [(ngModel)]="password" required placeholder="••••••••"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 font-medium text-slate-800 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50">
+            </div>
+
+            <button type="submit" [disabled]="loading() || !loginForm.form.valid"
+                class="w-full rounded-2xl bg-slate-900 py-4 text-lg font-bold text-white shadow-xl shadow-slate-200 transition-all active:scale-95 hover:bg-black disabled:opacity-50">
+                {{ loading() ? 'Iniciando sesión...' : 'Entrar al Prode' }}
+            </button>
+        </form>
+
+        <p class="mt-8 text-center text-sm font-medium text-slate-400">
+            ¿Tu empresa no tiene cuenta? <a routerLink="/register" [queryParams]="{ mode: 'company' }" class="font-bold text-indigo-600">Regístrala aquí</a>
+        </p>
+    </div>
+</div>

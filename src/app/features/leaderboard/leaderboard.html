@@ -1,0 +1,80 @@
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div>
+            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Ranking</h2>
+            <p class="text-slate-500 font-medium">Compite con tus colegas por el primer puesto.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4">
+            <!-- Selector de Torneo -->
+            <div class="flex items-center gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+                <label class="text-xs font-black uppercase text-slate-400 ml-2">Torneo:</label>
+                <select [ngModel]="tournamentService.currentTournamentId()" (ngModelChange)="selectTournament($event)"
+                  class="bg-transparent border-none font-bold text-indigo-600 focus:ring-0">
+                  @for (t of tournaments(); track t.id) {
+                    <option [value]="t.id">{{t.name}}</option>
+                  }
+                </select>
+            </div>
+
+            <div class="rounded-2xl bg-white border border-slate-200 px-4 py-2 shadow-sm">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ranking: </span>
+                <span class="text-sm font-black text-indigo-600 uppercase">{{ companyName() }}</span>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading()) {
+    <div class="space-y-4">
+        <div *ngFor="let i of [1,2,3,4,5]" class="h-20 w-full animate-pulse rounded-2xl bg-slate-100"></div>
+    </div>
+    } @else {
+    <div class="space-y-3">
+        <div class="grid grid-cols-12 px-6 py-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div class="col-span-1">Pos</div>
+            <div class="col-span-7 lg:col-span-8">Participante</div>
+            <div class="col-span-4 lg:col-span-3 text-right">Puntos Totales</div>
+        </div>
+
+        @for (user of leaderboard(); track user.id; let i = $index) {
+        <div class="group grid grid-cols-12 items-center rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-indigo-200 hover:shadow-md"
+            [class.border-indigo-500.bg-indigo-50/10]="user.id === auth.user()?.uid">
+
+            <div class="col-span-1 flex justify-center">
+                @if (i === 0) { <span class="text-2xl">🥇</span> }
+                @else if (i === 1) { <span class="text-2xl">🥈</span> }
+                @else if (i === 2) { <span class="text-2xl">🥉</span> }
+                @else { <span class="font-black text-slate-300 group-hover:text-slate-500">#{{ i + 1 }}</span> }
+            </div>
+
+            <div class="col-span-7 lg:col-span-8 flex items-center gap-4">
+                <img [src]="user.photoURL || 'https://ui-avatars.com/api/?name=' + user.name"
+                    class="h-10 w-10 rounded-xl border border-slate-100 shadow-sm" [alt]="user.name">
+                <div>
+                    <p class="font-bold text-slate-800 leading-none">
+                        {{ user.name }}
+                        @if (user.id === auth.user()?.uid) {
+                        <span
+                            class="ml-2 rounded-md bg-indigo-100 px-1.5 py-0.5 text-[10px] font-black text-indigo-600 uppercase">Tú</span>
+                        }
+                    </p>
+                    <p class="text-xs text-slate-400">{{ user.email }}</p>
+                </div>
+            </div>
+
+            <div class="col-span-4 lg:col-span-3 text-right">
+                <span class="text-xl font-black text-slate-800 tracking-tight">{{ user.totalPoints || 0 }}</span>
+                <span class="ml-1 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">pts</span>
+            </div>
+        </div>
+        } @empty {
+        <div
+            class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+            <span class="text-4xl mb-4">🏟️</span>
+            <p class="font-bold text-slate-500">Aún no hay participantes en esta empresa.</p>
+            <p class="text-sm text-slate-400">¡Invita a tus compañeros a unirse!</p>
+        </div>
+        }
+    </div>
+    }
+</div>

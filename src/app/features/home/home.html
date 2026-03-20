@@ -1,0 +1,45 @@
+<div class="min-h-screen bg-white font-sans antialiased text-slate-900">
+  
+  <nav class="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-md">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div class="flex items-center gap-2">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 font-black text-white shadow-lg shadow-indigo-200">M</div>
+        <span class="text-2xl font-black tracking-tight">Matchly</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <a routerLink="/login" class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Iniciar sesión</a>
+        <a routerLink="/register" [queryParams]="{ mode: 'company' }" class="rounded-full bg-slate-900 px-6 py-2.5 text-sm font-bold text-white shadow-xl shadow-slate-200 transition-transform hover:scale-105 active:scale-95">
+          Crear cuenta empresa
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="relative overflow-hidden px-6 pt-24 pb-32 lg:pt-32">
+    <div class="absolute top-0 -z-10 h-full w-full bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-indigo-50 via-white to-white opacity-60"></div>
+
+    <div class="mx-auto max-w-5xl text-center">
+      <div class="mb-6 inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-4 py-1.5 text-sm font-bold text-indigo-700">
+        ⚽ Mundial 2026 Ready
+      </div>
+      <h1 class="mb-8 text-6xl font-black tracking-tight text-slate-900 lg:text-8xl">
+        El prode que <br>
+        <span class="bg-linear-to-r from-indigo-600 to-emerald-500 bg-clip-text text-transparent">une a tu equipo.</span>
+      </h1>
+      <p class="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-500">
+        Aumenta el compromiso de tus empleados con la plataforma de predicciones deportivas más moderna. Fácil de usar, automática y diseñada para empresas.
+      </p>
+      
+      <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <a routerLink="/register" class="w-full rounded-2xl bg-indigo-600 px-8 py-5 text-lg font-bold text-white shadow-2xl shadow-indigo-200 transition-all hover:-translate-y-1 hover:bg-indigo-700 sm:w-auto text-center">
+          Empezar ahora — Gratis
+        </a>
+        <button class="w-full rounded-2xl border border-slate-200 bg-white px-8 py-5 text-lg font-bold text-slate-600 transition-all hover:bg-slate-50 sm:w-auto">
+          Ver demo en vivo
+        </button>
+      </div>
+    </div> 
+  </section>
+
+  <app-footer></app-footer>
+</div>

@@ -1,0 +1,112 @@
+<div class="max-w-7xl mx-auto space-y-8 p-6">
+  <header class="flex flex-col md:flex-row justify-between items-center gap-6">
+    <div>
+      <h1 class="text-4xl font-black text-slate-900 tracking-tight italic uppercase">
+        Tus Pronósticos
+      </h1>
+      <p class="text-slate-500 font-medium">Suma puntos en el ranking de tu empresa</p>
+    </div>
+
+    <!-- Selector de Torneo -->
+    <div class="flex items-center gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+      <label class="text-xs font-black uppercase text-slate-400 ml-2">Torneo:</label>
+      <select
+        [ngModel]="tournamentService.currentTournamentId()"
+        (ngModelChange)="selectTournament($event)"
+        class="bg-transparent border-none font-bold text-indigo-600 focus:ring-0"
+      >
+        @for (t of tournaments(); track t.id) {
+          <option [value]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </div>
+  </header>
+
+  <nav
+    class="flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200 sticky top-4 z-20 shadow-sm backdrop-blur-md"
+  >
+    @for (tab of [1, 2, 3]; track tab) {
+      <button
+        (click)="activeTab.set(tab)"
+        [class.bg-white]="activeTab() === tab"
+        [class.text-indigo-600]="activeTab() === tab"
+        [class.shadow-md]="activeTab() === tab"
+        class="flex-1 py-3 rounded-xl text-sm font-black transition-all duration-200 text-slate-500 hover:text-indigo-500 uppercase tracking-widest"
+      >
+        Fecha {{ tab }}
+      </button>
+    }
+  </nav>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
+    @if (loading()) {
+      <div
+        class="lg:col-span-3 md:col-span-2 text-center py-20 font-bold text-slate-400 animate-pulse"
+      >
+        Cargando partidos...
+      </div>
+    } @else {
+      @for (match of filteredMatches; track match.id) {
+        <app-match-card
+          [homeId]="match.homeTeamId"
+          [awayId]="match.awayTeamId"
+          [group]="match.group"
+          [matchDate]="match.matchDate"
+        >
+          <div scores class="flex items-center gap-2">
+            <input
+              type="number"
+              [(ngModel)]="match.userHomePrediction"
+              placeholder="0"
+              class="w-11 h-11 text-xl font-black text-center text-slate-800 bg-white rounded-xl border border-slate-200 shadow-sm focus:ring-4 focus:ring-indigo-500/20 outline-none"
+            />
+
+            <span class="text-slate-300 font-black text-sm lowercase">vs</span>
+
+            <input
+              type="number"
+              [(ngModel)]="match.userAwayPrediction"
+              placeholder="0"
+              class="w-11 h-11 text-xl font-black text-center text-slate-800 bg-white rounded-xl border border-slate-200 shadow-sm focus:ring-4 focus:ring-indigo-500/20 outline-none"
+            />
+          </div>
+
+          <button
+            action
+            (click)="savePrediction(match)"
+            class="bg-indigo-600 hover:bg-slate-900 text-white w-10 h-10 flex items-center justify-center rounded-xl font-bold text-lg transition-all active:scale-90 shadow-lg shadow-indigo-100"
+            title="Guardar Pronóstico"
+          >
+            <!-- ICON DISKETTE WITHOUT BACKGROUND -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-save-icon lucide-save"
+            >
+              <path
+                d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
+              />
+              <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" />
+              <path d="M7 3v4a1 1 0 0 0 1 1h7" />
+            </svg>
+          </button>
+        </app-match-card>
+      } @empty {
+        <div
+          class="lg:col-span-3 md:col-span-2 text-center py-20 bg-slate-50 rounded-[3rem] border-4 border-dashed border-slate-100"
+        >
+          <p class="text-slate-400 font-bold italic text-lg tracking-tight">
+            No hay partidos registrados en esta fecha.
+          </p>
+        </div>
+      }
+    }
+  </div>
+</div>

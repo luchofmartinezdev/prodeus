@@ -1,0 +1,75 @@
+<div class="flex h-screen bg-slate-50 font-sans antialiased text-slate-900">
+  
+  <aside class="flex w-20 flex-col items-center border-r border-slate-200 bg-white py-8 lg:w-64 lg:items-start lg:px-6 transition-all">
+    <div class="mb-10 flex items-center gap-3 px-2">
+      <div class="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-indigo-100">M</div>
+      <span class="hidden text-xl font-black tracking-tight lg:block">Matchly</span>
+    </div>
+
+    <nav class="flex w-full flex-1 flex-col gap-2">
+      <a routerLink="/dashboard" routerLinkActive="bg-indigo-50 text-indigo-700 border-indigo-100"
+        class="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 transition-all hover:bg-slate-50 group">
+        <span class="text-xl">📊</span>
+        <span class="hidden font-bold lg:block">Dashboard</span>
+      </a>
+      
+      @if (auth.user()?.role !== 'superadmin') {
+        <a routerLink="/predictions" routerLinkActive="bg-indigo-50 text-indigo-700 border-indigo-100"
+          class="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 transition-all hover:bg-slate-50 group">
+          <span class="text-xl">⚽</span>
+          <span class="hidden font-bold lg:block">Predicciones</span>
+        </a>
+
+        <a routerLink="/leaderboard" routerLinkActive="bg-indigo-50 text-indigo-700 border-indigo-100"
+          class="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 transition-all hover:bg-slate-50 group">
+          <span class="text-xl">🏆</span>
+          <span class="hidden font-bold lg:block">Ranking</span>
+        </a>
+      }
+
+      @if (auth.user()?.role === 'superadmin') {
+        <a routerLink="/admin-panel" routerLinkActive="bg-indigo-50 text-indigo-700 border-indigo-100"
+          class="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 transition-all hover:bg-slate-50 group">
+          <span class="text-xl">⚙️</span>
+          <span class="hidden font-bold lg:block">Admin Panel</span>
+        </a>
+      }
+    </nav>
+
+    <div class="w-full border-t border-slate-100 pt-6">
+      <button (click)="logout()" 
+        class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all font-bold">
+        <span>🚪</span>
+        <span class="hidden lg:block">Salir</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="flex-1 overflow-y-auto px-6 py-8 lg:px-12">
+    <header class="mb-10 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-black text-slate-800 tracking-tight">Matchly Pro</h1>
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-widest">Mundial 2026</p>
+      </div>
+
+      <div class="flex items-center gap-4 bg-white p-2 pr-4 rounded-2xl border border-slate-200 shadow-sm">
+        @if (auth.user(); as currentUser) {
+          @if (currentUser.role !== 'superadmin') {
+            <div class="text-right pl-2">
+              <p class="text-[10px] font-bold uppercase text-slate-400 leading-none">Mis Puntos</p>
+              <p class="text-lg font-black text-indigo-600">{{ currentUser.totalPoints || 0 }}</p>
+            </div>
+          }
+          <img [src]="currentUser.photoURL || 'https://ui-avatars.com/api/?name=' + currentUser.displayName" 
+               class="h-10 w-10 rounded-xl object-cover border border-slate-100 shadow-sm" 
+               [alt]="currentUser.displayName">
+        }
+      </div>
+    </header>
+
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Modales Globales -->
+  <app-alert-modal></app-alert-modal>
+</div>
