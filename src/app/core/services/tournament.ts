@@ -60,7 +60,8 @@ export class TournamentService {
       list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       this.tournaments.set(list);
     } catch (e) {
-      console.error('Matchly Service: Error cargando torneos:', e);
+      console.error('Prodeus Service: Error cargando torneos:', e);
+
     } finally {
       this.loading.set(false);
     }

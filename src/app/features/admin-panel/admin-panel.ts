@@ -131,7 +131,8 @@ export class AdminPanelComponent implements OnInit {
         this.currentCompany.set(comp);
       }
     } catch (error) {
-      console.error('Matchly Admin: Error en carga inicial:', error);
+      console.error('Prodeus Admin: Error en carga inicial:', error);
+
     } finally {
       this.loading.set(false);
     }

@@ -9,8 +9,9 @@ import { CommonModule } from '@angular/common';
     <div class="max-w-4xl mx-auto space-y-12 p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header class="text-center space-y-4">
         <h1 class="text-5xl font-black text-slate-900 tracking-tight italic uppercase">
-          Reglamento <span class="text-indigo-600">Matchly</span>
+          Reglamento <span class="text-indigo-600">Prodeus</span>
         </h1>
+
         <p class="text-slate-500 font-medium text-lg max-w-2xl mx-auto">
           Demuestra tus conocimientos futbolísticos y compite con tus compañeros. ¡Aprende cómo sumar al máximo!
         </p>

@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "matchly": {
+    "prodeus": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -57,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "matchly:build:production"
+              "buildTarget": "prodeus:build:production"
             },
             "development": {
-              "buildTarget": "matchly:build:development"
+              "buildTarget": "prodeus:build:development"
             }
           },
           "defaultConfiguration": "development"
