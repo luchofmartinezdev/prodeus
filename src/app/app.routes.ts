@@ -55,7 +55,14 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./features/profile/profile')
                         .then(m => m.ProfileComponent)
+            },
+            {
+                path: 'rules',
+                loadComponent: () =>
+                    import('./features/rules/rules')
+                        .then(m => m.RulesComponent)
             }
+
         ]
     },
     {

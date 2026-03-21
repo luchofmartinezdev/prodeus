@@ -93,6 +93,10 @@ export interface Match {
   awayScore?: number;
   status: 'scheduled' | 'live' | 'finished';
   group?: string;           // Ej: 'A', 'B', 'Octavos'
+  stadium?: string;         // Ej: 'Estadio Lusail'
+  matchday?: number;        // Fecha a la que pertenece (1, 2, 3...)
+
+
   predictions?: Prediction[];
   // UI helper fields
   userHomePrediction?: number | null;

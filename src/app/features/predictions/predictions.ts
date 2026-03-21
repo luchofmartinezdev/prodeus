@@ -97,6 +97,11 @@ export class PredictionsComponent {
    * Guarda o actualiza la predicción de un partido específico
    */
   async savePrediction(match: any) {
+    if (this.isMatchClosed(match)) {
+      this.alertService.error('Partido Cerrado', 'No puedes realizar pronósticos sobre partidos que ya terminaron o comenzaron.');
+      return;
+    }
+
     if (match.userHomePrediction === null || match.userAwayPrediction === null) {
       this.alertService.error('Marcador incompleto', 'Ingresa ambos marcadores antes de guardar tu pronóstico.');
       return;
@@ -121,4 +126,15 @@ export class PredictionsComponent {
       this.alertService.error('Error al guardar', 'Hubo un problema técnico al procesar tu predicción.');
     }
   }
-}
+
+  isMatchClosed(match: any): boolean {
+    if (match.status === 'finished') return true;
+    if (!match.matchDate) return false;
+    
+    const now = new Date();
+    // Manejar tanto JS Date como Firestore Timestamp
+    const mDate = match.matchDate?.toDate ? match.matchDate.toDate() : new Date(match.matchDate);
+    return now > mDate;
+  }
+}
+

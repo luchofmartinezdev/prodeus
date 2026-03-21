@@ -1,26 +1,28 @@
-import { onDocumentUpdated } from "firebase-functions/v2/firestore";
-import * as admin from "firebase-admin";
-import { setGlobalOptions } from "firebase-functions/options";
+import {onDocumentUpdated} from "firebase-functions/v2/firestore";
+import {initializeApp, getApps} from "firebase-admin/app";
+import {getFirestore, FieldValue} from "firebase-admin/firestore";
+import {setGlobalOptions} from "firebase-functions/options";
 
-setGlobalOptions({ region: "southamerica-east1" });
+setGlobalOptions({region: "southamerica-east1"});
 
-if (admin.apps.length === 0) {
-  admin.initializeApp();
+if (getApps().length === 0) {
+  initializeApp();
 }
-const db = admin.firestore();
 
-export const calculatepointsonmatchfinish = onDocumentUpdated(
-  "matches/{matchId}",
-  async (event) => {
+const db = getFirestore();
+
+export const calculatePointsOnMatchFinish = onDocumentUpdated(
+  "tournaments/{tourId}/matches/{matchId}",
+  async (event: any) => {
     const newData = event.data?.after.data();
     const oldData = event.data?.before.data();
     const matchId = event.params.matchId;
 
     if (!newData || !oldData) return;
 
-    if (newData["status"] === "finished" && oldData["status"] !== "finished") {
-      const hScore = newData["homeScore"];
-      const aScore = newData["awayScore"];
+    if (newData.status === "finished" && oldData.status !== "finished") {
+      const hScore = newData.homeScore;
+      const aScore = newData.awayScore;
 
       const predictionsSnap = await db.collection("predictions")
         .where("matchId", "==", matchId)
@@ -32,30 +34,38 @@ export const calculatepointsonmatchfinish = onDocumentUpdated(
 
       predictionsSnap.docs.forEach((doc) => {
         const pred = doc.data();
+        const hS = Number(hScore);
+        const aS = Number(aScore);
+        const pH = Number(pred.homeScore);
+        const pA = Number(pred.awayScore);
+
         let points = 0;
 
-        const exact = pred["homeScore"] === hScore &&
-          pred["awayScore"] === aScore;
-
-        const actRes = hScore > aScore ? "H" : hScore < aScore ? "A" : "D";
-        const preRes = pred["homeScore"] > pred["awayScore"] ?
-          "H" : pred["homeScore"] < pred["awayScore"] ? "A" : "D";
+        const exact = pH === hS && pA === aS;
+        const actualTrend = hS > aS ? "H" : hS < aS ? "A" : "D";
+        const predTrend = pH > pA ? "H" : pH < pA ? "A" : "D";
+        const trendCorrect = actualTrend === predTrend;
+        const oneScoreCorrect = (pH === hS || pA === aS);
 
         if (exact) {
-          points = 3;
-        } else if (actRes === preRes) {
+          points = 5;
+        } else if (trendCorrect) {
+          points = 2;
+        } else if (oneScoreCorrect) {
           points = 1;
         }
 
-        batch.update(doc.ref, { points: points, processed: true });
+        batch.update(doc.ref, {points: points, processed: true});
 
-        const userRef = db.collection("users").doc(pred["userId"]);
+        const userRef = db.collection("users").doc(pred.userId);
         batch.update(userRef, {
-          totalPoints: admin.firestore.FieldValue.increment(points),
+          totalPoints: FieldValue.increment(points),
         });
       });
+
 
       await batch.commit();
     }
   },
 );
+

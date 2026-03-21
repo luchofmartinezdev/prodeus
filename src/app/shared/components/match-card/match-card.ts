@@ -13,7 +13,9 @@ export class MatchCardComponent {
   awayId = input.required<string>();
   group = input<string>();
   matchDate = input<any>();
+  stadium = input<string>();
   hasActionContent = input(false);
+
 
   private tournamentService = inject(TournamentService);
 

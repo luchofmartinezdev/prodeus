@@ -7,11 +7,14 @@ import {
   addDoc,
   getDocs,
   updateDoc,
+  deleteDoc,
   doc,
   orderBy,
   query,
-  writeBatch
+  writeBatch,
+  where
 } from 'firebase/firestore';
+
 
 // Importación de tipos y constantes
 import { COUNTRIES_DATA, Country } from '../../core/data/countries';
@@ -47,6 +50,7 @@ export class AdminPanelComponent implements OnInit {
   currentCompany = signal<Company | null>(null);
   selectedMatchday = signal<number>(1);
   bulkJson = signal<string>('');
+  updatingMatch = signal<string | null>(null);
 
   // Vista Previa de Carga Masiva
   bulkPreview = signal<{ id: string; name: string; fileName: string; previewUrl: string; matched: boolean; exists: boolean }[]>([]);
@@ -322,8 +326,10 @@ export class AdminPanelComponent implements OnInit {
         awayScore: null,
         status: 'scheduled',
         stadium: this.newMatch.stadium,
-        group: this.newMatch.group
+        group: this.newMatch.group,
+        matchday: this.selectedMatchday()
       });
+
       await this.loadMatches();
     } catch (e) {
       console.error(e);
@@ -334,15 +340,17 @@ export class AdminPanelComponent implements OnInit {
 
   async setFinalResult(matchId: string, hScore: any, aScore: any) {
     if (!this.currentTournamentId()) return;
-    this.loading.set(true);
+    this.updatingMatch.set(matchId);
     try {
       const matchRef = doc(db, `tournaments/${this.currentTournamentId()}/matches`, matchId);
       await updateDoc(matchRef, { homeScore: Number(hScore), awayScore: Number(aScore), status: 'finished' });
+      this.alertService.success('Resultado Guardado', 'El resultado del partido ha sido actualizado correctamente.');
       await this.loadMatches();
     } catch (e) {
       console.error(e);
+      this.alertService.error('Error', 'Hubo un problema al guardar el resultado.');
     } finally {
-      this.loading.set(false);
+      this.updatingMatch.set(null);
     }
   }
 
@@ -563,7 +571,64 @@ export class AdminPanelComponent implements OnInit {
     }
   }
 
+  async resetTournamentData() {
+    const tournamentId = this.currentTournamentId();
+    console.log('☢️ Reset Iniciado - Tournament ID:', tournamentId);
+
+    if (!tournamentId) {
+      console.warn('⚠️ No se puede resetear: No hay un ID de torneo seleccionado.');
+      this.alertService.error('Error de Reset', 'Primero debes seleccionar un torneo en la pestaña de Torneos.');
+      return;
+    }
+
+    const ok = await this.alertService.confirm(
+      '☢️ PELIGRO: RESET TOTAL',
+      '¿Estás ABSOLUTAMENTE SEGURO de querer borrar todo el progreso de este torneo? Esto afectará partidos, predicciones y ranking mundial.'
+    );
+    if (!ok) {
+      console.log('❌ Reset Cancelado por el usuario.');
+      return;
+    }
+
+    this.loading.set(true);
+    console.log('🔄 Ejecutando Reset en bloque...');
+
+    try {
+      const batch = writeBatch(db);
+
+      // 1. Resetear Partidos del Torneo
+      console.log('- Reseteando partidos...');
+      const matchesSnap = await getDocs(collection(db, `tournaments/${tournamentId}/matches`));
+      matchesSnap.docs.forEach(m => {
+        batch.update(m.ref, { homeScore: null, awayScore: null, status: 'scheduled' });
+      });
+
+      // 2. Borrar Predicciones Globales de este Torneo
+      console.log('- Borrando todas las predicciones asociadas...');
+      const globalPreds = await getDocs(query(collection(db, 'predictions'), where('tournamentId', '==', tournamentId)));
+      globalPreds.docs.forEach(p => batch.delete(p.ref));
+
+      // 3. Resetear Puntos de Usuarios
+      console.log('- Poniendo a 0 el ranking de usuarios...');
+      const usersSnap = await getDocs(collection(db, 'users'));
+      usersSnap.docs.forEach(u => batch.update(u.ref, { totalPoints: 0 }));
+
+      await batch.commit();
+      console.log('✅ Reset Completado con éxito.');
+
+      this.alertService.success('Reset Exitoso', 'El torneo y el ranking han vuelto a cero desde la base de datos.');
+      await this.loadMatches();
+    } catch (e) {
+      console.error('❌ Error crítico en el Reset:', e);
+      this.alertService.error('Error Fatal', 'Hubo un fallo durante el proceso de reset. Revisa la consola.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+
   async seedFullWorldCupFixture() {
+
     if (!this.currentTournamentId()) return;
     this.loading.set(true);
     try {
