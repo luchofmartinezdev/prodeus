@@ -11,6 +11,11 @@ export class AuthService {
 
   constructor() {
     onAuthStateChanged(auth, async (firebaseUser) => {
+      // Reiniciamos el signal a 'undefined' (estado cargando)
+      // Esto evita que el AuthGuard actúe sobre un signal de 'null' previo 
+      // mientras se está buscando la info en Firestore.
+      this.user.set(undefined);
+      
       if (firebaseUser) {
         try {
           const docRef = doc(db, 'users', firebaseUser.uid);
@@ -29,6 +34,7 @@ export class AuthService {
         this.user.set(null);
       }
     });
+
   }
 
   async login(email: string, pass: string) {

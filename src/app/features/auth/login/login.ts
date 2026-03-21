@@ -25,12 +25,17 @@ export class LoginComponent {
 
     try {
       await this.authService.login(this.email, this.password);
-      this.router.navigate(['/dashboard']);
+      // 'navigate' devuelve un booleano indicando si la navegación fue exitosa
+      const success = await this.router.navigate(['/dashboard']);
+      if (!success) {
+        this.loading.set(false);
+      }
     } catch (e: any) {
-      console.error(e);
+      console.error('Error en Login:', e);
       this.errorMessage.set('Email o contraseña incorrectos');
-    } finally {
       this.loading.set(false);
     }
+
+
   }
 }
