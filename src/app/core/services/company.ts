@@ -24,7 +24,6 @@ export class CompanyService {
    */
   async registerCompany(companyData: Partial<Company>, adminUserId: string) {
     const companyId = companyData.id || doc(collection(db, 'companies')).id;
-    // Generar un código simple para unirse: NOMBRE-AÑO
     const safeName = (companyData.name || 'COMPANY').toUpperCase().replace(/\s/g, '');
     const joinCode = `${safeName}-${new Date().getFullYear()}`;
 
@@ -34,15 +33,31 @@ export class CompanyService {
       adminUserId: adminUserId,
       adminEmail: companyData.adminEmail,
       phone: companyData.phone || '',
-      active: true,
+      active: false,           // Inactiva hasta aprobación
+      status: 'pending',       // ⓘ Requiere aprobación del SuperAdmin
       joinCode: joinCode,
       createdAt: Timestamp.now(),
       ...companyData
     };
 
     await setDoc(doc(db, 'companies', companyId), newCompany);
-    
     return { companyId, joinCode };
+  }
+
+  /**
+   * Aprueba una empresa (SuperAdmin)
+   */
+  async approveCompany(companyId: string) {
+    const compRef = doc(db, 'companies', companyId);
+    await updateDoc(compRef, { status: 'approved', active: true });
+  }
+
+  /**
+   * Rechaza una empresa (SuperAdmin)
+   */
+  async rejectCompany(companyId: string) {
+    const compRef = doc(db, 'companies', companyId);
+    await updateDoc(compRef, { status: 'rejected', active: false });
   }
 
   /**

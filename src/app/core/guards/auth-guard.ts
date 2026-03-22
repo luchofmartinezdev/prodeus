@@ -1,4 +1,5 @@
-// src/app/core/guards/auth.guard.ts
+// src/app/core/guards/auth-guard.ts
+
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth';
@@ -22,3 +23,19 @@ export const authGuard = () => {
     take(1)
   );
 };
+
+export const adminGuard = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  return toObservable(authService.user).pipe(
+    filter(user => user !== undefined), // Esperar respuesta de Firestore
+    map(user => {
+      if (user && (user.role === 'admin' || user.role === 'superadmin')) {
+        return true;
+      }
+      return router.parseUrl('/dashboard');
+    }),
+    take(1)
+  );
+};

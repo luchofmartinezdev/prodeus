@@ -53,34 +53,59 @@
         <h2 class="text-xl font-bold text-slate-800">Crear Nuevo Torneo (Prode)</h2>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Nombre</label>
-          <input type="text" [(ngModel)]="newTournament.name" placeholder="Ej: Champions League 24"
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Nombre -->
+        <div class="lg:col-span-3">
+          <label class="text-xs font-bold uppercase text-slate-400">Nombre del Torneo</label>
+          <input type="text" [(ngModel)]="newTournament.name" placeholder="Ej: Champions League 24/25"
             class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
         </div>
+        <!-- Tipo Público/Privado -->
         <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Inicio</label>
+          <label class="text-xs font-bold uppercase text-slate-400">Visibilidad</label>
+          <select [(ngModel)]="newTournament.type"
+            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold">
+            <option value="public">🌍 Público (Global)</option>
+            <option value="private">🔒 Privado (Solo Empresa)</option>
+          </select>
+        </div>
+        <!-- Tipo de Equipos -->
+        <div>
+          <label class="text-xs font-bold uppercase text-slate-400">Tipo de Equipos</label>
+          <select [(ngModel)]="newTournament.teamType"
+            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold">
+            <option value="national">🌍 Selecciones Nacionales</option>
+            <option value="club">🏟️ Clubes</option>
+          </select>
+        </div>
+        <!-- Cantidad de Equipos -->
+        <div>
+          <label class="text-xs font-bold uppercase text-slate-400">Cantidad de Equipos</label>
+          <input type="number" [(ngModel)]="newTournament.teamCount" min="2" max="128"
+            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
+        </div>
+        <!-- Cantidad de Fechas -->
+        <div>
+          <label class="text-xs font-bold uppercase text-slate-400">Cantidad de Fechas</label>
+          <input type="number" [(ngModel)]="newTournament.matchdayCount" min="1" max="50"
+            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
+        </div>
+        <!-- Fecha Inicio -->
+        <div>
+          <label class="text-xs font-bold uppercase text-slate-400">Inicio <span class="normal-case text-slate-300">(Opcional)</span></label>
           <input type="date" [(ngModel)]="newTournament.startDate"
             class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
         </div>
+        <!-- Fecha Fin -->
         <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Fin</label>
+          <label class="text-xs font-bold uppercase text-slate-400">Fin <span class="normal-case text-slate-300">(Opcional)</span></label>
           <input type="date" [(ngModel)]="newTournament.endDate"
             class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
         </div>
-        <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Tipo</label>
-          <select [(ngModel)]="newTournament.type"
-            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold">
-            <option value="private">Privado (Solo Empresa)</option>
-            <option value="public">Público (Global)</option>
-          </select>
-        </div>
       </div>
-      <button (click)="saveTournament()" [disabled]="loading()"
-        class="mt-6 bg-slate-900 text-white px-8 py-3 rounded-xl font-black hover:bg-slate-800 transition-all">
-        {{ loading() ? 'Creando...' : 'Crear Torneo' }}
+      <button (click)="saveTournament()" [disabled]="loading() || !newTournament.name"
+        class="mt-6 bg-slate-900 text-white px-8 py-3 rounded-xl font-black hover:bg-indigo-600 transition-all disabled:opacity-40">
+        {{ loading() ? 'Creando...' : '🚀 Crear Torneo' }}
       </button>
     </section>
     }
@@ -344,52 +369,85 @@
 
   <!-- CONTENIDO TAB 2: EMPRESAS -->
   @if (activeTab() === 2) {
-  <section class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-    <div class="flex items-center justify-between mb-8">
-      <div class="flex items-center gap-3">
-        <span class="text-2xl">🏢</span>
-        <h2 class="text-xl font-bold text-slate-800">Empresas Registradas</h2>
+  <section class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm space-y-8">
+
+    <!-- Solicitudes Pendientes -->
+    @if (pendingCompanies().length > 0) {
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-black text-slate-800 flex items-center gap-2">
+          <span class="h-6 w-6 rounded-full bg-amber-400 text-white text-xs flex items-center justify-center font-black">{{ pendingCompanies().length }}</span>
+          Solicitudes Pendientes
+        </h2>
       </div>
-      <div class="text-xs font-black text-slate-400 bg-slate-50 px-4 py-2 rounded-full uppercase">
-        Total: {{ companies().length }}
+      <div class="space-y-3">
+        @for (company of pendingCompanies(); track company.id) {
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-amber-50 border border-amber-100">
+          <div>
+            <p class="font-black text-slate-800">{{ company.name }}</p>
+            <p class="text-xs text-slate-500 mt-0.5">{{ company.adminEmail }} · WhatsApp: {{ company.phone }}</p>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button (click)="approveCompany(company.id)" [disabled]="loading()"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all active:scale-95">
+              ✅ Aprobar
+            </button>
+            <button (click)="rejectCompany(company.id)" [disabled]="loading()"
+              class="px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-black rounded-xl transition-all active:scale-95">
+              ❌ Rechazar
+            </button>
+          </div>
+        </div>
+        }
       </div>
     </div>
+    <hr class="border-slate-100">
+    }
 
-    <div class="overflow-x-auto">
-      <table class="w-full text-left">
-        <thead>
-          <tr class="border-b border-slate-100 text-xs font-black uppercase text-slate-400">
-            <th class="pb-4">Empresa</th>
-            <th class="pb-4">WhatsApp</th>
-            <th class="pb-4">Admin Email</th>
-            <th class="pb-4">Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (company of companies(); track company.id) {
-          <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-            <td class="py-4 font-bold text-slate-700">{{ company.name }}</td>
-            <td class="py-4 text-slate-500 font-medium">{{ company.phone }}</td>
-            <td class="py-4 text-slate-500 text-xs">{{ company.adminEmail }}</td>
-            <td class="py-4">
-              <span [class]="
-                      company.active
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-amber-100 text-amber-700'
-                    " class="px-3 py-1 rounded-full text-[10px] font-black uppercase">
-                Activa
-              </span>
-            </td>
-          </tr>
-          } @empty {
-          <tr>
-            <td colspan="5" class="py-10 text-center text-slate-400 font-medium italic">
-              No hay empresas registradas.
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
+    <!-- Listado completo -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-black text-slate-800">Todas las Empresas</h2>
+        <div class="text-xs font-black text-slate-400 bg-slate-50 px-4 py-2 rounded-full uppercase">Total: {{ companies().length }}</div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-slate-100 text-xs font-black uppercase text-slate-400">
+              <th class="pb-4">Empresa</th>
+              <th class="pb-4">WhatsApp</th>
+              <th class="pb-4">Admin Email</th>
+              <th class="pb-4">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (company of companies(); track company.id) {
+            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+              <td class="py-4 font-bold text-slate-700">{{ company.name }}</td>
+              <td class="py-4 text-slate-500 font-medium">{{ company.phone }}</td>
+              <td class="py-4 text-slate-500 text-xs">{{ company.adminEmail }}</td>
+              <td class="py-4">
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase"
+                  [class.bg-emerald-100]="company.status === 'approved' || (!company.status && company.active)"
+                  [class.text-emerald-700]="company.status === 'approved' || (!company.status && company.active)"
+                  [class.bg-amber-100]="company.status === 'pending' || !company.status"
+                  [class.text-amber-700]="company.status === 'pending'"
+                  [class.bg-rose-100]="company.status === 'rejected'"
+                  [class.text-rose-700]="company.status === 'rejected'">
+                  {{ company.status === 'approved' ? 'Aprobada' : company.status === 'rejected' ? 'Rechazada' : 'Pendiente' }}
+                </span>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="4" class="py-10 text-center text-slate-400 font-medium italic">
+                No hay empresas registradas.
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
   }

@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home';
 import { LoginComponent } from './features/auth/login/login';
 import { MainLayoutComponent } from './core/layout/main-layout/main-layout';
-import { authGuard } from './core/guards/auth-guard';
+import { authGuard, adminGuard } from './core/guards/auth-guard';
 
 
 export const routes: Routes = [
@@ -25,10 +25,12 @@ export const routes: Routes = [
         children: [
             {
                 path: 'admin-panel',
+                canActivate: [adminGuard],
                 loadComponent: () =>
                     import('./features/admin-panel/admin-panel')
                         .then(m => m.AdminPanelComponent)
             },
+
             {
                 path: 'dashboard',
                 loadComponent: () =>

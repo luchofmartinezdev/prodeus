@@ -96,7 +96,8 @@ export class RegisterComponent {
           name: this.companyName,
           phone: this.whatsapp,
           adminEmail: this.email,
-          active: true 
+          active: false,
+          status: 'pending'
         }, user.uid);
         companyIdToAssign = companyId;
       }

@@ -100,6 +100,9 @@ export class AdminPanelComponent implements OnInit {
   newTournament = {
     name: '',
     type: 'public' as 'public' | 'private',
+    teamType: 'national' as 'national' | 'club',
+    teamCount: 32,
+    matchdayCount: 3,
     companyId: '',
     isTemplate: false,
     startDate: '',
@@ -144,12 +147,46 @@ export class AdminPanelComponent implements OnInit {
     if (tab === 3) await this.teamService.loadTeams();
   }
 
+  // Carga de empresas con separación por estado
+  pendingCompanies = signal<Company[]>([]);
+
   async loadCompanies() {
     try {
       const snap = await getDocs(collection(db, 'companies'));
       const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as Company));
       this.companies.set(list);
+      this.pendingCompanies.set(list.filter(c => !c.status || c.status === 'pending'));
     } catch (e) { }
+  }
+
+  async approveCompany(companyId: string) {
+    const ok = await this.alertService.confirm('Aprobar Empresa', '¿Confirmas la aprobación de esta empresa? Se le notificó por email.');
+    if (!ok) return;
+    this.loading.set(true);
+    try {
+      await this.companyService.approveCompany(companyId);
+      this.alertService.success('✅ Empresa Aprobada', 'Ya puede suscribirse a torneos.');
+      await this.loadCompanies();
+    } catch (e) {
+      this.alertService.error('Error', 'No se pudo aprobar la empresa.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async rejectCompany(companyId: string) {
+    const ok = await this.alertService.confirm('⚠️ Rechazar Empresa', '¿Seguro quieres rechazar esta empresa?');
+    if (!ok) return;
+    this.loading.set(true);
+    try {
+      await this.companyService.rejectCompany(companyId);
+      this.alertService.success('Empresa Rechazada', 'Se marcó como rechazada.');
+      await this.loadCompanies();
+    } catch (e) {
+      this.alertService.error('Error', 'No se pudo rechazar la empresa.');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async handleAddTeam(name: string, id: string, fileInput: any) {
@@ -270,16 +307,24 @@ export class AdminPanelComponent implements OnInit {
     if (!this.newTournament.name) return;
     this.loading.set(true);
     try {
-      await addDoc(collection(db, 'tournaments'), {
-        ...this.newTournament,
+      const payload: any = {
+        name: this.newTournament.name,
+        type: this.newTournament.type,
+        teamType: this.newTournament.teamType,
+        teamCount: this.newTournament.teamCount,
+        matchdayCount: this.newTournament.matchdayCount,
         status: 'upcoming',
-        startDate: new Date(),
-        endDate: new Date()
-      });
-      this.newTournament.name = '';
+        startDate: this.newTournament.startDate ? new Date(this.newTournament.startDate) : null,
+        endDate: this.newTournament.endDate ? new Date(this.newTournament.endDate) : null,
+      };
+      await addDoc(collection(db, 'tournaments'), payload);
+      // Reset form
+      this.newTournament = { name: '', type: 'public', teamType: 'national', teamCount: 32, matchdayCount: 3, companyId: '', isTemplate: false, startDate: '', endDate: '' };
       await this.tournamentService.loadTournaments();
+      this.alertService.success('Torneo Creado', 'El torneo fue creado correctamente.');
     } catch (e) {
       console.error(e);
+      this.alertService.error('Error', 'No se pudo crear el torneo.');
     } finally {
       this.loading.set(false);
     }

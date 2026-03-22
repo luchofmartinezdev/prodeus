@@ -26,12 +26,13 @@ export interface Company {
   adminEmail?: string;     // Email del administrador para comunicaciones
   logoUrl?: string;        // Logo de la empresa
   description?: string;    // Descripción breve
-  active: boolean;         // Estado activo/inactivo (siempre true por ahora)
+  active: boolean;         // Estado activo/inactivo
+  status: 'pending' | 'approved' | 'rejected'; // Estado de aprobación
   activeTournamentId?: string; // Torneo actual seleccionado (legacy/default)
   subscribedTournaments?: string[]; // Listado de todos los torneos en los que participa
   joinCode?: string;       // Código para que empleados se unan
   websiteUrl?: string;     // Página web
-  phone: string;            // Formato internacional: 54911... 
+  phone: string;            // Formato internacional: 54911...
 }
 
 // =========================
@@ -109,12 +110,15 @@ export interface Match {
 export interface Tournament {
   id: string;            // tournamentId
   name: string;
-  startDate: Date | any;
-  endDate: Date | any;
+  startDate?: Date | any;
+  endDate?: Date | any;
   status: 'upcoming' | 'ongoing' | 'finished';
 
   // Multi-tenant fields
   type: 'public' | 'private';
+  teamType?: 'national' | 'club'; // Tipo de equipos del torneo
+  teamCount?: number;    // Número de equipos participantes
+  matchdayCount?: number; // Número de fechas del torneo
   companyId?: string;    // ID of the company if private
   isTemplate?: boolean;  // If Super Admin marks it as template
 

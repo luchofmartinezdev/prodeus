@@ -127,8 +127,8 @@ export class TournamentService {
           }
         }
 
-        // Si no tiene empresa o torneo activo, mostramos los públicos por defecto (para exploración)
-        const publicSnap = await getDocs(query(tourRef, where('type', '==', 'public')));
+        // Si no tiene empresa o torneo activo, mostramos solo los públicos PRÓXIMOS (para suscripción)
+        const publicSnap = await getDocs(query(tourRef, where('type', '==', 'public'), where('status', '==', 'upcoming')));
         return publicSnap.docs.map(d => ({ id: d.id, ...d.data() } as Tournament));
       }
     } catch (error) {
