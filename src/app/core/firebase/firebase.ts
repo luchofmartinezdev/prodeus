@@ -3,9 +3,10 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-import { firebaseConfig } from '../../environments/firebase.config';
+import { environment } from '../../../environments/environment';
 
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(environment.firebaseConfig);
+
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
