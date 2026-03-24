@@ -34,62 +34,44 @@
             {{ errorMessage() }}
         </div>
         }
+        <form (ngSubmit)="onRegister()" #registerForm="ngForm" class="space-y-5">
+            <app-form-field label="Tu Nombre Completo">
+                <app-input name="name" [(ngModel)]="name" required placeholder="Ej: Juan Pérez"></app-input>
+            </app-form-field>
 
-        <form (submit)="onRegister()" class="space-y-5">
+            <app-form-field label="Email Personal o Corporativo">
+                <app-input type="email" name="email" [(ngModel)]="email" required placeholder="nombre@ejemplo.com"></app-input>
+            </app-form-field>
+
+            <!-- Campos según el modo -->
             @if (registerMode() === 'company') {
-                <div>
-                    <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">Nombre de la Empresa</label>
-                    <input type="text" [(ngModel)]="companyName" name="companyName" required
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                        placeholder="Ej. Acme Corp">
-                </div>
+                <div class="space-y-6 animate-in fade-in slide-in-from-top-2">
+                    <app-form-field label="Nombre de tu Empresa">
+                        <app-input name="companyName" [(ngModel)]="companyName" required placeholder="Ej: Tech Solutions S.A."></app-input>
+                    </app-form-field>
 
-                <div>
-                    <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">WhatsApp de la Empresa</label>
-                    <input type="tel" [(ngModel)]="whatsapp" name="whatsapp" required
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                        placeholder="Ej. 54911...">
-                    <p class="mt-1 text-[10px] text-slate-400">Sin +, espacios ni guiones. Ej: 5491155555555</p>
+                    <app-form-field label="WhatsApp de Contacto (Empresa)">
+                        <app-input name="whatsapp" [(ngModel)]="whatsapp" required placeholder="54911..."></app-input>
+                    </app-form-field>
+                </div>
+            } @else {
+                <div class="animate-in fade-in slide-in-from-top-2">
+                    <app-form-field label="Código de Invitación (Opcional)">
+                        <app-input name="companyCode" [(ngModel)]="companyCode" placeholder="Ej: XYZ-123"></app-input>
+                    </app-form-field>
                 </div>
             }
 
-            <div>
-                <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">Tu Nombre</label>
-                <input type="text" [(ngModel)]="name" name="name" required
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                    placeholder="Ej. Alex Smith">
-            </div>
+            <app-form-field label="Contraseña">
+                <app-password-input name="password" [(ngModel)]="password" required></app-password-input>
+            </app-form-field>
 
-            <div>
-                <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">Correo @empresa.com</label>
-                <input type="email" [(ngModel)]="email" name="email" required
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                    placeholder="alex@empresa.com">
-            </div>
-
-            <div>
-                <label class="mb-1.5 block text-xs font-bold uppercase text-slate-500">Contraseña</label>
-                <input type="password" [(ngModel)]="password" name="password" required
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-medium outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
-                    placeholder="••••••••">
-            </div>
-
-            @if (registerMode() === 'user') {
-            <div class="pt-2">
-                <label class="mb-1.5 block text-xs font-bold uppercase text-indigo-600">Código de Invitación</label>
-                <input type="text" [(ngModel)]="companyCode" name="companyCode"
-                    class="w-full rounded-xl border-2 border-indigo-100 bg-indigo-50/30 px-4 py-3.5 font-bold text-indigo-700 outline-none transition-all focus:border-indigo-500 focus:ring-0"
-                    placeholder="CÓDIGO-2026">
-            </div>
-            }
-
-            <button type="submit" [disabled]="loading()"
-                class="w-full mt-4 rounded-2xl bg-slate-900 py-4 text-lg font-bold text-white shadow-xl shadow-slate-200 transition-all active:scale-95 hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed">
-                {{ loading() ? 'Creando cuenta...' : 'Registrarme' }}
-            </button>
+            <app-button type="submit" variant="dark" [loading]="loading()" [disabled]="!registerForm.form.valid" class="w-full mt-4" size="lg">
+                {{ loading() ? 'Creando cuenta...' : 'Comenzar ahora' }}
+            </app-button>
         </form>
 
-        <p class="mt-8 text-center text-sm font-medium text-slate-400">
+        <p class="mt-10 text-center text-sm font-medium text-slate-400">
             ¿Ya tienes cuenta? <a routerLink="/login" class="font-bold text-indigo-600">Inicia sesión</a>
         </p>
     </div>

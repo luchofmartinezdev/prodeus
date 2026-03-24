@@ -8,10 +8,15 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { CompanyService } from '../../../core/services/company';
 
+import { FormFieldComponent } from '../../../shared/components/form-field/form-field';
+import { InputComponent } from '../../../shared/components/input/input';
+import { PasswordInputComponent } from '../../../shared/components/password-input/password-input';
+import { ButtonComponent } from '../../../shared/components/button/button';
+
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, FormFieldComponent, InputComponent, PasswordInputComponent, ButtonComponent],
   templateUrl: './register.html'
 })
 export class RegisterComponent {
@@ -40,6 +45,7 @@ export class RegisterComponent {
 
   loading = signal(false);
   errorMessage = signal('');
+  showPassword = signal(false);
 
   setMode(mode: 'user' | 'company') {
     this.registerMode.set(mode);

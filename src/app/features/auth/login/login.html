@@ -15,29 +15,22 @@
         </div>
         }
 
-        <form (ngSubmit)="login()" #loginForm="ngForm" class="space-y-6">
-            <div>
-                <label class="mb-2 block text-xs font-bold uppercase text-slate-500">Email de la empresa</label>
-                <input type="email" name="email" [(ngModel)]="email" required placeholder="nombre@empresa.com"
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 font-medium text-slate-800 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50">
-            </div>
+        <form (ngSubmit)="login()" #loginForm="ngForm" class="space-y-5">
+            <app-form-field label="Email de la empresa">
+                <app-input type="email" name="email" [(ngModel)]="email" required placeholder="nombre@empresa.com"></app-input>
+            </app-form-field>
 
-            <div>
-                <div class="mb-2 flex items-center justify-between">
-                    <label class="block text-xs font-bold uppercase text-slate-500">Contraseña</label>
-                    <a href="#" class="text-xs font-bold text-indigo-600 hover:underline">¿Olvidaste tu contraseña?</a>
-                </div>
-                <input type="password" name="password" [(ngModel)]="password" required placeholder="••••••••"
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 font-medium text-slate-800 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50">
-            </div>
+            <app-form-field label="Contraseña">
+                <a labelAction href="#" class="text-[10px] font-bold text-indigo-600 hover:underline uppercase tracking-tight">¿Olvidaste tu contraseña?</a>
+                <app-password-input name="password" [(ngModel)]="password" required></app-password-input>
+            </app-form-field>
 
-            <button type="submit" [disabled]="loading() || !loginForm.form.valid"
-                class="w-full rounded-2xl bg-slate-900 py-4 text-lg font-bold text-white shadow-xl shadow-slate-200 transition-all active:scale-95 hover:bg-black disabled:opacity-50">
+            <app-button type="submit" variant="dark" [loading]="loading()" [disabled]="!loginForm.form.valid" class="w-full mt-4" size="lg">
                 {{ loading() ? 'Iniciando sesión...' : 'Entrar al Prode' }}
-            </button>
+            </app-button>
         </form>
 
-        <p class="mt-8 text-center text-sm font-medium text-slate-400">
+        <p class="mt-10 text-center text-sm font-medium text-slate-400">
             ¿Tu empresa no tiene cuenta? <a routerLink="/register" [queryParams]="{ mode: 'company' }" class="font-bold text-indigo-600">Regístrala aquí</a>
         </p>
     </div>

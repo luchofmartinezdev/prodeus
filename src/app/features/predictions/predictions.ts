@@ -10,10 +10,13 @@ import { AlertService } from '../../core/services/alert';
 import { MatchCardComponent } from '../../shared/components/match-card/match-card';
 import { Match, Prediction, Tournament } from '../../core/models/models';
 
+import { ButtonComponent } from '../../shared/components/button/button';
+import { FormFieldComponent } from '../../shared/components/form-field/form-field';
+
 @Component({
   selector: 'app-predictions',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatchCardComponent],
+  imports: [CommonModule, FormsModule, MatchCardComponent, ButtonComponent, FormFieldComponent],
   templateUrl: './predictions.html'
 })
 export class PredictionsComponent {
@@ -50,6 +53,11 @@ export class PredictionsComponent {
     if (!user) return;
     const tours = await this.tournamentService.getAvailableTournaments(user.role, user.companyId);
     this.tournaments.set(tours);
+
+    // Si hay torneos y no hay ninguno seleccionado, seleccionar el primero
+    if (tours.length > 0 && !this.tournamentService.currentTournamentId()) {
+      this.selectTournament(tours[0].id || '');
+    }
   }
 
   selectTournament(id: string) {
@@ -57,7 +65,7 @@ export class PredictionsComponent {
   }
 
   // Getter que utiliza el servicio centralizado para filtrar por jornada (24 partidos)
-  get filteredMatches() {
+  get filteredMatches(): Match[] {
     return this.tournamentService.getMatchesByDay(this.matches(), this.activeTab());
   }
 
@@ -65,14 +73,28 @@ export class PredictionsComponent {
    * Carga los partidos y las predicciones existentes del usuario
    */
   async loadMatchesAndPredictions() {
-    if (!this.userId) return;
+    if (!this.userId) {
+      console.warn("Predictions: userId no disponible.");
+      return;
+    }
+    const tid = this.tournamentService.currentTournamentId();
+    if (!tid) {
+      console.warn("Predictions: tournamentId no disponible.");
+      return;
+    }
+
     this.loading.set(true);
     try {
-      // 1. Cargar Partidos desde el nuevo path
+      // 1. Cargar Partidos
+      console.log(`Predictions: Cargando partidos para torneo ${tid}...`);
       const allMatches = await this.tournamentService.getMatches();
+      console.log(`Predictions: ${allMatches.length} partidos cargados.`);
 
-      // 2. Cargar Predicciones del usuario (desde la colección global o vía service)
+      // 2. Cargar Predicciones
+      console.log(`Predictions: Cargando predicciones de usuario ${this.userId}...`);
       const userPredsArray = await this.tournamentService.getUserPredictions(this.userId);
+      console.log(`Predictions: ${userPredsArray.length} predicciones cargadas.`);
+
       const userPredsMap = userPredsArray.reduce((acc: any, p: Prediction) => {
         acc[p.matchId] = p;
         return acc;
@@ -86,8 +108,11 @@ export class PredictionsComponent {
       }));
 
       this.matches.set(merged);
-    } catch (e) {
-      console.error("Error al cargar predicciones:", e);
+    } catch (e: any) {
+      console.error("Error al cargar predicciones (detallado):", e);
+      if (e.code === 'permission-denied') {
+         this.alertService.error('Acceso Denegado', 'No tienes permisos para ver estos datos. Verificá si tu empresa está aprobada.');
+      }
     } finally {
       this.loading.set(false);
     }

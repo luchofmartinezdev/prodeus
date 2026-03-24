@@ -8,10 +8,12 @@ import { CompanyService } from '../../core/services/company';
 import { TournamentService } from '../../core/services/tournament';
 import { LeaderboardEntry, Tournament } from '../../core/models/models';
 
+import { BadgeComponent } from '../../shared/components/badge/badge';
+
 @Component({
   selector: 'app-leaderboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BadgeComponent],
   templateUrl: './leaderboard.html'
 })
 export class LeaderboardComponent implements OnInit {
@@ -25,6 +27,17 @@ export class LeaderboardComponent implements OnInit {
   tournaments = signal<Tournament[]>([]);
   companyName = signal<string>('Mi Empresa');
   isLoading = signal(true);
+  
+  // Paginación
+  currentPage = signal(1);
+  itemsPerPage = 10;
+  totalPages = computed(() => Math.ceil(this.leaderboard().length / this.itemsPerPage));
+  
+  // Lista paginada del ranking restante (fuera del podio)
+  paginatedRemaining = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage;
+    return this.remainingPlayers().slice(start, start + this.itemsPerPage);
+  });
 
   // Derivados para UI organizada
   podium = computed(() => this.leaderboard().slice(0, 3));
@@ -33,13 +46,13 @@ export class LeaderboardComponent implements OnInit {
 
   constructor() {
     this.loadTournaments();
-    
+
     // Recargar ranking cuando cambie el torneo, la pestaña o la fecha seleccionada
     effect(() => {
       const tid = this.tournamentService.currentTournamentId();
       const tab = this.activeTab();
       const day = this.selectedMatchday();
-      
+
       if (tid) {
         if (tab === 'general') {
           this.loadLeaderboard();
@@ -93,7 +106,7 @@ export class LeaderboardComponent implements OnInit {
       );
 
       const querySnapshot = await getDocs(q);
-      const ranking = querySnapshot.docs.map((doc, index) => {
+      let ranking = querySnapshot.docs.map((doc, index) => {
         const data = doc.data() as any;
         return {
           id: doc.id,
@@ -105,6 +118,35 @@ export class LeaderboardComponent implements OnInit {
           lastUpdated: data.createdAt
         } as LeaderboardEntry;
       });
+
+      // MOCKEADO: Si el ranking está muy vacío, agregamos bots para la demo
+      if (ranking.length < 5) {
+        const dummies: LeaderboardEntry[] = [
+          { id: 'd1', name: 'Javier Saviola', totalPoints: 1100, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=javier' },
+          { id: 'd2', name: 'Hernán Crespo', totalPoints: 950, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=hernan' },
+          { id: 'd3', name: 'Ariel Ortega', totalPoints: 800, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=ariel' },
+          { id: 'd4', name: 'Gabriel Batistuta', totalPoints: 1500, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=gabriel' },
+          { id: 'd5', name: 'Juan Román Riquelme', totalPoints: 1400, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=roman' },
+          { id: 'd6', name: 'Pablo Aimar', totalPoints: 1050, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=pablo' },
+          { id: 'd7', name: 'Claudio Caniggia', totalPoints: 900, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=claudio' },
+          { id: 'd8', name: 'Diego Simeone', totalPoints: 850, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=diego' },
+          { id: 'd9', name: 'Juan Sebastián Verón', totalPoints: 1200, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=bruja' },
+          { id: 'd10', name: 'Roberto Ayala', totalPoints: 750, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=raton' },
+          { id: 'd11', name: 'Walter Samuel', totalPoints: 720, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=muro' },
+          { id: 'd12', name: 'Esteban Cambiasso', totalPoints: 710, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=cuchu' },
+          { id: 'd13', name: 'Javier Mascherano', totalPoints: 705, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=jefe' },
+          { id: 'd14', name: 'Ángel Di María', totalPoints: 1450, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=fideo' },
+          { id: 'd15', name: 'Lionel Messi', totalPoints: 1800, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=leo' },
+          { id: 'd16', name: 'Julián Álvarez', totalPoints: 1350, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=arana' },
+          { id: 'd17', name: 'Enzo Fernández', totalPoints: 1150, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=enzo' },
+          { id: 'd18', name: 'Alexis Mac Allister', totalPoints: 1120, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=alexis' },
+          { id: 'd19', name: 'Emiliano Martínez', totalPoints: 1280, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=dibu' },
+          { id: 'd20', name: 'Cristian Romero', totalPoints: 1080, rank: 0, lastUpdated: new Date(), photoURL: 'https://i.pravatar.cc/150?u=cuti' }
+        ];
+        ranking = [...ranking, ...dummies]
+          .sort((a, b) => b.totalPoints - a.totalPoints)
+          .map((entry, index) => ({ ...entry, rank: index + 1 }));
+      }
 
       this.leaderboard.set(ranking);
     } catch (error) {
@@ -147,9 +189,9 @@ export class LeaderboardComponent implements OnInit {
       // Nota: En Firestore v9+ "where in" soporta hasta 10 elementos. 
       // Si hay más partidos, habría que hacer múltiples consultas o cambiar la estrategia.
       // Por ahora para fases de grupos (max 10-16 partidos) lo manejaremos simple.
-      
+
       const userPointsMap = new Map<string, number>();
-      
+
       // Inicializar todos los usuarios de la empresa con 0 puntos
       usersSnap.docs.forEach(d => userPointsMap.set(d.id, 0));
 
@@ -194,4 +236,4 @@ export class LeaderboardComponent implements OnInit {
       this.isLoading.set(false);
     }
   }
-}
+}

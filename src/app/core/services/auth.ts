@@ -21,7 +21,17 @@ export class AuthService {
           const docRef = doc(db, 'users', firebaseUser.uid);
           const userDoc = await getDoc(docRef);
           if (userDoc.exists()) {
-            this.user.set({ ...firebaseUser, ...userDoc.data() });
+            const data = userDoc.data();
+            this.user.set({ 
+              ...firebaseUser, 
+              ...data,
+              // Datos Mockeados para demostración
+              totalPoints: data['totalPoints'] || 1250,
+              rank: 4,
+              globalRank: 128,
+              accuracy: 78,
+              predictionsCount: 45
+            });
           } else {
             console.warn(`Aviso: No se encontró un documento en Firestore para el UID: ${firebaseUser.uid}. Asegúrate de que existe en la colección 'users'.`);
             this.user.set(firebaseUser);

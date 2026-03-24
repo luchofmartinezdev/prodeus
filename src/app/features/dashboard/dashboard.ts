@@ -9,16 +9,18 @@ import { CompanyService } from '../../core/services/company';
 import { AlertService } from '../../core/services/alert';
 import { Tournament } from '../../core/models/models';
 
+import { ImmersiveBannerComponent } from '../../shared/components/immersive-banner/immersive-banner';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ImmersiveBannerComponent],
   templateUrl: './dashboard.html'
 })
 export class DashboardComponent {
   public auth = inject(AuthService);
-  private router = inject(Router);
-  private tournamentService = inject(TournamentService);
+  public router = inject(Router);
+  public tournamentService = inject(TournamentService);
   private companyService = inject(CompanyService);
   public alertService = inject(AlertService);
   
@@ -50,8 +52,9 @@ export class DashboardComponent {
       if (u) {
         if (u.role === 'superadmin') {
           this.loadGlobalMetrics();
-        } else if (u.role === 'admin') {
-          this.loadAdminView();
+        } else {
+          // Tanto 'admin' como 'user' cargan los torneos de su empresa
+          this.loadCompanyView();
         }
       }
     });
@@ -73,7 +76,7 @@ export class DashboardComponent {
     }
   }
 
-  async loadAdminView() {
+  async loadCompanyView() {
     const u = this.auth.user();
     if (!u.companyId) return;
     

@@ -8,10 +8,9 @@
     </div>
 
     @if (currentTournamentId()) {
-    <button (click)="backToList()"
-      class="flex items-center gap-2 text-indigo-600 font-black hover:bg-indigo-50 px-4 py-2 rounded-xl transition-all">
-      ← Volver al Listado
-    </button>
+    <app-button (clicked)="backToList()" variant="secondary" size="sm">
+      <span leftIcon>←</span> Volver al Listado
+    </app-button>
     } @else {
     <div class="px-4 py-2 bg-slate-100 rounded-xl border border-slate-200">
       <span class="text-xs font-black uppercase text-slate-400">Ambiente de:</span>
@@ -54,59 +53,44 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Nombre -->
-        <div class="lg:col-span-3">
-          <label class="text-xs font-bold uppercase text-slate-400">Nombre del Torneo</label>
-          <input type="text" [(ngModel)]="newTournament.name" placeholder="Ej: Champions League 24/25"
-            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
-        </div>
-        <!-- Tipo Público/Privado -->
-        <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Visibilidad</label>
-          <select [(ngModel)]="newTournament.type"
-            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold">
+        <app-form-field label="Nombre del Torneo" class="lg:col-span-3">
+          <app-input [(ngModel)]="newTournament.name" placeholder="Ej: Champions League 24/25"></app-input>
+        </app-form-field>
+
+        <app-form-field label="Visibilidad">
+          <select [(ngModel)]="newTournament.type" class="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer">
             <option value="public">🌍 Público (Global)</option>
             <option value="private">🔒 Privado (Solo Empresa)</option>
           </select>
-        </div>
-        <!-- Tipo de Equipos -->
-        <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Tipo de Equipos</label>
-          <select [(ngModel)]="newTournament.teamType"
-            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold">
+        </app-form-field>
+
+        <app-form-field label="Tipo de Equipos">
+          <select [(ngModel)]="newTournament.teamType" class="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer">
             <option value="national">🌍 Selecciones Nacionales</option>
             <option value="club">🏟️ Clubes</option>
           </select>
-        </div>
-        <!-- Cantidad de Equipos -->
-        <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Cantidad de Equipos</label>
-          <input type="number" [(ngModel)]="newTournament.teamCount" min="2" max="128"
-            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
-        </div>
-        <!-- Cantidad de Fechas -->
-        <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Cantidad de Fechas</label>
-          <input type="number" [(ngModel)]="newTournament.matchdayCount" min="1" max="50"
-            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
-        </div>
-        <!-- Fecha Inicio -->
-        <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Inicio <span class="normal-case text-slate-300">(Opcional)</span></label>
-          <input type="date" [(ngModel)]="newTournament.startDate"
-            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
-        </div>
-        <!-- Fecha Fin -->
-        <div>
-          <label class="text-xs font-bold uppercase text-slate-400">Fin <span class="normal-case text-slate-300">(Opcional)</span></label>
-          <input type="date" [(ngModel)]="newTournament.endDate"
-            class="w-full mt-2 rounded-xl border border-slate-200 bg-white p-3 font-bold" />
-        </div>
+        </app-form-field>
+
+        <app-form-field label="Cantidad de Equipos">
+          <app-input type="number" [(ngModel)]="newTournament.teamCount"></app-input>
+        </app-form-field>
+
+        <app-form-field label="Cantidad de Fechas">
+          <app-input type="number" [(ngModel)]="newTournament.matchdayCount"></app-input>
+        </app-form-field>
+
+        <app-form-field label="Inicio (Opcional)">
+          <app-input type="date" [(ngModel)]="newTournament.startDate"></app-input>
+        </app-form-field>
+
+        <app-form-field label="Fin (Opcional)">
+          <app-input type="date" [(ngModel)]="newTournament.endDate"></app-input>
+        </app-form-field>
       </div>
-      <button (click)="saveTournament()" [disabled]="loading() || !newTournament.name"
-        class="mt-6 bg-slate-900 text-white px-8 py-3 rounded-xl font-black hover:bg-indigo-600 transition-all disabled:opacity-40">
-        {{ loading() ? 'Creando...' : '🚀 Crear Torneo' }}
-      </button>
+
+      <app-button (clicked)="saveTournament()" [disabled]="!newTournament.name" [loading]="loading()" class="mt-6">
+        🚀 Crear Torneo
+      </app-button>
     </section>
     }
 
@@ -211,9 +195,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
-          <!-- Local -->
-          <div>
-            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Local</label>
+          <app-form-field label="Local">
             <select [(ngModel)]="newMatch.homeId"
               class="w-full mt-2 rounded-2xl border border-slate-100 bg-slate-50 p-4 font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer text-sm">
               <option value="">Seleccionar...</option>
@@ -221,11 +203,9 @@
               <option [value]="t.id">{{ t.name }}</option>
               }
             </select>
-          </div>
+          </app-form-field>
 
-          <!-- Visitante -->
-          <div>
-            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Visitante</label>
+          <app-form-field label="Visitante">
             <select [(ngModel)]="newMatch.awayId"
               class="w-full mt-2 rounded-2xl border border-slate-100 bg-slate-50 p-4 font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer text-sm">
               <option value="">Seleccionar...</option>
@@ -233,34 +213,23 @@
               <option [value]="t.id">{{ t.name }}</option>
               }
             </select>
-          </div>
+          </app-form-field>
 
-          <!-- Fecha -->
-          <div>
-            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Fecha y Hora</label>
-            <input type="datetime-local" [(ngModel)]="newMatch.date"
-              class="w-full mt-2 rounded-2xl border border-slate-100 bg-slate-50 p-4 font-bold focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs" />
-          </div>
+          <app-form-field label="Fecha y Hora">
+            <app-input type="datetime-local" [(ngModel)]="newMatch.date"></app-input>
+          </app-form-field>
 
-          <!-- Grupo -->
-          <div>
-            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Grupo/Fase</label>
-            <input type="text" [(ngModel)]="newMatch.group" placeholder="Ej: Grupo A"
-              class="w-full mt-2 rounded-2xl border border-slate-100 bg-slate-50 p-4 font-bold text-xs uppercase focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all" />
-          </div>
+          <app-form-field label="Grupo/Fase">
+            <app-input [(ngModel)]="newMatch.group" placeholder="Ej: Grupo A"></app-input>
+          </app-form-field>
 
-          <!-- Sede -->
-          <div>
-            <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Sede</label>
-            <input type="text" [(ngModel)]="newMatch.stadium" placeholder="Ej: Sede"
-              class="w-full mt-2 rounded-2xl border border-slate-100 bg-slate-50 p-4 font-bold text-xs focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all" />
-          </div>
+          <app-form-field label="Sede">
+            <app-input [(ngModel)]="newMatch.stadium" placeholder="Ej: Estadio"></app-input>
+          </app-form-field>
 
-          <!-- Acción -->
-          <button (click)="createMatch()" [disabled]="loading()"
-            class="w-full bg-indigo-600 text-white p-4 h-[58px] rounded-2xl font-black hover:bg-slate-900 transition-all shadow-lg hover:shadow-indigo-500/20 active:scale-95 uppercase tracking-widest text-[10px]">
+          <app-button (clicked)="createMatch()" [disabled]="loading() || !newMatch.homeId || !newMatch.awayId" class="h-[58px] uppercase tracking-widest text-[10px]">
             {{ loading() ? '...' : 'Publicar en Fecha ' + selectedMatchday() }}
-          </button>
+          </app-button>
         </div>
       </section>
 
@@ -291,10 +260,9 @@
               <div class="text-[10px] text-slate-500 font-medium italic">
                 * El ID del equipo debe ser de 3 letras. La fecha en formato ISO.
               </div>
-              <button (click)="handleBulkUpload()" [disabled]="loading() || !bulkJson()"
-                class="bg-indigo-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl font-black transition-all active:scale-95 shadow-xl shadow-indigo-500/10 uppercase tracking-widest text-xs">
+              <app-button (clicked)="handleBulkUpload()" [disabled]="!bulkJson" [loading]="loading()" size="lg">
                 {{ loading() ? 'Procesando...' : '🚀 Ejecutar Importación' }}
-              </button>
+              </app-button>
             </div>
           </div>
         </div>
@@ -331,12 +299,12 @@
         <div class="flex flex-col gap-4 max-w-4xl mx-auto w-full">
           @for (match of filteredMatches; track match.id) {
           <app-match-card [homeId]="match.homeTeamId" [awayId]="match.awayTeamId" [group]="match.group"
-            [matchDate]="match.matchDate" [stadium]="match.stadium">
+            [matchDate]="match.matchDate">
 
             <div info
               class="text-[9px] font-black text-slate-400 uppercase tracking-tighter flex items-center gap-1.5 line-clamp-1">
               <span class="text-indigo-500">🏟️</span>
-              {{ match.stadium || 'Estadio Sede' }}
+              {{ $any(match).stadium || 'Estadio Sede' }}
             </div>
 
             <div scores class="flex items-center gap-1.5">
@@ -346,11 +314,12 @@
               <input type="number" #aS [value]="match.awayScore"
                 class="w-10 h-10 rounded-lg border-none bg-slate-50 text-center font-black text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all" />
             </div>
-            <button action (click)="setFinalResult(match.id, hS.value, aS.value)"
-              [disabled]="updatingMatch() === match.id"
-              class="h-10 w-10 flex items-center justify-center bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition-all font-bold shadow-lg shadow-slate-200">
-              {{ updatingMatch() === match.id ? '...' : '💾' }}
-            </button>
+            <app-button action (clicked)="setFinalResult(match.id, hS.value, aS.value)"
+              [loading]="updatingMatch === match.id"
+              variant="dark"
+              class="w-10 h-10 !p-0">
+              💾
+            </app-button>
           </app-match-card>
           } @empty {
           <div
@@ -388,14 +357,12 @@
             <p class="text-xs text-slate-500 mt-0.5">{{ company.adminEmail }} · WhatsApp: {{ company.phone }}</p>
           </div>
           <div class="flex gap-2 shrink-0">
-            <button (click)="approveCompany(company.id)" [disabled]="loading()"
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all active:scale-95">
+            <app-button (clicked)="approveCompany(company.id)" [loading]="loading()" variant="primary" size="sm">
               ✅ Aprobar
-            </button>
-            <button (click)="rejectCompany(company.id)" [disabled]="loading()"
-              class="px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-black rounded-xl transition-all active:scale-95">
+            </app-button>
+            <app-button (clicked)="rejectCompany(company.id)" [loading]="loading()" variant="danger" size="sm" class="!bg-rose-100 !text-rose-700 !border-rose-200">
               ❌ Rechazar
-            </button>
+            </app-button>
           </div>
         </div>
         }
@@ -427,15 +394,9 @@
               <td class="py-4 text-slate-500 font-medium">{{ company.phone }}</td>
               <td class="py-4 text-slate-500 text-xs">{{ company.adminEmail }}</td>
               <td class="py-4">
-                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase"
-                  [class.bg-emerald-100]="company.status === 'approved' || (!company.status && company.active)"
-                  [class.text-emerald-700]="company.status === 'approved' || (!company.status && company.active)"
-                  [class.bg-amber-100]="company.status === 'pending' || !company.status"
-                  [class.text-amber-700]="company.status === 'pending'"
-                  [class.bg-rose-100]="company.status === 'rejected'"
-                  [class.text-rose-700]="company.status === 'rejected'">
-                  {{ company.status === 'approved' ? 'Aprobada' : company.status === 'rejected' ? 'Rechazada' : 'Pendiente' }}
-                </span>
+                <app-badge [variant]="$any(company).status === 'approved' || (!$any(company).status && company.active) ? 'success' : $any(company).status === 'rejected' ? 'danger' : 'warning'">
+                  {{ $any(company).status === 'approved' ? 'Aprobada' : $any(company).status === 'rejected' ? 'Rechazada' : 'Pendiente' }}
+                </app-badge>
               </td>
             </tr>
             } @empty {
@@ -695,14 +656,12 @@
         </p>
       </div>
       <div class="flex flex-col sm:flex-row gap-4 shrink-0">
-        <button (click)="migrateCompanies()"
-          class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-5 rounded-[1.5rem] font-black uppercase text-[11px] tracking-widest shadow-xl shadow-amber-200 active:scale-95 transition-all">
+        <app-button (clicked)="migrateCompanies()" [loading]="loading()" variant="dark" class="!bg-amber-600 !shadow-amber-200 !px-8 !py-5">
           🚀 Migrar Empresas
-        </button>
-        <button (click)="resetTournamentData()" [class.opacity-40]="!currentTournamentId()"
-          class="bg-rose-600 hover:bg-rose-700 text-white px-8 py-5 rounded-[1.5rem] font-black uppercase text-[11px] tracking-widest shadow-xl shadow-rose-200 active:scale-95 transition-all">
+        </app-button>
+        <app-button (clicked)="resetTournamentData()" [disabled]="!currentTournamentId()" [loading]="loading()" variant="danger" class="!px-8 !py-5">
           {{ currentTournamentId() ? '☢️ Reset Torneo' : '⚠️ Selecciona un Torneo primero' }}
-        </button>
+        </app-button>
 
       </div>
 

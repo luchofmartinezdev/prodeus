@@ -26,10 +26,15 @@ import { CompanyService } from '../../core/services/company';
 import { TeamService } from '../../core/services/team';
 import { AlertService } from '../../core/services/alert';
 
+import { FormFieldComponent } from '../../shared/components/form-field/form-field';
+import { InputComponent } from '../../shared/components/input/input';
+import { ButtonComponent } from '../../shared/components/button/button';
+import { BadgeComponent } from '../../shared/components/badge/badge';
+
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatchCardComponent],
+  imports: [CommonModule, FormsModule, MatchCardComponent, FormFieldComponent, InputComponent, ButtonComponent, BadgeComponent],
   templateUrl: './admin-panel.html'
 })
 export class AdminPanelComponent implements OnInit {
@@ -49,8 +54,8 @@ export class AdminPanelComponent implements OnInit {
   user = this.authService.user;
   currentCompany = signal<Company | null>(null);
   selectedMatchday = signal<number>(1);
-  bulkJson = signal<string>('');
-  updatingMatch = signal<string | null>(null);
+  bulkJson = '';
+  updatingMatch = '';
 
   // Vista Previa de Carga Masiva
   bulkPreview = signal<{ id: string; name: string; fileName: string; previewUrl: string; matched: boolean; exists: boolean }[]>([]);
@@ -386,7 +391,7 @@ export class AdminPanelComponent implements OnInit {
 
   async setFinalResult(matchId: string, hScore: any, aScore: any) {
     if (!this.currentTournamentId()) return;
-    this.updatingMatch.set(matchId);
+    this.updatingMatch = matchId;
     try {
       const matchRef = doc(db, `tournaments/${this.currentTournamentId()}/matches`, matchId);
       await updateDoc(matchRef, { homeScore: Number(hScore), awayScore: Number(aScore), status: 'finished' });
@@ -396,7 +401,7 @@ export class AdminPanelComponent implements OnInit {
       console.error(e);
       this.alertService.error('Error', 'Hubo un problema al guardar el resultado.');
     } finally {
-      this.updatingMatch.set(null);
+      this.updatingMatch = '';
     }
   }
 
@@ -461,7 +466,7 @@ export class AdminPanelComponent implements OnInit {
 
     this.bulkPreview().forEach(p => { if (p.previewUrl.startsWith('blob:')) URL.revokeObjectURL(p.previewUrl); });
 
-    const jsonStr = this.bulkJson().trim();
+    const jsonStr = this.bulkJson.trim();
     if (!jsonStr || !input?.files?.length) { this.bulkPreview.set([]); return; }
 
     try {
@@ -507,7 +512,7 @@ export class AdminPanelComponent implements OnInit {
 
   // ────── BULK UPLOAD REAL ──────
   async handleBulkUpload(fileInput?: HTMLInputElement) {
-    const jsonStr = this.bulkJson().trim();
+    const jsonStr = this.bulkJson.trim();
     if (!jsonStr) return;
 
     const input = fileInput ?? this.activeFileInput ?? undefined;
@@ -605,7 +610,7 @@ export class AdminPanelComponent implements OnInit {
         await this.loadMatches();
       }
 
-      this.bulkJson.set('');
+      this.bulkJson = '';
       this.clearBulkPreview();
       if (input) input.value = '';
       this.alertService.success('Carga Masiva Exitosa', `Carga completada: ${teamsToProcess.length} equipos procesados, ${uploaded} imágenes subidas a Storage.`);

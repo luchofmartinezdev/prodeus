@@ -42,11 +42,14 @@ export class TournamentService {
         if (company?.activeTournamentId) {
           this.currentTournamentId.set(company.activeTournamentId);
         }
+        if (u.role === 'superadmin') {
+          this.loadTournaments();
+        }
       }
     }, { allowSignalWrites: true });
 
-    // Cargar catálogos inicialmente
-    this.loadTournaments();
+    // Cargar catálogos inicialmente solo de manera segura
+    // this.loadTournaments(); <-- Eliminamos esta llamada global
     this.teamService.loadTeams();
   }
 
@@ -161,17 +164,27 @@ export class TournamentService {
   }
 
   async getMatches(): Promise<Match[]> {
-    const q = query(this.getMatchesCollection(), orderBy('matchDate', 'asc'));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => {
-      const data = d.data() as any;
-      return { 
-        id: d.id, 
-        ...data,
-        homeTeamId: data.homeTeamId || data.homeTeam,
-        awayTeamId: data.awayTeamId || data.awayTeam
-      } as Match;
-    });
+    const tid = this.currentTournamentId();
+    if (!tid) {
+      console.warn('TournamentService: Intentando cargar partidos sin ID de torneo.');
+      return [];
+    }
+    try {
+      const q = query(this.getMatchesCollection(), orderBy('matchDate', 'asc'));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => {
+        const data = d.data() as any;
+        return { 
+          id: d.id, 
+          ...data,
+          homeTeamId: data.homeTeamId || data.homeTeam,
+          awayTeamId: data.awayTeamId || data.awayTeam
+        } as Match;
+      });
+    } catch (e: any) {
+      console.error(`TournamentService: Error cargando partidos del torneo ${tid}:`, e);
+      throw e;
+    }
   }
 
   async savePrediction(matchId: string, prediction: Partial<Prediction>) {
@@ -192,16 +205,29 @@ export class TournamentService {
   }
 
   async getUserPredictions(userId: string) {
+    const user = this.auth.user();
+    if (!user || !user.companyId) {
+      console.warn('TournamentService: Intentando cargar predicciones sin usuario o empresa asignada.');
+      return [];
+    }
+
+    // Las reglas de seguridad exigen filtrar por companyId para permitir la lectura.
     const q = query(
       collection(db, 'predictions'),
-      where('userId', '==', userId),
-      where('tournamentId', '==', this.currentTournamentId())
+      where('companyId', '==', user.companyId),
+      where('userId', '==', userId)
     );
+    
     const snap = await getDocs(q);
-    return snap.docs.map(d => d.data() as Prediction);
+    const tid = this.currentTournamentId();
+    
+    // Filtrado adicional por torneo en memoria si es necesario
+    return snap.docs
+      .map(d => d.data() as Prediction)
+      .filter(p => p.tournamentId === tid);
   }
 
-  getMatchesByDay(allMatches: Match[], matchday: number) {
+  getMatchesByDay(allMatches: Match[], matchday: number): Match[] {
     const sorted = [...allMatches].sort((a, b) => {
       const dateA = a.matchDate?.seconds ? a.matchDate.seconds * 1000 : new Date(a.matchDate).getTime();
       const dateB = b.matchDate?.seconds ? b.matchDate.seconds * 1000 : new Date(b.matchDate).getTime();

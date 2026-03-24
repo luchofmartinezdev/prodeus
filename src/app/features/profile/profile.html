@@ -1,14 +1,77 @@
-<div class="max-w-2xl mx-auto rounded-3xl bg-white p-8 border border-slate-200">
-    <h2 class="text-2xl font-bold mb-6">Mi Perfil</h2>
-    <div class="flex items-center gap-6 mb-8">
-        <div class="h-20 w-20 rounded-full bg-indigo-100 flex items-center justify-center text-3xl">👤</div>
-        <div>
-            <p class="text-xl font-bold text-slate-800">{{ auth.user()?.displayName }}</p>
-            <p class="text-slate-500">{{ auth.user()?.email }}</p>
-        </div>
+<div class="max-w-4xl mx-auto space-y-8">
+  
+  <app-immersive-banner 
+    [title]="'¡Hola, ' + auth.user()?.displayName + '! 👋'"
+    [subtitle]="auth.user()?.role === 'admin' ? 'Administrador de Empresa - Gestioná tu equipo' : 'Miembro Prodeus - Demostrá tus conocimientos'"
+    [icon]="'👤'"
+    [accentLabel]="'Nivel Actual'"
+    [accentValue]="'Elite'">
+  </app-immersive-banner>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <app-stats-card label="Puntos Totales" [value]="auth.user()?.totalPoints" unit="pts"></app-stats-card>
+    <app-stats-card label="Ranking Empresa" [value]="'#' + auth.user()?.rank" tag="Nivel 4" tagColor="amber"></app-stats-card>
+    <app-stats-card label="Ranking Global" [value]="'#' + auth.user()?.globalRank" tag="Top 5%" tagColor="slate"></app-stats-card>
+    <app-stats-card label="Precisión" [value]="auth.user()?.accuracy + '%'" tag="🎯 Muy Alta" tagColor="emerald"></app-stats-card>
+  </div>
+
+  <!-- Actividad y Configuración -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-sm">
+      <div class="flex items-center justify-between mb-8">
+        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight">Actividad Reciente</h3>
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ auth.user()?.predictionsCount }} Predicciones</span>
+      </div>
+      
+      <div class="space-y-4">
+        @for (item of [1,2,3]; track item) {
+          <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-indigo-100 hover:bg-white transition-all">
+            <div class="flex items-center gap-4">
+              <div class="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-lg shadow-sm">
+                {{ item === 1 ? '🇦🇷' : '🇧🇷' }}
+              </div>
+              <div>
+                <p class="text-sm font-black text-slate-800">Catar 2022 - Final</p>
+                <p class="text-[10px] text-slate-400 font-bold uppercase">Hace 2 días</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[10px] font-black">+15 pts</span>
+            </div>
+          </div>
+        }
+      </div>
     </div>
-    <button (click)="auth.logout()"
-        class="w-full py-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors">
+
+    <div class="bg-white rounded-[2.5rem] border border-slate-200 p-8 shadow-sm flex flex-col justify-between">
+      <div>
+        <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight mb-8">Cuenta</h3>
+        
+        <div class="mb-6 flex flex-col items-center p-4 bg-slate-50 rounded-3xl border border-slate-100">
+            <img [src]="auth.user()?.photoURL || 'https://ui-avatars.com/api/?name=' + auth.user()?.displayName" class="h-16 w-16 rounded-2xl mb-3 shadow-md border-2 border-white">
+            <p class="font-black text-slate-800 text-sm">{{ auth.user()?.displayName }}</p>
+            <app-badge class="mt-2">
+              {{ auth.user()?.role === 'admin' ? 'Admin' : 'Usuario' }}
+            </app-badge>
+        </div>
+
+        <div class="space-y-2">
+            <button class="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 transition-all group">
+                <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900">Editar Información</span>
+                <span class="text-slate-300">→</span>
+            </button>
+            <button class="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 transition-all group">
+                <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900">Notificaciones</span>
+                <span class="text-indigo-500 font-black text-[10px] uppercase">ON</span>
+            </button>
+        </div>
+      </div>
+
+      <button (click)="auth.logout()"
+        class="mt-8 w-full py-4 bg-red-50 text-red-600 font-black rounded-2xl hover:bg-red-600 hover:text-white transition-all active:scale-95 text-xs uppercase tracking-widest">
         Cerrar Sesión Segura
-    </button>
+      </button>
+    </div>
+  </div>
 </div>
