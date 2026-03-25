@@ -1,10 +1,10 @@
-<div class="flex h-screen bg-slate-50 font-sans antialiased text-slate-900">
+<div class="flex h-screen bg-slate-50 font-sans antialiased text-slate-900 pb-20 sm:pb-0 overflow-hidden">
   
-  <aside class="flex w-20 flex-col items-center border-r border-slate-200 bg-white py-8 lg:w-64 lg:items-start lg:px-6 transition-all">
+  <!-- Sidebar Desktop -->
+  <aside class="hidden sm:flex w-20 flex-col items-center border-r border-slate-200 bg-white py-8 lg:w-64 lg:items-start lg:px-6 transition-all shrink-0">
     <div class="mb-10 flex items-center gap-3 px-2">
       <div class="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-indigo-100">P</div>
       <span class="hidden text-xl font-black tracking-tight lg:block">Prodeus</span>
-
     </div>
 
     <nav class="flex w-full flex-1 flex-col gap-2">
@@ -53,35 +53,64 @@
     </div>
   </aside>
 
-  <main class="flex-1 overflow-y-auto px-6 py-10 lg:px-12">
-    <header class="mb-10 flex items-center justify-between border-b border-slate-100 pb-6">
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-10 lg:px-12">
+    <header class="mb-8 sm:mb-10 flex items-center justify-between border-b border-slate-100 pb-5 sm:pb-6">
       <div>
-        <h1 class="text-2xl font-black text-slate-800 tracking-tight">Prodeus Pro</h1>
-
-        <p class="text-xs font-medium text-slate-400 uppercase tracking-widest">Mundial 2026</p>
+        <h1 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Prodeus Pro</h1>
+        <p class="text-[10px] sm:text-xs font-medium text-slate-400 uppercase tracking-widest">Mundial 2026</p>
       </div>
 
-      <a routerLink="/profile" class="flex items-center gap-4 bg-white p-2 pr-4 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group">
+      <a routerLink="/profile" class="flex items-center gap-2 sm:gap-4 bg-white p-1.5 sm:p-2 pr-3 sm:pr-4 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all group">
         @if (auth.user(); as currentUser) {
           @if (currentUser.role !== 'superadmin') {
-            <div class="text-right pl-2">
-              <p class="text-[10px] font-bold uppercase text-slate-400 leading-none">Mis Puntos</p>
-              <p class="text-lg font-black text-indigo-600">{{ currentUser.totalPoints || 0 }}</p>
+            <div class="text-right pl-1 sm:pl-2">
+              <p class="text-[8px] sm:text-[10px] font-bold uppercase text-slate-400 leading-none">Puntos</p>
+              <p class="text-base sm:text-lg font-black text-indigo-600 leading-none mt-0.5 sm:mt-1">{{ currentUser.totalPoints || 0 }}</p>
             </div>
           }
           <div class="relative">
             <img [src]="currentUser.photoURL || 'https://ui-avatars.com/api/?name=' + currentUser.displayName" 
-                 class="h-10 w-10 rounded-xl object-cover border border-slate-100 shadow-sm" 
+                 class="h-8 w-8 sm:h-10 sm:w-10 rounded-xl object-cover border border-slate-100 shadow-sm" 
                  [alt]="currentUser.displayName">
-            <div class="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white bg-emerald-500"></div>
+            <div class="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full border-2 border-white bg-emerald-500"></div>
           </div>
         }
       </a>
     </header>
 
-    <router-outlet></router-outlet>
+    <div class="pb-12 sm:pb-0">
+      <router-outlet></router-outlet>
+    </div>
   </main>
+
+  <!-- Bottom Navigation (Mobile Only) -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/80 backdrop-blur-xl border-t border-slate-100 px-6 py-4 flex items-center justify-between shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+    <a routerLink="/dashboard" routerLinkActive="!text-indigo-600" class="flex flex-col items-center gap-1 text-slate-400 transition-all active:scale-90">
+      <span class="text-2xl">📊</span>
+    </a>
+    
+    @if (auth.user()?.role !== 'superadmin') {
+      <a routerLink="/predictions" routerLinkActive="!text-indigo-600" class="flex flex-col items-center gap-1 text-slate-400 transition-all active:scale-90">
+        <span class="text-2xl">⚽</span>
+      </a>
+
+      <a routerLink="/leaderboard" routerLinkActive="!text-indigo-600" class="flex flex-col items-center gap-1 text-slate-400 transition-all active:scale-90">
+        <span class="text-2xl">🏆</span>
+      </a>
+    }
+
+    @if (auth.user()?.role === 'superadmin') {
+      <a routerLink="/admin-panel" routerLinkActive="!text-indigo-600" class="flex flex-col items-center gap-1 text-slate-400 transition-all active:scale-90">
+        <span class="text-2xl">⚙️</span>
+      </a>
+    }
+
+    <a (click)="logout()" class="flex flex-col items-center gap-1 text-slate-400 transition-all active:scale-90">
+      <span class="text-2xl">🚪</span>
+    </a>
+  </nav>
 
   <!-- Modales Globales -->
   <app-alert-modal></app-alert-modal>
-</div>
+</div>

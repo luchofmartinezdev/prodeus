@@ -1,4 +1,4 @@
-<div class="space-y-8">
+<div class="space-y-6 sm:space-y-8 p-1 sm:p-0">
   <app-immersive-banner
     [title]="'¡Hola, ' + userFirstName() + '! 👋'"
     [subtitle]="auth.user()?.role === 'admin' ? 'Gestioná tu empresa y motivá a tu equipo desde hoy.' : 
@@ -11,31 +11,31 @@
 
   <!-- Vista SuperAdmin (Global Metrics) -->
   @if (auth.user()?.role === 'superadmin') {
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <div class="rounded-3xl border-2 border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-indigo-200">
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
+      <div class="rounded-3xl border-2 border-slate-200 bg-white p-5 sm:p-6 shadow-sm transition-all hover:border-indigo-200">
         <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-2xl">👥</div>
+          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-slate-100 text-xl sm:text-2xl">👥</div>
           <div>
-            <p class="text-xs font-black uppercase tracking-wider text-slate-400">Usuarios Totales</p>
-            <p class="text-3xl font-black text-slate-900">{{ totalUsers() }}</p>
+            <p class="text-[9px] sm:text-xs font-black uppercase tracking-wider text-slate-400">Usuarios Totales</p>
+            <p class="text-2xl sm:text-3xl font-black text-slate-900 leading-none mt-1">{{ totalUsers() }}</p>
           </div>
         </div>
       </div>
-      <div class="rounded-3xl border-2 border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-indigo-200">
+      <div class="rounded-3xl border-2 border-slate-200 bg-white p-5 sm:p-6 shadow-sm transition-all hover:border-indigo-200">
         <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-2xl">🏢</div>
+          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-slate-100 text-xl sm:text-2xl">🏢</div>
           <div>
-            <p class="text-xs font-black uppercase tracking-wider text-slate-400">Empresas</p>
-            <p class="text-3xl font-black text-slate-900">{{ totalCompanies() }}</p>
+            <p class="text-[9px] sm:text-xs font-black uppercase tracking-wider text-slate-400">Empresas</p>
+            <p class="text-2xl sm:text-3xl font-black text-slate-900 leading-none mt-1">{{ totalCompanies() }}</p>
           </div>
         </div>
       </div>
-      <div class="rounded-3xl border-2 border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-indigo-200">
+      <div class="rounded-3xl border-2 border-slate-200 bg-white p-5 sm:p-6 shadow-sm transition-all hover:border-indigo-200">
         <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-2xl">📝</div>
+          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-slate-100 text-xl sm:text-2xl">📝</div>
           <div>
-            <p class="text-xs font-black uppercase tracking-wider text-slate-400">Predicciones</p>
-            <p class="text-3xl font-black text-slate-900">{{ totalPredictions() }}</p>
+            <p class="text-[9px] sm:text-xs font-black uppercase tracking-wider text-slate-400">Predicciones</p>
+            <p class="text-2xl sm:text-3xl font-black text-slate-900 leading-none mt-1">{{ totalPredictions() }}</p>
           </div>
         </div>
       </div>
@@ -47,51 +47,51 @@
     
     <!-- Panel de Empresa e Join Code (Solo para Admin) -->
     @if (auth.user()?.role === 'admin') {
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div class="md:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Empresa en Gestión</p>
-            <h3 class="text-2xl font-black text-slate-800 tracking-tight">{{ company()?.name }}</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
+        <div class="md:col-span-2 bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="text-center sm:text-left">
+            <p class="text-[9px] sm:text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Empresa en Gestión</p>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight leading-none">{{ company()?.name }}</h3>
           </div>
-          <div class="flex flex-col items-center sm:items-end">
-            <p class="text-[10px] font-black uppercase text-indigo-500 tracking-widest mb-1 text-center">Código de Invitación</p>
+          <div class="flex flex-col items-center sm:items-end w-full sm:w-auto">
+            <p class="text-[9px] sm:text-[10px] font-black uppercase text-indigo-500 tracking-widest mb-2 sm:mb-1 text-center">Código de Invitación</p>
             <div class="flex items-center gap-2">
-               <span class="text-2xl font-black text-slate-900 border-2 border-dashed border-indigo-200 px-4 py-2 rounded-2xl bg-indigo-50/50">
+               <span class="flex-1 sm:flex-none text-xl sm:text-2xl font-black text-slate-900 border-2 border-dashed border-indigo-200 px-4 py-2 rounded-2xl bg-indigo-50/50 text-center">
                  {{ company()?.joinCode || '...' }}
                </span>
-               <button (click)="copyJoinCode()" class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-900 text-white hover:bg-indigo-600 transition-all text-sm shadow-sm active:scale-90" title="Copiar Código">
+               <button (click)="copyJoinCode()" class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-900 text-white hover:bg-indigo-600 transition-all text-sm shadow-sm active:scale-90" title="Copiar">
                  📋
                </button>
             </div>
           </div>
         </div>
         
-        <div class="bg-indigo-50 rounded-3xl border border-indigo-100 p-6 flex flex-col justify-center">
-          <p class="text-[10px] font-black uppercase text-indigo-400 tracking-widest mb-2">Pasos a seguir</p>
-          <p class="text-[11px] text-indigo-900 leading-tight font-medium">Comparte este código con tus colaboradores para que se unan a tu grupo corporativo.</p>
+        <div class="bg-indigo-50 rounded-3xl border border-indigo-100 p-5 sm:p-6 flex flex-col justify-center">
+          <p class="text-[9px] sm:text-[10px] font-black uppercase text-indigo-400 tracking-widest mb-1.5 sm:mb-2 text-center sm:text-left">Próximos Pasos</p>
+          <p class="text-[11px] text-indigo-900 leading-tight font-medium text-center sm:text-left">Comparte este código con tus colaboradores para que se unan a tu grupo corporativo.</p>
         </div>
       </div>
     }
 
-    <div class="space-y-6">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">
+    <div class="space-y-4 sm:space-y-6">
+      <div class="flex items-center justify-between gap-4">
+        <h3 class="text-base sm:text-xl font-black text-slate-800 uppercase tracking-tight">
           {{ auth.user()?.role === 'admin' ? 'Torneos Corporativos' : 'Mis Torneos' }}
         </h3>
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          {{ auth.user()?.role === 'admin' ? 'Gestiona la participación de tu empresa' : 'Participa y suma puntos' }}
+        <p class="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">
+          {{ auth.user()?.role === 'admin' ? 'Gestiona tu empresa' : 'Participa y suma puntos' }}
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         @for (tour of availableTournaments(); track tour.id) {
           @let isSubscribed = (company()?.subscribedTournaments?.includes(tour.id || '') || tour.id === company()?.activeTournamentId);
-          <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all group">
+          <div class="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-sm hover:shadow-md transition-all group">
             <div class="flex items-start justify-between mb-4">
-              <div class="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-3xl group-hover:bg-indigo-50 transition-colors pointer-events-none">
+              <div class="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-2xl sm:text-3xl group-hover:bg-indigo-50 transition-colors pointer-events-none">
                 {{ tour.type === 'public' ? '🏆' : '🏢' }}
               </div>
-              <span class="text-[9px] font-black uppercase px-2 py-1 rounded-full"
+              <span class="text-[8px] sm:text-[9px] font-black uppercase px-2 py-1 rounded-full"
                 [class.bg-emerald-50]="tour.type === 'public'"
                 [class.text-emerald-600]="tour.type === 'public'"
                 [class.bg-amber-50]="tour.type !== 'public'"
@@ -100,22 +100,22 @@
               </span>
             </div>
 
-            <h4 class="text-lg font-black text-slate-800 leading-tight mb-2">{{ tour.name }}</h4>
-            <p class="text-xs text-slate-500 line-clamp-2 mb-6">Inicia el {{ tour.startDate | date:'dd/MM/yyyy' }}. Demostrá tus conocimientos.</p>
+            <h4 class="text-base sm:text-lg font-black text-slate-800 leading-tight mb-1.5 sm:mb-2">{{ tour.name }}</h4>
+            <p class="text-[11px] sm:text-xs text-slate-500 line-clamp-2 mb-5 sm:mb-6">Inicia el {{ tour.startDate | date:'dd/MM/yyyy' }}. Demostrá tus conocimientos.</p>
             
             @if (auth.user()?.role === 'admin') {
               <button (click)="createCompanyGroup(tour.id || '')"
-                class="w-full py-3 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all">
+                class="w-full py-3 rounded-xl bg-slate-900 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all">
                 {{ isSubscribed ? '✨ Torneo Gestionado' : 'Activar para Empresa' }}
               </button>
             } @else {
               @if (isSubscribed) {
                 <button (click)="tournamentService.setCurrentTournament(tour.id || ''); router.navigate(['/predictions'])"
-                  class="w-full py-3 rounded-xl bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 active:scale-95 transition-all">
+                  class="w-full py-3 rounded-xl bg-indigo-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 active:scale-95 transition-all">
                    Ir a Predecir
                 </button>
               } @else {
-                <div class="w-full py-3 rounded-xl bg-slate-100 text-slate-400 text-[10px] font-black uppercase tracking-widest text-center cursor-not-allowed">
+                <div class="w-full py-3 rounded-xl bg-slate-100 text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center cursor-not-allowed">
                   Torneo No Activo
                 </div>
               }
@@ -123,7 +123,7 @@
           </div>
         } @empty {
           <div class="col-span-full py-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-             <p class="text-slate-400 font-bold">No hay torneos disponibles en este momento.</p>
+             <p class="text-slate-400 font-bold text-sm">No hay torneos disponibles.</p>
           </div>
         }
       </div>
@@ -132,34 +132,34 @@
 
   <!-- Vista Usuario Regular (Stats Personales) -->
   @if (auth.user()?.role !== 'superadmin' && auth.user()?.role !== 'admin') {
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm font-sans">
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
+      <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
         <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-2xl">🏆</div>
+          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-amber-50 text-xl sm:text-2xl">🏆</div>
           <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Ranking</p>
-            <p class="text-2xl font-black text-slate-800">#{{ stats.globalRank }}</p>
+            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 leading-none">Ranking</p>
+            <p class="text-xl sm:text-2xl font-black text-slate-800 mt-1 leading-none">#{{ stats.globalRank }}</p>
           </div>
         </div>
       </div>
-      <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
         <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-2xl">🎯</div>
+          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-emerald-50 text-xl sm:text-2xl">🎯</div>
           <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Precisión</p>
-            <p class="text-2xl font-black text-slate-800">{{ stats.accuracy }}%</p>
+            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 leading-none">Precisión</p>
+            <p class="text-xl sm:text-2xl font-black text-slate-800 mt-1 leading-none">{{ stats.accuracy }}%</p>
           </div>
         </div>
       </div>
-      <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
         <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-2xl">📈</div>
+          <div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-indigo-50 text-xl sm:text-2xl">📈</div>
           <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Participantes</p>
-            <p class="text-2xl font-black text-slate-800">{{ stats.totalPlayers }}</p>
+            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 leading-none">Compañeros</p>
+            <p class="text-xl sm:text-2xl font-black text-slate-800 mt-1 leading-none">{{ stats.totalPlayers }}</p>
           </div>
         </div>
       </div>
     </div>
   }
-</div>
+</div>

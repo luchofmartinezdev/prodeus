@@ -8,12 +8,11 @@ import { CompanyService } from '../../core/services/company';
 import { TournamentService } from '../../core/services/tournament';
 import { LeaderboardEntry, Tournament } from '../../core/models/models';
 
-import { BadgeComponent } from '../../shared/components/badge/badge';
 
 @Component({
   selector: 'app-leaderboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, BadgeComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './leaderboard.html'
 })
 export class LeaderboardComponent implements OnInit {
@@ -27,12 +26,12 @@ export class LeaderboardComponent implements OnInit {
   tournaments = signal<Tournament[]>([]);
   companyName = signal<string>('Mi Empresa');
   isLoading = signal(true);
-  
+
   // Paginación
   currentPage = signal(1);
   itemsPerPage = 10;
   totalPages = computed(() => Math.ceil(this.leaderboard().length / this.itemsPerPage));
-  
+
   // Lista paginada del ranking restante (fuera del podio)
   paginatedRemaining = computed(() => {
     const start = (this.currentPage() - 1) * this.itemsPerPage;

@@ -1,20 +1,19 @@
-<div class="max-w-5xl mx-auto space-y-10 p-6">
+<div class="max-w-5xl mx-auto space-y-6 sm:space-y-10 p-4 sm:p-6 pb-20 sm:pb-6">
   <header
-    class="border-b border-slate-200 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    class="border-b border-slate-200 pb-6 sm:pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6">
     <div>
-      <h1 class="text-4xl font-black text-slate-900 tracking-tight">Admin Panel</h1>
-      <p class="text-slate-500 font-medium">Control Central de Prodeus</p>
-
+      <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">Admin Panel</h1>
+      <p class="text-xs sm:text-base text-slate-500 font-medium">Control Central de Prodeus</p>
     </div>
 
     @if (currentTournamentId()) {
-    <app-button (clicked)="backToList()" variant="secondary" size="sm">
+    <app-button (clicked)="backToList()" variant="secondary" size="sm" class="w-full sm:w-auto">
       <span leftIcon>←</span> Volver al Listado
     </app-button>
     } @else {
     <div class="px-4 py-2 bg-slate-100 rounded-xl border border-slate-200">
-      <span class="text-xs font-black uppercase text-slate-400">Ambiente de:</span>
-      <span class="ml-2 font-bold text-slate-900">{{
+      <span class="text-[9px] sm:text-xs font-black uppercase text-slate-400">Ambiente de:</span>
+      <span class="ml-2 text-xs sm:text-sm font-bold text-slate-900">{{
         user()?.role === 'superadmin' ? 'Super Admin' : 'Admin'
         }}</span>
     </div>
@@ -23,21 +22,22 @@
 
   <!-- NAVEGACIÓN POR TABS PARA SUPERADMIN -->
   @if (user()?.role === 'superadmin') {
-  <div class="flex p-1 bg-slate-100 rounded-2xl border border-slate-200">
-    <button (click)="changeTab(1)" [class.bg-indigo-600]="activeTab() === 1" [class.text-white]="activeTab() === 1"
-      class="flex-1 py-3 rounded-xl text-xs font-black transition-all text-slate-500 uppercase tracking-widest">
-      🏆 Torneos y Partidos
+  <div class="flex overflow-x-auto sm:overflow-visible p-1 bg-slate-100 rounded-2xl border border-slate-200 no-scrollbar">
+    <button (click)="changeTab(1)" [class.bg-white]="activeTab() === 1" [class.text-indigo-600]="activeTab() === 1" [class.shadow-sm]="activeTab() === 1"
+      class="flex-1 min-w-[120px] py-3 rounded-xl text-[9px] sm:text-xs font-black transition-all text-slate-500 uppercase tracking-widest whitespace-nowrap">
+      🏆 Torneos
     </button>
-    <button (click)="changeTab(2)" [class.bg-indigo-600]="activeTab() === 2" [class.text-white]="activeTab() === 2"
-      class="flex-1 py-3 rounded-xl text-xs font-black transition-all text-slate-500 uppercase tracking-widest">
+    <button (click)="changeTab(2)" [class.bg-white]="activeTab() === 2" [class.text-indigo-600]="activeTab() === 2" [class.shadow-sm]="activeTab() === 2"
+      class="flex-1 min-w-[120px] py-3 rounded-xl text-[9px] sm:text-xs font-black transition-all text-slate-500 uppercase tracking-widest whitespace-nowrap">
       🏢 Empresas
     </button>
-    <button (click)="changeTab(3)" [class.bg-indigo-600]="activeTab() === 3" [class.text-white]="activeTab() === 3"
-      class="flex-1 py-3 rounded-xl text-xs font-black transition-all text-slate-500 uppercase tracking-widest">
-      🛡️ Equipos y Catálogos
+    <button (click)="changeTab(3)" [class.bg-white]="activeTab() === 3" [class.text-indigo-600]="activeTab() === 3" [class.shadow-sm]="activeTab() === 3"
+      class="flex-1 min-w-[120px] py-3 rounded-xl text-[9px] sm:text-xs font-black transition-all text-slate-500 uppercase tracking-widest whitespace-nowrap">
+      🛡️ Equipos
     </button>
   </div>
   }
+
 
   <!-- CONTENIDO TAB 1: TORNEOS Y PARTIDOS -->
   @if (activeTab() === 1) {
@@ -46,26 +46,26 @@
   <div class="space-y-10">
     <!-- SECCIÓN CREAR TORNEO (Solo SuperAdmin) -->
     @if (user()?.role === 'superadmin') {
-    <section class="rounded-3xl border border-indigo-100 bg-indigo-50/30 p-8">
+    <section class="rounded-3xl border border-indigo-100 bg-indigo-50/30 p-5 sm:p-8">
       <div class="flex items-center gap-3 mb-6">
-        <span class="text-2xl">➕</span>
-        <h2 class="text-xl font-bold text-slate-800">Crear Nuevo Torneo (Prode)</h2>
+        <span class="text-xl sm:text-2xl">➕</span>
+        <h2 class="text-lg sm:text-xl font-bold text-slate-800">Crear Nuevo Torneo</h2>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <app-form-field label="Nombre del Torneo" class="lg:col-span-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <app-form-field label="Nombre del Torneo" class="sm:col-span-2 lg:col-span-3">
           <app-input [(ngModel)]="newTournament.name" placeholder="Ej: Champions League 24/25"></app-input>
         </app-form-field>
 
         <app-form-field label="Visibilidad">
-          <select [(ngModel)]="newTournament.type" class="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer">
+          <select [(ngModel)]="newTournament.type" class="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 sm:py-3.5 font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer text-xs sm:text-sm">
             <option value="public">🌍 Público (Global)</option>
             <option value="private">🔒 Privado (Solo Empresa)</option>
           </select>
         </app-form-field>
 
         <app-form-field label="Tipo de Equipos">
-          <select [(ngModel)]="newTournament.teamType" class="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer">
+          <select [(ngModel)]="newTournament.teamType" class="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 sm:py-3.5 font-bold outline-none focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer text-xs sm:text-sm">
             <option value="national">🌍 Selecciones Nacionales</option>
             <option value="club">🏟️ Clubes</option>
           </select>
@@ -88,11 +88,12 @@
         </app-form-field>
       </div>
 
-      <app-button (clicked)="saveTournament()" [disabled]="!newTournament.name" [loading]="loading()" class="mt-6">
+      <app-button (clicked)="saveTournament()" [disabled]="!newTournament.name" [loading]="loading()" class="mt-6 w-full sm:w-auto">
         🚀 Crear Torneo
       </app-button>
     </section>
     }
+
 
     <!-- LISTADO DE CARDS -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -140,27 +141,27 @@
   <!-- VISTA DETALLE DEL TORNEO SELECCIONADO -->
   <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
     <!-- HEADER DEL TORNEO -->
-    <div class="relative overflow-hidden rounded-[2.5rem] bg-slate-900 p-8 text-white shadow-2xl">
-      <div class="relative z-10 flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
+    <div class="relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] bg-slate-900 p-6 sm:p-8 text-white shadow-2xl">
+      <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <div class="flex items-center gap-3 mb-2">
             <span
-              class="px-3 py-1 bg-indigo-500 rounded-full text-[10px] font-black uppercase tracking-widest">Tournament
+              class="px-3 py-1 bg-indigo-500 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Tournament
               Detail</span>
           </div>
-          <h2 class="text-4xl font-black tracking-tight italic uppercase">
+          <h2 class="text-2xl sm:text-4xl font-black tracking-tight italic uppercase">
             {{ tournaments().find(t => t.id === currentTournamentId())?.name || 'Cargando...' }}
           </h2>
-          <p class="text-slate-400 font-medium mt-1">
+          <p class="text-xs sm:text-base text-slate-400 font-medium mt-1">
             Gestión integral de partidos y resultados
           </p>
         </div>
 
-        <div class="flex gap-3">
+        <div class="flex gap-3 w-full sm:w-auto">
           @if (user()?.role === 'admin' && currentCompany(); as company) {
           <button (click)="setActiveTournamentForCompany(currentTournamentId())"
             [class.bg-emerald-500]="company.activeTournamentId === currentTournamentId()"
-            class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-black transition-all text-xs uppercase tracking-widest">
+            class="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 sm:px-6 py-3 rounded-xl sm:rounded-2xl font-black transition-all text-[10px] sm:text-xs uppercase tracking-widest">
             {{
             company.activeTournamentId === currentTournamentId()
             ? '✓ Torneo Activo'
@@ -174,30 +175,31 @@
       <div class="absolute -bottom-20 left-20 h-40 w-40 rounded-full bg-indigo-400 opacity-5"></div>
     </div>
 
+
     <!-- DASHBOARD DE GESTIÓN (HORIZONTAL) -->
     <div class="space-y-8 pb-20">
       <!-- SECCIÓN: NUEVO PARTIDO (HORIZONTAL) -->
-      <section class="rounded-[2.5rem] border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
-        <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-8">
-          <h2 class="text-xl font-black text-slate-800 flex items-center gap-2">
+      <section class="rounded-3xl sm:rounded-[2.5rem] border border-slate-200 bg-white p-5 sm:p-8 shadow-xl shadow-slate-200/50">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <h2 class="text-lg sm:text-xl font-black text-slate-800 flex items-center gap-2">
             <span
-              class="h-8 w-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-sm">+</span>
+              class="h-7 w-7 sm:h-8 sm:w-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-sm">+</span>
             Nuevo Partido
           </h2>
 
           <!-- Herramientas Rápidas -->
-          <div class="flex gap-2">
+          <div class="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
             <button (click)="seedFullWorldCupFixture()"
-              class="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase hover:bg-indigo-600 hover:text-white transition-all">
+              class="px-3 sm:px-4 py-2 shrink-0 rounded-xl bg-indigo-50 text-indigo-600 text-[8px] sm:text-[10px] font-black uppercase hover:bg-indigo-600 hover:text-white transition-all">
               ⚡ Sembrar Fixture Mundial
             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
           <app-form-field label="Local">
             <select [(ngModel)]="newMatch.homeId"
-              class="w-full mt-2 rounded-2xl border border-slate-100 bg-slate-50 p-4 font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer text-sm">
+              class="w-full mt-2 rounded-2xl border border-slate-100 bg-slate-50 p-3 sm:p-4 font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer text-xs sm:text-sm">
               <option value="">Seleccionar...</option>
               @for (t of teams(); track t.id) {
               <option [value]="t.id">{{ t.name }}</option>
@@ -207,7 +209,7 @@
 
           <app-form-field label="Visitante">
             <select [(ngModel)]="newMatch.awayId"
-              class="w-full mt-2 rounded-2xl border border-slate-100 bg-slate-50 p-4 font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer text-sm">
+              class="w-full mt-2 rounded-2xl border border-slate-100 bg-slate-50 p-3 sm:p-4 font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer text-xs sm:text-sm">
               <option value="">Seleccionar...</option>
               @for (t of teams(); track t.id) {
               <option [value]="t.id">{{ t.name }}</option>
@@ -227,41 +229,38 @@
             <app-input [(ngModel)]="newMatch.stadium" placeholder="Ej: Estadio"></app-input>
           </app-form-field>
 
-          <app-button (clicked)="createMatch()" [disabled]="loading() || !newMatch.homeId || !newMatch.awayId" class="h-[58px] uppercase tracking-widest text-[10px]">
-            {{ loading() ? '...' : 'Publicar en Fecha ' + selectedMatchday() }}
+          <app-button (clicked)="createMatch()" [disabled]="loading() || !newMatch.homeId || !newMatch.awayId" class="h-12 sm:h-[58px] uppercase tracking-widest text-[9px] sm:text-[10px]">
+            {{ loading() ? '...' : 'Publicar en F' + selectedMatchday() }}
           </app-button>
         </div>
       </section>
 
+
       <!-- SECCIÓN: CARGA MASIVA JSON -->
-      <section class="rounded-[2.5rem] bg-slate-900 p-8 shadow-2xl text-white relative overflow-hidden group">
+      <section class="rounded-3xl sm:rounded-[2.5rem] bg-slate-900 p-6 sm:p-8 shadow-2xl text-white relative overflow-hidden group">
         <div class="relative z-10">
-          <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-8">
-            <h2 class="text-xl font-black flex items-center gap-3">
+          <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <h2 class="text-lg sm:text-xl font-black flex items-center gap-3">
               <span class="h-8 w-8 bg-indigo-500 rounded-lg flex items-center justify-center text-sm">📦</span>
               Carga Masiva (JSON)
             </h2>
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <div class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               Importa equipos y partidos al mismo tiempo
             </div>
           </div>
 
           <div class="space-y-4">
             <textarea [(ngModel)]="bulkJson" placeholder='{ 
-  "teams": [
-    { "id": "arg", "name": "Argentina" }
-  ], 
-  "matches": [
-    { "homeId": "arg", "awayId": "bra", "matchday": 1, "date": "2026-06-12T15:00:00" }
-  ] 
-}' class="w-full h-40 rounded-2xl border-none bg-slate-800 p-6 font-mono text-sm text-indigo-300 focus:ring-4 focus:ring-indigo-500/20 transition-all"></textarea>
+  "teams": [ { "id": "arg", "name": "Argentina" } ], 
+  "matches": [ { "homeId": "arg", "awayId": "bra", "matchday": 1, "date": "2026-06-12T15:00:00" } ] 
+}' class="w-full h-32 sm:h-40 rounded-2xl border-none bg-slate-800 p-4 sm:p-6 font-mono text-[11px] sm:text-sm text-indigo-300 focus:ring-4 focus:ring-indigo-500/20 transition-all"></textarea>
 
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div class="text-[10px] text-slate-500 font-medium italic">
-                * El ID del equipo debe ser de 3 letras. La fecha en formato ISO.
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="text-[9px] sm:text-[10px] text-slate-500 font-medium italic text-center sm:text-left">
+                * El ID del equipo debe ser de 3 letras. Fecha ISO.
               </div>
-              <app-button (clicked)="handleBulkUpload()" [disabled]="!bulkJson" [loading]="loading()" size="lg">
-                {{ loading() ? 'Procesando...' : '🚀 Ejecutar Importación' }}
+              <app-button (clicked)="handleBulkUpload()" [disabled]="!bulkJson" [loading]="loading()" size="lg" class="w-full sm:w-auto">
+                {{ loading() ? '...' : '🚀 Ejecutar Importación' }}
               </app-button>
             </div>
           </div>
@@ -272,28 +271,39 @@
         </div>
       </section>
 
+
       <!-- FIXTURE (DEBAJO, ANCHO COMPLETO) -->
       <div class="space-y-8">
-        <div class="flex flex-col lg:flex-row items-center justify-between gap-6 px-2">
-          <div class="flex items-center gap-6">
-            <h3 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3 shrink-0">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 px-2">
+          <div class="flex items-center justify-between w-full sm:w-auto gap-4">
+            <h3 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2 sm:gap-3 shrink-0">
               Fixture
-              <span class="bg-indigo-50 text-indigo-600 text-xs px-3 py-1 rounded-full">#{{ filteredMatches.length
-                }}</span>
+              <span class="bg-indigo-50 text-indigo-600 text-[10px] px-3 py-1 rounded-full">#{{ filteredMatches.length }}</span>
             </h3>
 
-            <!-- Selector de Fechas (1, 2, 3) -->
-            <div class="flex p-1 bg-slate-100 rounded-[1.25rem] border border-slate-200 shadow-inner">
-              @for (day of [1, 2, 3]; track day) {
-              <button (click)="selectedMatchday.set(day)" [class.bg-white]="selectedMatchday() === day"
-                [class.shadow-md]="selectedMatchday() === day" [class.text-indigo-600]="selectedMatchday() === day"
-                class="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-400">
-                Fecha {{ day }}
-              </button>
-              }
+            <!-- Selector de Fechas (Mobile) -->
+            <div class="sm:hidden flex p-1 bg-slate-100 rounded-xl border border-slate-200">
+               <select [ngModel]="selectedMatchday()" (ngModelChange)="selectedMatchday.set(+$event)" 
+                  class="bg-transparent border-none text-[10px] font-black uppercase text-indigo-600 focus:ring-0 py-1 pl-3 pr-8">
+                  @for (day of [1,2,3]; track day) {
+                    <option [value]="day">Fecha {{day}}</option>
+                  }
+               </select>
             </div>
           </div>
+
+          <!-- Selector de Fechas (Desktop) -->
+          <div class="hidden sm:flex p-1 bg-slate-100 rounded-[1.25rem] border border-slate-200 shadow-inner">
+            @for (day of [1, 2, 3]; track day) {
+            <button (click)="selectedMatchday.set(day)" [class.bg-white]="selectedMatchday() === day"
+              [class.shadow-md]="selectedMatchday() === day" [class.text-indigo-600]="selectedMatchday() === day"
+              class="px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-400">
+              Fecha {{ day }}
+            </button>
+            }
+          </div>
         </div>
+
 
         <!-- LISTA DE PARTIDOS (MODO ÚNICO) -->
         <div class="flex flex-col gap-4 max-w-4xl mx-auto w-full">
@@ -377,23 +387,23 @@
         <h2 class="text-lg font-black text-slate-800">Todas las Empresas</h2>
         <div class="text-xs font-black text-slate-400 bg-slate-50 px-4 py-2 rounded-full uppercase">Total: {{ companies().length }}</div>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left">
+      <div class="overflow-x-auto -mx-5 px-5 sm:mx-0 sm:px-0 no-scrollbar">
+        <table class="w-full text-left min-w-[600px]">
           <thead>
-            <tr class="border-b border-slate-100 text-xs font-black uppercase text-slate-400">
+            <tr class="border-b border-slate-100 text-[10px] font-black uppercase text-slate-400">
               <th class="pb-4">Empresa</th>
               <th class="pb-4">WhatsApp</th>
               <th class="pb-4">Admin Email</th>
-              <th class="pb-4">Estado</th>
+              <th class="pb-4 text-right">Estado</th>
             </tr>
           </thead>
           <tbody>
             @for (company of companies(); track company.id) {
             <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-              <td class="py-4 font-bold text-slate-700">{{ company.name }}</td>
-              <td class="py-4 text-slate-500 font-medium">{{ company.phone }}</td>
-              <td class="py-4 text-slate-500 text-xs">{{ company.adminEmail }}</td>
-              <td class="py-4">
+              <td class="py-3 sm:py-4 font-bold text-slate-700 text-xs sm:text-sm">{{ company.name }}</td>
+              <td class="py-3 sm:py-4 text-slate-500 font-medium text-xs">{{ company.phone }}</td>
+              <td class="py-3 sm:py-4 text-slate-500 text-[10px] sm:text-xs">{{ company.adminEmail }}</td>
+              <td class="py-3 sm:py-4 text-right">
                 <app-badge [variant]="$any(company).status === 'approved' || (!$any(company).status && company.active) ? 'success' : $any(company).status === 'rejected' ? 'danger' : 'warning'">
                   {{ $any(company).status === 'approved' ? 'Aprobada' : $any(company).status === 'rejected' ? 'Rechazada' : 'Pendiente' }}
                 </app-badge>
@@ -401,7 +411,7 @@
             </tr>
             } @empty {
             <tr>
-              <td colspan="4" class="py-10 text-center text-slate-400 font-medium italic">
+              <td colspan="4" class="py-10 text-center text-slate-400 font-medium italic text-sm">
                 No hay empresas registradas.
               </td>
             </tr>
@@ -409,6 +419,7 @@
           </tbody>
         </table>
       </div>
+
     </div>
   </section>
   }
@@ -584,47 +595,47 @@
     </div>
 
     <!-- Lista de Equipos Cargados -->
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
       @for (team of paginatedTeams(); track team.id) {
       <div
-        class="group relative rounded-2xl border border-slate-200 bg-white p-4 text-center transition-all hover:border-indigo-500 hover:shadow-lg">
+        class="group relative rounded-xl border border-slate-200 bg-white p-2 sm:p-4 text-center transition-all hover:border-indigo-500 hover:shadow-lg">
         <button (click)="deleteTeam(team.id)"
-          class="absolute -top-2 -right-2 hidden h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white text-[10px] shadow-sm group-hover:flex">
+          class="absolute -top-1.5 -right-1.5 hidden h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white text-[9px] shadow-sm group-hover:flex">
           ✕
         </button>
-        <div class="flex items-center justify-center -space-x-5 mb-3 group-hover:space-x-1 transition-all h-10">
+        <div class="flex items-center justify-center -space-x-4 sm:-space-x-5 mb-3 group-hover:space-x-1 transition-all h-8 sm:h-10">
           @if (team.repechageFlagUrl && team.repechageFlagUrl.length > 0) {
           @for (url of team.repechageFlagUrl; track url) {
           <img [src]="url" (error)="$any($event.target).src = 'https://flagcdn.com/unknown.svg'"
-            class="h-10 w-10 object-cover rounded-full border-2 border-white shadow-sm" [alt]="team.name" />
+            class="h-8 w-8 sm:h-10 sm:w-10 object-cover rounded-full border-2 border-white shadow-sm" [alt]="team.name" />
           }
           } @else {
           <img [src]="team.flagUrl || 'https://flagcdn.com/unknown.svg'"
             (error)="$any($event.target).src = 'https://flagcdn.com/unknown.svg'"
-            class="h-10 w-10 object-cover rounded-full shadow-sm border border-slate-100" [alt]="team.name" />
+            class="h-8 w-8 sm:h-10 sm:w-10 object-cover rounded-full shadow-sm border border-slate-100" [alt]="team.name" />
           }
         </div>
 
         <!-- Info del Equipo -->
-        <p class="truncate text-[11px] font-black uppercase text-slate-800 tracking-tight mb-1" [title]="team.name">
+        <p class="truncate text-[10px] sm:text-[11px] font-black uppercase text-slate-800 tracking-tight mb-1" [title]="team.name">
           {{ team.name }}
         </p>
 
         <!-- Badges Dinámicos -->
-        <div class="flex items-center justify-center gap-1.5">
+        <div class="flex items-center justify-center gap-1">
           @if (team.type === 'national') {
           <span
-            class="text-[7px] font-black bg-indigo-50 text-indigo-500 border border-indigo-100/50 px-2 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">
+            class="text-[7px] font-black bg-indigo-50 text-indigo-500 border border-indigo-100/50 px-1.5 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap">
             🌍 Selección
           </span>
           } @else if (team.country) {
           <span
-            class="text-[7px] font-black bg-slate-50 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full uppercase tracking-widest flex items-center gap-1 whitespace-nowrap">
+            class="text-[7px] font-black bg-slate-50 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded-full uppercase tracking-widest flex items-center gap-1 whitespace-nowrap">
             📍 {{ team.country }}
           </span>
           } @else {
           <span
-            class="text-[7px] font-black bg-slate-50 text-slate-400 border border-slate-100 px-2 py-0.5 rounded-full uppercase tracking-widest">
+            class="text-[7px] font-black bg-slate-50 text-slate-400 border border-slate-100 px-1.5 py-0.5 rounded-full uppercase tracking-widest">
             Club
           </span>
           }
@@ -634,39 +645,38 @@
     </div>
 
     @if (paginatedTeams().length === 0) {
-    <div class="py-20 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-      <p class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">No hay equipos en esta categoría</p>
+    <div class="py-12 sm:py-20 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+      <p class="text-slate-400 font-bold uppercase text-[9px] sm:text-[10px] tracking-widest">No hay equipos</p>
     </div>
     }
+
   </section>
 
   <!-- HERRAMIENTAS DE MANTENIMIENTO (Solo SuperAdmin) -->
   @if (user()?.role === 'superadmin') {
-  <div class="mt-20 pt-10 border-t border-slate-200/50">
+  <div class="mt-12 sm:mt-20 pt-8 sm:pt-10 border-t border-slate-200/50">
     <div
-      class="bg-amber-50 rounded-[2.5rem] p-8 md:p-10 border border-amber-100 flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm">
+      class="bg-amber-50 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 border border-amber-100 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 shadow-sm">
       <div class="text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-3 mb-3">
-          <span class="text-2xl">🛠️</span>
-          <h3 class="text-xl font-black text-amber-900 uppercase tracking-tight">Utilidades de Sistema</h3>
+          <span class="text-xl sm:text-2xl">🛠️</span>
+          <h3 class="text-lg sm:text-xl font-black text-amber-900 uppercase tracking-tight">Utilidades</h3>
         </div>
-        <p class="text-[13px] text-amber-800/60 font-medium max-w-xl leading-relaxed">
-          Ejecuta la migración de empresas para habilitar el soporte de múltiples torneos en cuentas creadas
-          anteriormente. Esta acción es segura y no borrará datos existentes.
+        <p class="text-[11px] sm:text-[13px] text-amber-800/60 font-medium max-w-xl leading-relaxed">
+          Migraciones de sistema y mantenimiento general. Use con precaución.
         </p>
       </div>
-      <div class="flex flex-col sm:flex-row gap-4 shrink-0">
-        <app-button (clicked)="migrateCompanies()" [loading]="loading()" variant="dark" class="!bg-amber-600 !shadow-amber-200 !px-8 !py-5">
-          🚀 Migrar Empresas
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 shrink-0 w-full sm:w-auto">
+        <app-button (clicked)="migrateCompanies()" [loading]="loading()" variant="dark" class="w-full sm:w-auto !bg-amber-600 !shadow-amber-200 !px-6 !py-4">
+          🚀 Migrar
         </app-button>
-        <app-button (clicked)="resetTournamentData()" [disabled]="!currentTournamentId()" [loading]="loading()" variant="danger" class="!px-8 !py-5">
-          {{ currentTournamentId() ? '☢️ Reset Torneo' : '⚠️ Selecciona un Torneo primero' }}
+        <app-button (clicked)="resetTournamentData()" [disabled]="!currentTournamentId()" [loading]="loading()" variant="danger" class="w-full sm:w-auto !px-6 !py-4">
+          ☢️ Reset
         </app-button>
-
       </div>
-
     </div>
   </div>
+
   }
   }
 </div>

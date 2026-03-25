@@ -7,18 +7,19 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   styles: [`:host { display: block; height: 100%; }`],
   template: `
-    <div class="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all">
-      <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">{{ label() }}</p>
+    <div class="bg-white rounded-3xl sm:rounded-[2rem] p-5 sm:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all h-full">
+      <p class="text-[9px] sm:text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">{{ label() }}</p>
       <div class="flex items-baseline gap-1">
-        <span class="text-3xl font-black text-slate-900">{{ value() }}</span>
+        <span class="text-2xl sm:text-3xl font-black text-slate-900 leading-none">{{ value() }}</span>
         @if (unit()) {
-          <span class="text-xs font-bold text-indigo-600 uppercase">{{ unit() }}</span>
+          <span class="text-[10px] sm:text-xs font-bold text-indigo-600 uppercase">{{ unit() }}</span>
         }
       </div>
       @if (tag()) {
-        <p class="mt-2 text-[9px] font-bold uppercase" [class]="tagClass()">{{ tag() }}</p>
+        <p class="mt-2 text-[8px] sm:text-[9px] font-bold uppercase" [class]="tagClass()">{{ tag() }}</p>
       }
     </div>
+
   `
 })
 export class StatsCardComponent {
