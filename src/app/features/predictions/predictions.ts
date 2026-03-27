@@ -28,7 +28,10 @@ export class PredictionsComponent {
   matches = signal<Match[]>([]);
   tournaments = signal<Tournament[]>([]);
   loading = signal(false);
-  activeTab = signal<number>(1);
+  
+  phases = ['Fase de Grupos', '16avos', 'Octavos', 'Cuartos', 'Semifinal', 'Final'];
+  selectedPhase = signal<string>('Fase de Grupos');
+  selectedMatchday = signal<number>(1);
   
   get userId() {
     return this.authService.user()?.uid;
@@ -64,9 +67,52 @@ export class PredictionsComponent {
     this.tournamentService.setCurrentTournament(id);
   }
 
-  // Getter que utiliza el servicio centralizado para filtrar por jornada (24 partidos)
   get filteredMatches(): Match[] {
-    return this.tournamentService.getMatchesByDay(this.matches(), this.activeTab());
+    const sorted = [...this.matches()].sort((a, b) => {
+      const dateA = a.matchDate ? (a.matchDate.seconds ? a.matchDate.seconds * 1000 : new Date(a.matchDate).getTime()) : 0;
+      const dateB = b.matchDate ? (b.matchDate.seconds ? b.matchDate.seconds * 1000 : new Date(b.matchDate).getTime()) : 0;
+      return dateA - (dateB || 0); // fallback to 0 if NaN
+    });
+
+    const phase = this.selectedPhase();
+    if (phase === 'Fase de Grupos') {
+      return sorted.filter(m => {
+        const mGroup = m.group ? m.group.toLowerCase().trim() : '';
+        const isPlayoff = ['16avos', 'octavos', 'cuartos', 'semifinal', 'final', '3er puesto'].includes(mGroup);
+        
+        // Robust matchday extraction
+        const rawMday = m.matchday !== undefined && m.matchday !== null ? String(m.matchday) : '1';
+        const digits = rawMday.match(/\d+/);
+        const numericDay = digits ? parseInt(digits[0], 10) : 1;
+        
+        return !isPlayoff && numericDay === this.selectedMatchday();
+      });
+    }
+    
+    return sorted.filter(m => m.group?.toLowerCase() === phase.toLowerCase());
+  }
+
+  isPhaseUnlocked(phase: string): boolean {
+    if (phase === 'Fase de Grupos') return true;
+    
+    const allMatches = this.matches();
+    if (!allMatches || allMatches.length === 0) return false;
+
+    const currentIndex = this.phases.indexOf(phase);
+    if (currentIndex <= 0) return true;
+
+    const previousPhase = this.phases[currentIndex - 1];
+
+    const previousMatches = allMatches.filter(m => {
+       const mGroup = m.group ? m.group.toLowerCase().trim() : '';
+       if (previousPhase === 'Fase de Grupos') {
+          return !['16avos', 'octavos', 'cuartos', 'semifinal', 'final', '3er puesto'].includes(mGroup);
+       }
+       return mGroup === previousPhase.toLowerCase();
+    });
+
+    if (previousMatches.length === 0) return false;
+    return previousMatches.every(m => m.status === 'finished');
   }
 
   /**

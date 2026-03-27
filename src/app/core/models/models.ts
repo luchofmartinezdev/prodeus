@@ -102,7 +102,15 @@ export interface Match {
   // UI helper fields
   userHomePrediction?: number | null;
   userAwayPrediction?: number | null;
+
+  // --- Playoff / Automation Fields ---
+  homePlaceholder?: string;      // Ej: '1A', '2B', '3ABC', 'winner_m49'
+  awayPlaceholder?: string;      // Ej: '2A', '1B', 'winner_m50'
+  winnerTeamId?: string;         // El ID del equipo que avanza (útil en caso de penales/empate)
+  nextMatchId?: string;          // ID del partido al que avanza el ganador
+  isHomeInNext?: boolean;        // Indica si el ganador de este partido es Local o Visitante en el siguiente
 }
+
 
 // =========================
 // 7. Tournament

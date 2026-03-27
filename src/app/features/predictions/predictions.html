@@ -22,20 +22,38 @@
   </header>
 
   <nav
-    class="flex p-1 bg-slate-100 rounded-2xl border border-slate-200 sticky top-2 z-20 shadow-sm backdrop-blur-md"
+    class="flex p-1 bg-slate-100 rounded-2xl border border-slate-200 sticky top-2 z-30 shadow-sm backdrop-blur-md overflow-x-auto no-scrollbar"
   >
-    @for (tab of [1, 2, 3]; track tab) {
+    @for (phase of phases; track phase) {
       <button
-        (click)="activeTab.set(tab)"
-        [class.bg-white]="activeTab() === tab"
-        [class.text-indigo-600]="activeTab() === tab"
-        [class.shadow-md]="activeTab() === tab"
-        class="flex-1 py-2 sm:py-3 rounded-[0.9rem] text-[10px] sm:text-xs font-black transition-all duration-200 text-slate-500 hover:text-indigo-500 uppercase tracking-widest"
+        (click)="isPhaseUnlocked(phase) ? selectedPhase.set(phase) : null"
+        [disabled]="!isPhaseUnlocked(phase)"
+        [class.bg-white]="selectedPhase() === phase"
+        [class.text-indigo-600]="selectedPhase() === phase"
+        [class.shadow-md]="selectedPhase() === phase"
+        [class.opacity-50]="!isPhaseUnlocked(phase)"
+        [class.cursor-not-allowed]="!isPhaseUnlocked(phase)"
+        class="flex-1 min-w-[100px] py-2 sm:py-3 rounded-[0.9rem] text-[10px] sm:text-xs font-black transition-all duration-200 text-slate-500 hover:text-indigo-500 uppercase tracking-widest whitespace-nowrap"
       >
-        Fecha {{ tab }}
+        {{ phase }} @if(!isPhaseUnlocked(phase)) { <span class="ml-1">🔒</span> }
       </button>
     }
   </nav>
+
+  @if (selectedPhase() === 'Fase de Grupos') {
+    <div class="flex justify-center -mt-2 sm:-mt-4 relative z-20">
+      <div class="inline-flex bg-white rounded-xl border border-slate-200 p-1 shadow-sm overflow-x-auto">
+        @for (day of [1, 2, 3]; track day) {
+          <button (click)="selectedMatchday.set(day)" 
+            [class.bg-indigo-50]="selectedMatchday() === day" 
+            [class.text-indigo-600]="selectedMatchday() === day" 
+            class="px-4 py-1.5 sm:px-6 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold text-slate-500 hover:text-indigo-500 transition-colors whitespace-nowrap">
+            Fecha {{ day }}
+          </button>
+        }
+      </div>
+    </div>
+  }
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4 md:gap-6">
     @if (loading()) {
@@ -49,6 +67,8 @@
         <app-match-card
           [homeId]="match.homeTeamId"
           [awayId]="match.awayTeamId"
+          [homePlaceholder]="match.homePlaceholder"
+          [awayPlaceholder]="match.awayPlaceholder"
           [group]="match.group"
           [matchDate]="match.matchDate"
         >

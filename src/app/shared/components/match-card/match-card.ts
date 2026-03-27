@@ -15,12 +15,28 @@ export class MatchCardComponent {
   matchDate = input<any>();
   stadium = input<string>();
   hasActionContent = input(false);
-
+  
+  homePlaceholder = input<string | undefined>();
+  awayPlaceholder = input<string | undefined>();
 
   private tournamentService = inject(TournamentService);
 
-  public homeData = computed(() => this.tournamentService.getCountry(this.homeId()));
-  public awayData = computed(() => this.tournamentService.getCountry(this.awayId()));
+  public homeData = computed(() => {
+    const id = this.homeId();
+    if (id) return this.tournamentService.getCountry(id);
+    const ph = this.homePlaceholder();
+    if (ph) return { id: ph, name: 'A Confirmar (' + ph + ')', flagUrl: 'https://flagcdn.com/unknown.svg' } as any;
+    return null;
+  });
+
+  public awayData = computed(() => {
+    const id = this.awayId();
+    if (id) return this.tournamentService.getCountry(id);
+    const ph = this.awayPlaceholder();
+    if (ph) return { id: ph, name: 'A Confirmar (' + ph + ')', flagUrl: 'https://flagcdn.com/unknown.svg' } as any;
+    return null;
+  });
+
 
   public formattedDate = computed(() => {
     const d = this.matchDate();

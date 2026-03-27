@@ -53,6 +53,8 @@ export class AdminPanelComponent implements OnInit {
   currentTournamentId = signal<string>('');
   user = this.authService.user;
   currentCompany = signal<Company | null>(null);
+  phases = ['Fase de Grupos', '16avos', 'Octavos', 'Cuartos', 'Semifinal', 'Final'];
+  selectedPhase = signal<string>('Fase de Grupos');
   selectedMatchday = signal<number>(1);
   bulkJson = '';
   updatingMatch = '';
@@ -336,14 +338,58 @@ export class AdminPanelComponent implements OnInit {
   }
 
   get filteredMatches() {
-    return this.tournamentService.getMatchesByDay(this.matches(), this.selectedMatchday());
+    const sorted = [...this.matches()].sort((a, b) => {
+      const dateA = a.matchDate ? (a.matchDate.seconds ? a.matchDate.seconds * 1000 : new Date(a.matchDate).getTime()) : 0;
+      const dateB = b.matchDate ? (b.matchDate.seconds ? b.matchDate.seconds * 1000 : new Date(b.matchDate).getTime()) : 0;
+      return dateA - (dateB || 0); // fallback to 0 if NaN
+    });
+
+    const phase = this.selectedPhase();
+    if (phase === 'Fase de Grupos') {
+      return sorted.filter(m => {
+        const mGroup = m.group ? m.group.toLowerCase().trim() : '';
+        const isPlayoff = ['16avos', 'octavos', 'cuartos', 'semifinal', 'final', '3er puesto'].includes(mGroup);
+        // Robust matchday extraction
+        const rawMday = m.matchday !== undefined && m.matchday !== null ? String(m.matchday) : '1';
+        const digits = rawMday.match(/\d+/);
+        const numericDay = digits ? parseInt(digits[0], 10) : 1;
+        
+        return !isPlayoff && numericDay === this.selectedMatchday();
+      });
+    }
+    
+    return sorted.filter(m => m.group?.toLowerCase() === phase.toLowerCase());
+  }
+
+  isPhaseUnlocked(phase: string): boolean {
+    if (phase === 'Fase de Grupos') return true;
+    
+    const allMatches = this.matches();
+    if (!allMatches || allMatches.length === 0) return false;
+
+    const currentIndex = this.phases.indexOf(phase);
+    if (currentIndex <= 0) return true;
+
+    const previousPhase = this.phases[currentIndex - 1];
+
+    const previousMatches = allMatches.filter(m => {
+       const mGroup = m.group ? m.group.toLowerCase().trim() : '';
+       if (previousPhase === 'Fase de Grupos') {
+          return !['16avos', 'octavos', 'cuartos', 'semifinal', 'final', '3er puesto'].includes(mGroup);
+       }
+       return mGroup === previousPhase.toLowerCase();
+    });
+
+    if (previousMatches.length === 0) return false;
+    return previousMatches.every(m => m.status === 'finished');
   }
 
   async loadMatches() {
     if (!this.currentTournamentId()) return;
     this.loading.set(true);
     try {
-      const q = query(collection(db, `tournaments/${this.currentTournamentId()}/matches`), orderBy('matchDate'));
+      // Remover orderBy a nivel base de datos para evitar que Firestore ignore los documentos que no tienen la propiedad 'matchDate' agregada
+      const q = query(collection(db, `tournaments/${this.currentTournamentId()}/matches`));
       const snap = await getDocs(q);
       const list = snap.docs.map(d => {
         const data = d.data() as any;
@@ -394,8 +440,31 @@ export class AdminPanelComponent implements OnInit {
     this.updatingMatch = matchId;
     try {
       const matchRef = doc(db, `tournaments/${this.currentTournamentId()}/matches`, matchId);
-      await updateDoc(matchRef, { homeScore: Number(hScore), awayScore: Number(aScore), status: 'finished' });
-      this.alertService.success('Resultado Guardado', 'El resultado del partido ha sido actualizado correctamente.');
+      const homeScore = Number(hScore);
+      const awayScore = Number(aScore);
+
+      // Obtener datos actuales del partido para saber el contexto (playoff o grupo)
+      const currentMatch = this.matches().find(m => m.id === matchId);
+      if (!currentMatch) return;
+
+      // Determinar ganador lógico (para avance)
+      let winnerTeamId = '';
+      if (homeScore > awayScore) winnerTeamId = currentMatch.homeTeamId;
+      else if (awayScore > homeScore) winnerTeamId = currentMatch.awayTeamId;
+      // Nota: Si hay empate en playoff, aquí se podría pedir quién ganó por penales
+
+      const updateData: any = { homeScore, awayScore, status: 'finished' };
+      if (winnerTeamId) updateData.winnerTeamId = winnerTeamId;
+
+      await updateDoc(matchRef, updateData);
+
+      // Lanzar motor de avance automático
+      await this.tournamentService.triggerAdvancementCheck({
+        ...currentMatch,
+        ...updateData
+      });
+
+      this.alertService.success('Resultado Guardado', 'Resultado actualizado y llaves procesadas.');
       await this.loadMatches();
     } catch (e) {
       console.error(e);
@@ -404,6 +473,7 @@ export class AdminPanelComponent implements OnInit {
       this.updatingMatch = '';
     }
   }
+
 
   async setActiveTournamentForCompany(tournamentId: string) {
     const u = this.user();
@@ -678,16 +748,59 @@ export class AdminPanelComponent implements OnInit {
   }
 
 
-  async seedFullWorldCupFixture() {
-
+  async simulateGroupStage() {
     if (!this.currentTournamentId()) return;
+    
+    // Check if there are matches to simulate
+    const groupMatches = this.matches().filter(m => m.group && m.group.length === 1 && m.status !== 'finished');
+    if (groupMatches.length === 0) {
+      this.alertService.info('Sin partidos', 'No hay partidos de fase de grupos (A-Z) pendientes por simular.');
+      return;
+    }
+
+    const ok = await this.alertService.confirm(
+      '🎲 Simular Fase de Grupos',
+      `¿Quieres generar resultados aleatorios para los ${groupMatches.length} partidos pendientes de fase de grupos? Esto disparará el armado de los playoffs.`
+    );
+    if (!ok) return;
+
     this.loading.set(true);
+    let count = 0;
     try {
-      const matchesRef = collection(db, `tournaments/${this.currentTournamentId()}/matches`);
-      console.log('Sembrando fixture para:', this.currentTournamentId);
-      this.loading.set(false);
+      // Usamos for/of para evitar sobresaturar Firestore y asegurar el orden del motor
+      for (const m of groupMatches) {
+        // Ignorar si no tiene equipos definidos
+        if (!m.homeTeamId || !m.awayTeamId) continue;
+        
+        const homeScore = Math.floor(Math.random() * 4); // 0 a 3 goles
+        const awayScore = Math.floor(Math.random() * 4);
+        
+        const matchRef = doc(db, `tournaments/${this.currentTournamentId()}/matches`, m.id);
+        
+        let winnerTeamId = '';
+        if (homeScore > awayScore) winnerTeamId = m.homeTeamId;
+        else if (awayScore > homeScore) winnerTeamId = m.awayTeamId;
+
+        const updateData: any = { homeScore, awayScore, status: 'finished' };
+        if (winnerTeamId) updateData.winnerTeamId = winnerTeamId;
+
+        await updateDoc(matchRef, updateData);
+
+        // Disparar motor de automatización de playoffs / grupos
+        await this.tournamentService.triggerAdvancementCheck({
+          ...m,
+          ...updateData
+        });
+        
+        count++;
+      }
+
+      this.alertService.success('🏆 Simulación Completada', `Se han jugado ${count} partidos y calculado los brackets de playoffs.`);
+      await this.loadMatches();
     } catch (e) {
       console.error(e);
+      this.alertService.error('Error', 'Hubo un error al ejecutar la simulación.');
+    } finally {
       this.loading.set(false);
     }
   }

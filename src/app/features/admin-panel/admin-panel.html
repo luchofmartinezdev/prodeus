@@ -186,15 +186,9 @@
               class="h-7 w-7 sm:h-8 sm:w-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-sm">+</span>
             Nuevo Partido
           </h2>
-
-          <!-- Herramientas Rápidas -->
-          <div class="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
-            <button (click)="seedFullWorldCupFixture()"
-              class="px-3 sm:px-4 py-2 shrink-0 rounded-xl bg-indigo-50 text-indigo-600 text-[8px] sm:text-[10px] font-black uppercase hover:bg-indigo-600 hover:text-white transition-all">
-              ⚡ Sembrar Fixture Mundial
-            </button>
-          </div>
         </div>
+
+
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
           <app-form-field label="Local">
@@ -230,7 +224,7 @@
           </app-form-field>
 
           <app-button (clicked)="createMatch()" [disabled]="loading() || !newMatch.homeId || !newMatch.awayId" class="h-12 sm:h-[58px] uppercase tracking-widest text-[9px] sm:text-[10px]">
-            {{ loading() ? '...' : 'Publicar en F' + selectedMatchday() }}
+            {{ loading() ? '...' : 'Publicar' }}
           </app-button>
         </div>
       </section>
@@ -278,37 +272,61 @@
           <div class="flex items-center justify-between w-full sm:w-auto gap-4">
             <h3 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2 sm:gap-3 shrink-0">
               Fixture
-              <span class="bg-indigo-50 text-indigo-600 text-[10px] px-3 py-1 rounded-full">#{{ filteredMatches.length }}</span>
+              <span class="bg-indigo-50 text-indigo-600 text-[10px] px-3 py-1 rounded-full">#{{ filteredMatches.length }} / Total: {{ matches().length }}</span>
             </h3>
 
-            <!-- Selector de Fechas (Mobile) -->
-            <div class="sm:hidden flex p-1 bg-slate-100 rounded-xl border border-slate-200">
-               <select [ngModel]="selectedMatchday()" (ngModelChange)="selectedMatchday.set(+$event)" 
-                  class="bg-transparent border-none text-[10px] font-black uppercase text-indigo-600 focus:ring-0 py-1 pl-3 pr-8">
-                  @for (day of [1,2,3]; track day) {
-                    <option [value]="day">Fecha {{day}}</option>
+            <!-- Selector de Fases (Mobile) -->
+            <div class="sm:hidden flex p-1 bg-slate-100 rounded-xl border border-slate-200 w-full">
+               <select [ngModel]="selectedPhase()" (ngModelChange)="selectedPhase.set($event)" 
+                  class="bg-transparent border-none text-[10px] w-full font-black uppercase text-indigo-600 focus:ring-0 py-1 pl-3 pr-8">
+                  @for (phase of phases; track phase) {
+                    <option [value]="phase" [disabled]="!isPhaseUnlocked(phase)">
+                      {{phase}} {{ !isPhaseUnlocked(phase) ? '🔒' : '' }}
+                    </option>
                   }
                </select>
             </div>
           </div>
 
-          <!-- Selector de Fechas (Desktop) -->
-          <div class="hidden sm:flex p-1 bg-slate-100 rounded-[1.25rem] border border-slate-200 shadow-inner">
-            @for (day of [1, 2, 3]; track day) {
-            <button (click)="selectedMatchday.set(day)" [class.bg-white]="selectedMatchday() === day"
-              [class.shadow-md]="selectedMatchday() === day" [class.text-indigo-600]="selectedMatchday() === day"
-              class="px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-400">
-              Fecha {{ day }}
+          <!-- Selector de Fases (Desktop) -->
+          <div class="hidden sm:flex p-1 bg-slate-100 rounded-[1.25rem] border border-slate-200 shadow-inner overflow-x-auto no-scrollbar">
+            @for (phase of phases; track phase) {
+            <button (click)="isPhaseUnlocked(phase) ? selectedPhase.set(phase) : null"
+              [disabled]="!isPhaseUnlocked(phase)"
+              [class.bg-white]="selectedPhase() === phase"
+              [class.shadow-md]="selectedPhase() === phase" 
+              [class.text-indigo-600]="selectedPhase() === phase"
+              [class.opacity-50]="!isPhaseUnlocked(phase)"
+              [class.cursor-not-allowed]="!isPhaseUnlocked(phase)"
+              class="px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-slate-400 whitespace-nowrap">
+              {{ phase }} @if(!isPhaseUnlocked(phase)) { <span class="ml-1">🔒</span> }
             </button>
             }
           </div>
         </div>
 
+        @if (selectedPhase() === 'Fase de Grupos') {
+          <div class="flex justify-end mt-4 sm:mt-1 mb-2">
+            <div class="inline-flex bg-white rounded-xl border border-slate-200 p-1 shadow-sm overflow-x-auto">
+              @for (day of [1, 2, 3]; track day) {
+                <button (click)="selectedMatchday.set(day)" 
+                  [class.bg-indigo-50]="selectedMatchday() === day" 
+                  [class.text-indigo-600]="selectedMatchday() === day" 
+                  class="px-4 py-1.5 sm:px-6 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold text-slate-500 hover:text-indigo-500 transition-colors whitespace-nowrap">
+                  Fecha {{ day }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
 
         <!-- LISTA DE PARTIDOS (MODO ÚNICO) -->
         <div class="flex flex-col gap-4 max-w-4xl mx-auto w-full">
           @for (match of filteredMatches; track match.id) {
-          <app-match-card [homeId]="match.homeTeamId" [awayId]="match.awayTeamId" [group]="match.group"
+          <app-match-card [homeId]="match.homeTeamId" [awayId]="match.awayTeamId"
+            [homePlaceholder]="match.homePlaceholder" [awayPlaceholder]="match.awayPlaceholder"
+            [group]="match.group"
             [matchDate]="match.matchDate">
 
             <div info
@@ -370,7 +388,7 @@
             <app-button (clicked)="approveCompany(company.id)" [loading]="loading()" variant="primary" size="sm">
               ✅ Aprobar
             </app-button>
-            <app-button (clicked)="rejectCompany(company.id)" [loading]="loading()" variant="danger" size="sm" class="!bg-rose-100 !text-rose-700 !border-rose-200">
+            <app-button (clicked)="rejectCompany(company.id)" [loading]="loading()" variant="danger" size="sm">
               ❌ Rechazar
             </app-button>
           </div>
@@ -654,29 +672,37 @@
 
   <!-- HERRAMIENTAS DE MANTENIMIENTO (Solo SuperAdmin) -->
   @if (user()?.role === 'superadmin') {
-  <div class="mt-12 sm:mt-20 pt-8 sm:pt-10 border-t border-slate-200/50">
-    <div
-      class="bg-amber-50 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 border border-amber-100 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 shadow-sm">
-      <div class="text-center md:text-left">
-        <div class="flex items-center justify-center md:justify-start gap-3 mb-3">
-          <span class="text-xl sm:text-2xl">🛠️</span>
-          <h3 class="text-lg sm:text-xl font-black text-amber-900 uppercase tracking-tight">Utilidades</h3>
+  <div class="mt-12 sm:mt-20">
+    <section class="rounded-[2.5rem] bg-slate-900 p-8 sm:p-10 shadow-2xl text-white relative overflow-hidden group border border-slate-800">
+      <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="text-center md:text-left">
+          <div class="flex items-center justify-center md:justify-start gap-3 mb-4">
+            <span class="h-10 w-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 text-lg border border-red-500/20">🛠️</span>
+            <h3 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">Utilidades & Mantenimiento</h3>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400 font-medium max-w-xl leading-relaxed">
+            Funciones peligrosas de migración de base de datos y reseteo global. <br class="hidden sm:block">
+            <span class="text-red-400 font-bold">Usar con extrema precaución.</span>
+          </p>
         </div>
-        <p class="text-[11px] sm:text-[13px] text-amber-800/60 font-medium max-w-xl leading-relaxed">
-          Migraciones de sistema y mantenimiento general. Use con precaución.
-        </p>
+        <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 shrink-0 w-full md:w-auto">
+          <!-- Botón Simular Grupos -->
+          <app-button (clicked)="simulateGroupStage()" [disabled]="!currentTournamentId()" [loading]="loading()" variant="primary" size="md" class="w-full sm:w-auto">
+            🎲 Simular Grupos
+          </app-button>
+          
+          <app-button (clicked)="migrateCompanies()" [loading]="loading()" variant="secondary" size="md" class="w-full sm:w-auto">
+            🚀 Migrar Formato
+          </app-button>
+          <app-button (clicked)="resetTournamentData()" [disabled]="!currentTournamentId()" [loading]="loading()" variant="danger" size="md" class="w-full sm:w-auto">
+            ☢️ Reset Torneo Activo
+          </app-button>
+        </div>
       </div>
-      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 shrink-0 w-full sm:w-auto">
-        <app-button (clicked)="migrateCompanies()" [loading]="loading()" variant="dark" class="w-full sm:w-auto !bg-amber-600 !shadow-amber-200 !px-6 !py-4">
-          🚀 Migrar
-        </app-button>
-        <app-button (clicked)="resetTournamentData()" [disabled]="!currentTournamentId()" [loading]="loading()" variant="danger" class="w-full sm:w-auto !px-6 !py-4">
-          ☢️ Reset
-        </app-button>
-      </div>
-    </div>
+      <!-- Fondo decorativo rojo/peligro -->
+      <div class="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-red-600 opacity-5 blur-3xl group-hover:opacity-10 transition-opacity"></div>
+    </section>
   </div>
-
   }
   }
 </div>

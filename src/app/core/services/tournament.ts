@@ -170,7 +170,7 @@ export class TournamentService {
       return [];
     }
     try {
-      const q = query(this.getMatchesCollection(), orderBy('matchDate', 'asc'));
+      const q = query(this.getMatchesCollection());
       const snap = await getDocs(q);
       return snap.docs.map(d => {
         const data = d.data() as any;
@@ -237,4 +237,88 @@ export class TournamentService {
     const start = (matchday - 1) * 24;
     return sorted.slice(start, start + 24);
   }
+
+  // --- AUTOMATION ENGINE ---
+
+  /**
+   * Dispara el chequeo de avance automático tras finalizar un partido
+   */
+  async triggerAdvancementCheck(match: Match) {
+    console.log(`🤖 Verificando avance automático para partido: ${match.id}`);
+
+    // 1. Caso Playoffs: Si este partido tiene un ganador y un destino (nextMatchId)
+    if (match.status === 'finished' && match.nextMatchId && match.winnerTeamId) {
+      const nextMatchRef = doc(db, `tournaments/${match.tournamentId}/matches`, match.nextMatchId);
+      const updateData: any = {};
+      if (match.isHomeInNext) updateData.homeTeamId = match.winnerTeamId;
+      else updateData.awayTeamId = match.winnerTeamId;
+
+      await updateDoc(nextMatchRef, updateData);
+      console.log(`✅ Ganador ${match.winnerTeamId} movido a partido ${match.nextMatchId}`);
+    }
+
+    // 2. Caso Fase de Grupos: Si el partido pertenece a un grupo estándar (A-L)
+    if (match.status === 'finished' && match.group && match.group.length === 1) {
+      await this.checkGroupCompletion(match.tournamentId, match.group);
+    }
+  }
+
+  private async checkGroupCompletion(tournamentId: string, groupName: string) {
+    const q = query(collection(db, `tournaments/${tournamentId}/matches`), where('group', '==', groupName));
+    const snap = await getDocs(q);
+    const matches = snap.docs.map(d => ({ id: d.id, ...d.data() } as Match));
+
+    const allFinished = matches.every(m => m.status === 'finished');
+    if (!allFinished) return;
+
+    console.log(`📊 Grupo ${groupName} completado. Calculando tabla...`);
+    const standings = this.calculateStandings(matches);
+
+    // Buscar partidos de playoffs que esperan al 1ro o 2do de este grupo
+    const knockoutQ = query(collection(db, `tournaments/${tournamentId}/matches`), where('status', '==', 'scheduled'));
+    const kSnap = await getDocs(knockoutQ);
+
+    for (const d of kSnap.docs) {
+      const m = d.data() as Match;
+      const updates: any = {};
+
+      if (m.homePlaceholder === `1${groupName}`) updates.homeTeamId = standings[0].teamId;
+      if (m.homePlaceholder === `2${groupName}`) updates.homeTeamId = standings[1].teamId;
+      if (m.awayPlaceholder === `1${groupName}`) updates.awayTeamId = standings[0].teamId;
+      if (m.awayPlaceholder === `2${groupName}`) updates.awayTeamId = standings[1].teamId;
+
+      if (Object.keys(updates).length > 0) {
+        await updateDoc(d.ref, updates);
+        console.log(`📌 Actualizado partido playoff ${d.id} con clasificado de Grupo ${groupName}`);
+      }
+    }
+  }
+
+  private calculateStandings(matches: Match[]) {
+    const table: Record<string, any> = {};
+    matches.forEach(m => {
+      [m.homeTeamId, m.awayTeamId].forEach(id => {
+        if (!table[id]) table[id] = { teamId: id, pts: 0, gd: 0, gf: 0 };
+      });
+
+      const h = m.homeScore ?? 0;
+      const a = m.awayScore ?? 0;
+
+      table[m.homeTeamId].gf += h;
+      table[m.awayTeamId].gf += a;
+      table[m.homeTeamId].gd += (h - a);
+      table[m.awayTeamId].gd += (a - h);
+
+      if (h > a) table[m.homeTeamId].pts += 3;
+      else if (a > h) table[m.awayTeamId].pts += 3;
+      else {
+        table[m.homeTeamId].pts += 1;
+        table[m.awayTeamId].pts += 1;
+      }
+    });
+
+    // Criterio básico: Puntos -> Diferencia de Gol -> Goles a Favor
+    return Object.values(table).sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+  }
 }
+

@@ -5,14 +5,14 @@ import { CommonModule } from '@angular/common';
   selector: 'app-button',
   standalone: true,
   imports: [CommonModule],
-  styles: [`:host { display: block; width: 100%; }`],
+  styles: [`:host { display: block; }`],
   template: `
     <button
       [type]="type()"
       [disabled]="disabled() || loading()"
       (click)="clicked.emit($event)"
       [class]="classes()"
-      class="flex items-center justify-center gap-2 rounded-2xl transition-all active:scale-95 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+      class="w-full h-full flex items-center justify-center gap-2 rounded-2xl transition-all active:scale-95 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
     >
       @if (loading()) {
         <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -34,12 +34,12 @@ export class ButtonComponent {
   loading = input(false);
   disabled = input(false);
   size = input<'sm' | 'md' | 'lg'>('md');
-  
+
   clicked = output<MouseEvent>();
 
   classes = computed(() => {
     let base = '';
-    
+
     // Tamaños
     if (this.size() === 'sm') base += ' px-5 py-2.5 text-xs ';
     if (this.size() === 'md') base += ' px-7 py-3.5 text-sm ';
