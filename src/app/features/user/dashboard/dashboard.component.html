@@ -1,0 +1,202 @@
+<div class="p-8 max-w-5xl">
+  <!-- Greeting -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-white">Hola, {{ authStore.profile()?.username }} 👋</h1>
+    <p class="text-gray-400 mt-1">Acá vas a encontrar un resumen de tu actividad en Prodeus.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-3">
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Grupos</p>
+      <p class="text-3xl font-black text-white">{{ groupStore.groups().length }}</p>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Torneos activos</p>
+      <p class="text-3xl font-black text-white">{{ activeTournamentCount }}</p>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 col-span-2 sm:col-span-1">
+      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">
+        Próximos partidos
+      </p>
+      <p class="text-3xl font-black text-white">{{ upcomingMatches().length }}</p>
+    </div>
+  </div>
+
+  <!-- Loading initial -->
+  @if (groupStore.isLoading()) {
+    <div class="flex justify-center py-20">
+      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+    </div>
+  }
+
+  @if (!groupStore.isLoading()) {
+    <!-- Empty state -->
+    @if (groupStore.groups().length === 0) {
+      <div class="bg-gray-900 border border-dashed border-gray-700 rounded-2xl p-12 text-center">
+        <svg
+          class="w-12 h-12 text-gray-700 mx-auto mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+        <p class="text-gray-300 font-semibold text-lg mb-1">
+          Todavía no participás en ningún grupo
+        </p>
+        <p class="text-gray-500 text-sm mb-6">
+          Creá uno nuevo o unite a uno con un código de invitación.
+        </p>
+        <div class="flex items-center justify-center gap-3">
+          <a
+            routerLink="/app/groups/new"
+            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors"
+          >
+            Crear grupo
+          </a>
+          <a
+            routerLink="/app/groups"
+            class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-colors"
+          >
+            Unirme por código
+          </a>
+        </div>
+      </div>
+    }
+
+    <!-- Mis grupos -->
+    @if (previewGroups.length > 0) {
+      <section class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-white">Mis grupos</h2>
+          @if (groupStore.groups().length > 4) {
+            <a
+              routerLink="/app/groups"
+              class="text-indigo-400 hover:text-indigo-300 text-sm transition-colors"
+            >
+              Ver todos ({{ groupStore.groups().length }})
+            </a>
+          }
+        </div>
+        <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          @for (group of previewGroups; track group.id) {
+            <a
+              [routerLink]="['/app/groups', group.id]"
+              class="block bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-4 transition-colors group/card"
+            >
+              <p class="text-xs text-gray-500 mb-1 truncate">{{ group.tournament.name }}</p>
+              <p
+                class="text-white font-semibold text-sm group-hover/card:text-indigo-300 transition-colors truncate"
+              >
+                {{ group.name }}
+              </p>
+              <span
+                class="mt-2 inline-block text-xs px-1.5 py-0.5 rounded"
+                [class]="
+                  group.join_mode === 'open'
+                    ? 'bg-green-900 text-green-400'
+                    : 'bg-yellow-900 text-yellow-400'
+                "
+              >
+                {{ group.join_mode === 'open' ? 'Abierto' : 'Cerrado' }}
+              </span>
+            </a>
+          }
+          <!-- Add group card -->
+          <a
+            routerLink="/app/groups/new"
+            class="flex flex-col items-center justify-center border border-dashed border-gray-700 hover:border-indigo-600 rounded-xl p-4 text-gray-600 hover:text-indigo-400 transition-colors min-h-[90px]"
+          >
+            <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            <span class="text-xs font-medium">Crear grupo</span>
+          </a>
+        </div>
+      </section>
+    }
+
+    <!-- Próximos partidos -->
+    @if (groupStore.groups().length > 0) {
+      <section>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-white">Próximos partidos</h2>
+        </div>
+
+        @if (isLoadingMatches()) {
+          <div class="flex items-center gap-2 text-gray-500 text-sm py-4">
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            Cargando partidos...
+          </div>
+        } @else if (upcomingMatches().length === 0) {
+          <div
+            class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-8 text-center text-gray-500 text-sm"
+          >
+            No hay partidos programados próximamente.
+          </div>
+        } @else {
+          <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+            @for (match of upcomingMatches(); track match.id) {
+              <div
+                class="flex items-center justify-between px-5 py-4 border-b border-gray-800 last:border-0"
+              >
+                <!-- Teams -->
+                <div class="flex items-center gap-3">
+                  <span class="text-white font-semibold text-sm">
+                    {{ match.home_team.short_name ?? match.home_team.name }}
+                  </span>
+                  <span class="text-gray-600 text-xs font-medium">vs</span>
+                  <span class="text-white font-semibold text-sm">
+                    {{ match.away_team.short_name ?? match.away_team.name }}
+                  </span>
+                  @if (match.round) {
+                    <span class="text-gray-600 text-xs hidden sm:inline">· {{ match.round }}</span>
+                  }
+                </div>
+                <!-- Date & time -->
+                <div class="text-right flex-shrink-0 ml-4">
+                  <p class="text-gray-300 text-xs font-medium">
+                    {{ formatDate(match.match_date) }}
+                  </p>
+                  <p class="text-gray-500 text-xs">{{ formatTime(match.match_date) }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+  }
+</div>

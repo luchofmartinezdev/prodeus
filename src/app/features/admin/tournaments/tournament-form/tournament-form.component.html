@@ -1,0 +1,166 @@
+<div class="p-8 max-w-2xl">
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6">
+    <a
+      routerLink="/admin/tournaments"
+      class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+    >
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-white">
+        {{ isEditMode() ? 'Editar torneo' : 'Nuevo torneo' }}
+      </h1>
+    </div>
+  </div>
+
+  <!-- Loading (edit mode) -->
+  @if (store.isLoading() && isEditMode()) {
+    <div class="flex justify-center py-20">
+      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+    </div>
+  }
+
+  @if (!store.isLoading() || !isEditMode()) {
+    <form (ngSubmit)="onSubmit()" novalidate>
+      <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+        <!-- Nombre -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1.5">
+            Nombre <span class="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
+            name="name"
+            [(ngModel)]="name"
+            placeholder="Copa América 2025"
+            class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+            [class.border-red-600]="fieldErrors()['name']"
+            [class.border-gray-700]="!fieldErrors()['name']"
+          />
+          @if (fieldErrors()['name']) {
+            <p class="mt-1 text-xs text-red-400">{{ fieldErrors()['name'] }}</p>
+          }
+        </div>
+
+        <!-- Descripción -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1.5">Descripción</label>
+          <textarea
+            name="description"
+            [(ngModel)]="description"
+            placeholder="Descripción del torneo..."
+            rows="3"
+            class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors resize-none"
+          >
+          </textarea>
+        </div>
+
+        <!-- Logo URL -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1.5">URL del logo</label>
+          <input
+            type="url"
+            name="logo_url"
+            [(ngModel)]="logo_url"
+            placeholder="https://..."
+            class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+          />
+        </div>
+
+        <!-- Fechas -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">
+              Inicio <span class="text-red-400">*</span>
+            </label>
+            <input
+              type="date"
+              name="start_date"
+              [(ngModel)]="start_date"
+              class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+              [class.border-red-600]="fieldErrors()['start_date']"
+              [class.border-gray-700]="!fieldErrors()['start_date']"
+            />
+            @if (fieldErrors()['start_date']) {
+              <p class="mt-1 text-xs text-red-400">{{ fieldErrors()['start_date'] }}</p>
+            }
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">
+              Cierre <span class="text-red-400">*</span>
+            </label>
+            <input
+              type="date"
+              name="end_date"
+              [(ngModel)]="end_date"
+              class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+              [class.border-red-600]="fieldErrors()['end_date']"
+              [class.border-gray-700]="!fieldErrors()['end_date']"
+            />
+            @if (fieldErrors()['end_date']) {
+              <p class="mt-1 text-xs text-red-400">{{ fieldErrors()['end_date'] }}</p>
+            }
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1.5">Estado</label>
+          <select
+            name="status"
+            [(ngModel)]="status"
+            class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+          >
+            <option value="draft">Borrador</option>
+            <option value="active">Activo</option>
+            <option value="closed">Cerrado</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-3 mt-5">
+        <button
+          type="submit"
+          [disabled]="store.isLoading()"
+          class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-sm rounded-lg transition-colors"
+        >
+          @if (store.isLoading()) {
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          }
+          {{ isEditMode() ? 'Guardar cambios' : 'Crear torneo' }}
+        </button>
+        <a
+          routerLink="/admin/tournaments"
+          class="px-5 py-2.5 text-gray-400 hover:text-white text-sm font-medium transition-colors"
+        >
+          Cancelar
+        </a>
+      </div>
+    </form>
+  }
+</div>

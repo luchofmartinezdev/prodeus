@@ -1,0 +1,75 @@
+{
+  "name": "prodeus",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "tw": "node scripts/build-styles.mjs",
+    "tw:watch": "node scripts/build-styles.mjs --watch",
+    "start": "concurrently \"node scripts/build-styles.mjs --watch\" \"ng serve\"",
+    "build": "node scripts/build-styles.mjs && ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/**/*.ts src/**/*.html",
+    "format": "prettier --write \"src/**/*.{ts,html,scss,json}\"",
+    "db:types": "npx supabase gen types typescript --project-id nipayavpzhbtdfputapv > src/app/data/database.types.ts",
+    "prepare": "husky"
+  },
+  "private": true,
+  "packageManager": "npm@11.4.2",
+  "dependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@ngrx/signals": "^21.1.0",
+    "@supabase/supabase-js": "^2.100.1",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zod": "^4.3.6"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.html": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{scss,json,md}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.3.1",
+    "@analogjs/vitest-angular": "^2.3.1",
+    "@angular-eslint/eslint-plugin": "^21.3.1",
+    "@angular-eslint/eslint-plugin-template": "^21.3.1",
+    "@angular-eslint/template-parser": "^21.3.1",
+    "@angular/build": "^21.2.2",
+    "@angular/cli": "^21.2.2",
+    "@angular/compiler-cli": "^21.2.0",
+    "@angular/platform-browser-dynamic": "^21.2.6",
+    "@eslint/js": "^10.0.1",
+    "@ngx-env/builder": "^21.0.1",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
+    "concurrently": "^9.2.1",
+    "eslint": "^10.1.0",
+    "husky": "^9.1.7",
+    "jsdom": "^28.0.0",
+    "lint-staged": "^16.4.0",
+    "postcss": "^8.5.8",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^4.2.2",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.57.2",
+    "vitest": "^4.0.8",
+    "zone.js": "^0.16.1"
+  }
+}

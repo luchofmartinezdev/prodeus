@@ -1,0 +1,178 @@
+<div class="p-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Torneos</h1>
+      <p class="text-gray-400 text-sm mt-0.5">Gestioná los torneos de la plataforma</p>
+    </div>
+    <a
+      routerLink="/admin/tournaments/new"
+      class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors"
+    >
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Nuevo torneo
+    </a>
+  </div>
+
+  <!-- Loading -->
+  @if (store.isLoading()) {
+    <div class="flex justify-center py-20">
+      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!store.isLoading() && store.tournaments().length === 0) {
+    <div class="text-center py-20">
+      <div class="text-5xl mb-4">🏆</div>
+      <h3 class="text-white font-semibold mb-1">No hay torneos todavía</h3>
+      <p class="text-gray-400 text-sm mb-4">Creá el primero para empezar</p>
+      <a
+        routerLink="/admin/tournaments/new"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors"
+      >
+        Crear torneo
+      </a>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (!store.isLoading() && store.tournaments().length > 0) {
+    <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-800">
+            <th class="text-left px-5 py-3.5 text-gray-400 font-medium">Torneo</th>
+            <th class="text-left px-5 py-3.5 text-gray-400 font-medium">Fechas</th>
+            <th class="text-left px-5 py-3.5 text-gray-400 font-medium">Estado</th>
+            <th class="px-5 py-3.5"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tournament of store.tournaments(); track tournament.id) {
+            <tr
+              class="border-b border-gray-800 last:border-0 hover:bg-gray-800/50 transition-colors"
+            >
+              <!-- Nombre -->
+              <td class="px-5 py-4">
+                <a
+                  [routerLink]="['/admin/tournaments', tournament.id]"
+                  class="text-white font-medium hover:text-indigo-400 transition-colors"
+                >
+                  {{ tournament.name }}
+                </a>
+                @if (tournament.description) {
+                  <p class="text-gray-500 text-xs mt-0.5 truncate max-w-xs">
+                    {{ tournament.description }}
+                  </p>
+                }
+              </td>
+
+              <!-- Fechas -->
+              <td class="px-5 py-4 text-gray-400 whitespace-nowrap">
+                {{ tournament.start_date | slice: 0 : 10 }} →
+                {{ tournament.end_date | slice: 0 : 10 }}
+              </td>
+
+              <!-- Estado -->
+              <td class="px-5 py-4">
+                <span
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  [class]="statusClass(tournament.status)"
+                >
+                  {{ statusLabel(tournament.status) }}
+                </span>
+              </td>
+
+              <!-- Acciones -->
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-2 justify-end">
+                  <!-- Ver detalle -->
+                  <a
+                    [routerLink]="['/admin/tournaments', tournament.id]"
+                    title="Ver detalle"
+                    class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  </a>
+
+                  <!-- Editar -->
+                  <a
+                    [routerLink]="['/admin/tournaments', tournament.id, 'edit']"
+                    title="Editar"
+                    class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </a>
+
+                  <!-- Cambiar estado -->
+                  <button
+                    type="button"
+                    title="Cambiar estado"
+                    (click)="onChangeStatus(tournament.id, tournament.status)"
+                    class="p-1.5 text-gray-400 hover:text-yellow-400 hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                  </button>
+
+                  <!-- Eliminar -->
+                  <button
+                    type="button"
+                    title="Eliminar"
+                    (click)="onDelete(tournament.id, tournament.name)"
+                    class="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

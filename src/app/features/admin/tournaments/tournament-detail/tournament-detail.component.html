@@ -1,0 +1,516 @@
+<div class="p-8">
+  <!-- Header -->
+  @if (store.selected(); as t) {
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <a
+          routerLink="/admin/tournaments"
+          class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </a>
+        <div>
+          <div class="flex items-center gap-3">
+            <h1 class="text-2xl font-bold text-white">{{ t.name }}</h1>
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              [class]="statusClass(t.status)"
+            >
+              {{ statusLabel(t.status) }}
+            </span>
+          </div>
+          <p class="text-gray-400 text-sm mt-0.5">
+            {{ t.start_date | slice: 0 : 10 }} → {{ t.end_date | slice: 0 : 10 }}
+          </p>
+        </div>
+      </div>
+      <a
+        [routerLink]="['/admin/tournaments', id, 'edit']"
+        class="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          />
+        </svg>
+        Editar
+      </a>
+    </div>
+  }
+
+  @if (store.isLoading()) {
+    <div class="flex justify-center py-20">
+      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+    </div>
+  }
+
+  @if (!store.isLoading() && store.selected()) {
+    <!-- Tabs -->
+    <div class="flex gap-1 border-b border-gray-800 mb-6">
+      @for (tab of tabs; track tab.key) {
+        <button
+          type="button"
+          (click)="setTab(tab.key)"
+          class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px"
+          [class]="
+            activeTab() === tab.key
+              ? 'border-indigo-500 text-white'
+              : 'border-transparent text-gray-400 hover:text-white hover:border-gray-600'
+          "
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Tab error -->
+    @if (tabError()) {
+      <div class="mb-4 px-4 py-3 bg-red-950 border border-red-800 rounded-lg text-red-300 text-sm">
+        {{ tabError() }}
+      </div>
+    }
+
+    <!-- Tab loading -->
+    @if (isLoadingTab()) {
+      <div class="flex justify-center py-12">
+        <svg class="animate-spin h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24">
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          />
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          />
+        </svg>
+      </div>
+    }
+
+    <!-- ══ TAB: EQUIPOS ══════════════════════════════════════ -->
+    @if (activeTab() === 'teams' && !isLoadingTab()) {
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-gray-400 text-sm">{{ teams().length }} equipo(s)</p>
+          @if (!showTeamForm()) {
+            <button
+              type="button"
+              (click)="openTeamForm()"
+              class="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Agregar equipo
+            </button>
+          }
+        </div>
+
+        <!-- Form -->
+        @if (showTeamForm()) {
+          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-4">
+            <h3 class="text-white font-semibold text-sm mb-4">
+              {{ editingTeam() ? 'Editar equipo' : 'Nuevo equipo' }}
+            </h3>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Nombre *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="teamName"
+                  placeholder="Argentina"
+                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  [class.border-red-600]="teamErrors()['name']"
+                  [class.border-gray-700]="!teamErrors()['name']"
+                />
+                @if (teamErrors()['name']) {
+                  <p class="mt-0.5 text-xs text-red-400">{{ teamErrors()['name'] }}</p>
+                }
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1"
+                  >Abreviatura (máx 5)</label
+                >
+                <input
+                  type="text"
+                  [(ngModel)]="teamShortName"
+                  placeholder="ARG"
+                  maxlength="5"
+                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-400 mb-1">URL del escudo</label>
+                <input
+                  type="url"
+                  [(ngModel)]="teamLogoUrl"
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button
+                type="button"
+                (click)="submitTeamForm()"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {{ editingTeam() ? 'Guardar' : 'Agregar' }}
+              </button>
+              <button
+                type="button"
+                (click)="cancelTeamForm()"
+                class="px-4 py-2 text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Teams list -->
+        @if (teams().length === 0) {
+          <div class="text-center py-12 text-gray-500 text-sm">No hay equipos cargados todavía</div>
+        } @else {
+          <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-gray-800">
+                  <th class="text-left px-5 py-3 text-gray-400 font-medium">Equipo</th>
+                  <th class="text-left px-5 py-3 text-gray-400 font-medium">Abrev.</th>
+                  <th class="px-5 py-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (team of teams(); track team.id) {
+                  <tr
+                    class="border-b border-gray-800 last:border-0 hover:bg-gray-800/50 transition-colors"
+                  >
+                    <td class="px-5 py-3 text-white">{{ team.name }}</td>
+                    <td class="px-5 py-3 text-gray-400 font-mono">{{ team.short_name ?? '—' }}</td>
+                    <td class="px-5 py-3">
+                      <div class="flex gap-2 justify-end">
+                        <button
+                          type="button"
+                          (click)="openTeamForm(team)"
+                          class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                          <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="deleteTeam(team)"
+                          class="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                          <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ══ TAB: PARTIDOS ══════════════════════════════════════ -->
+    @if (activeTab() === 'matches' && !isLoadingTab()) {
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-gray-400 text-sm">{{ matches().length }} partido(s)</p>
+          @if (!showMatchForm()) {
+            <button
+              type="button"
+              (click)="openMatchForm()"
+              class="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Agregar partido
+            </button>
+          }
+        </div>
+
+        <!-- Match Form -->
+        @if (showMatchForm()) {
+          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-4">
+            <h3 class="text-white font-semibold text-sm mb-4">
+              {{ editingMatch() ? 'Editar partido' : 'Nuevo partido' }}
+            </h3>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Local *</label>
+                <select
+                  [(ngModel)]="matchHomeTeamId"
+                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  [class.border-red-600]="matchErrors()['home']"
+                  [class.border-gray-700]="!matchErrors()['home']"
+                >
+                  <option value="">Seleccionar equipo</option>
+                  @for (t of teams(); track t.id) {
+                    <option [value]="t.id">{{ t.name }}</option>
+                  }
+                </select>
+                @if (matchErrors()['home']) {
+                  <p class="mt-0.5 text-xs text-red-400">{{ matchErrors()['home'] }}</p>
+                }
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Visitante *</label>
+                <select
+                  [(ngModel)]="matchAwayTeamId"
+                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  [class.border-red-600]="matchErrors()['away']"
+                  [class.border-gray-700]="!matchErrors()['away']"
+                >
+                  <option value="">Seleccionar equipo</option>
+                  @for (t of teams(); track t.id) {
+                    <option [value]="t.id">{{ t.name }}</option>
+                  }
+                </select>
+                @if (matchErrors()['away']) {
+                  <p class="mt-0.5 text-xs text-red-400">{{ matchErrors()['away'] }}</p>
+                }
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1"
+                  >Fecha del partido *</label
+                >
+                <input
+                  type="datetime-local"
+                  [(ngModel)]="matchDate"
+                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  [class.border-red-600]="matchErrors()['date']"
+                  [class.border-gray-700]="!matchErrors()['date']"
+                />
+                @if (matchErrors()['date']) {
+                  <p class="mt-0.5 text-xs text-red-400">{{ matchErrors()['date'] }}</p>
+                }
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1"
+                  >Deadline predicción *</label
+                >
+                <input
+                  type="datetime-local"
+                  [(ngModel)]="matchDeadline"
+                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  [class.border-red-600]="matchErrors()['deadline']"
+                  [class.border-gray-700]="!matchErrors()['deadline']"
+                />
+                @if (matchErrors()['deadline']) {
+                  <p class="mt-0.5 text-xs text-red-400">{{ matchErrors()['deadline'] }}</p>
+                }
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-400 mb-1">Jornada / Ronda</label>
+                <input
+                  type="text"
+                  [(ngModel)]="matchRound"
+                  placeholder="Ej: Fase de grupos, Semifinal..."
+                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button
+                type="button"
+                (click)="submitMatchForm()"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {{ editingMatch() ? 'Guardar' : 'Agregar' }}
+              </button>
+              <button
+                type="button"
+                (click)="cancelMatchForm()"
+                class="px-4 py-2 text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Matches list -->
+        @if (matches().length === 0) {
+          <div class="text-center py-12 text-gray-500 text-sm">
+            No hay partidos cargados todavía
+          </div>
+        } @else {
+          <div class="space-y-2">
+            @for (match of matches(); track match.id) {
+              <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <!-- Teams + score -->
+                    <div class="flex items-center gap-3 mb-1">
+                      <span class="text-white font-semibold">
+                        {{ match.home_team.short_name ?? match.home_team.name }}
+                      </span>
+                      @if (match.status === 'finished') {
+                        <span class="text-xl font-black text-white"
+                          >{{ match.home_score }} – {{ match.away_score }}</span
+                        >
+                      } @else {
+                        <span class="text-gray-500 text-sm font-medium">vs</span>
+                      }
+                      <span class="text-white font-semibold">
+                        {{ match.away_team.short_name ?? match.away_team.name }}
+                      </span>
+                      <span
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        [class]="matchStatusClass(match.status)"
+                      >
+                        {{ matchStatusLabel(match.status) }}
+                      </span>
+                    </div>
+                    <!-- Meta -->
+                    <p class="text-gray-500 text-xs">
+                      {{ formatDatetime(match.match_date) }}
+                      @if (match.round) {
+                        · {{ match.round }}
+                      }
+                    </p>
+                  </div>
+                  <!-- Actions -->
+                  <div class="flex items-center gap-1 ml-4">
+                    @if (match.status !== 'finished') {
+                      <button
+                        type="button"
+                        (click)="openResultForm(match.id)"
+                        title="Cargar resultado"
+                        class="px-2.5 py-1.5 bg-green-900 hover:bg-green-800 text-green-300 text-xs font-medium rounded-lg transition-colors"
+                      >
+                        + Resultado
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      (click)="openMatchForm(match)"
+                      class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="deleteMatch(match)"
+                      class="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Result form inline -->
+                @if (resultMatchId() === match.id) {
+                  <div class="mt-3 pt-3 border-t border-gray-700 flex items-center gap-3">
+                    <span class="text-gray-400 text-sm">Resultado:</span>
+                    <input
+                      type="number"
+                      [(ngModel)]="resultHome"
+                      min="0"
+                      class="w-14 px-2 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <span class="text-gray-500">–</span>
+                    <input
+                      type="number"
+                      [(ngModel)]="resultAway"
+                      min="0"
+                      class="w-14 px-2 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button
+                      type="button"
+                      (click)="submitResult(match.id)"
+                      class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg transition-colors"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      type="button"
+                      (click)="resultMatchId.set(null)"
+                      class="text-gray-500 hover:text-gray-300 text-xs transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

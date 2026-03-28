@@ -1,0 +1,138 @@
+<div class="p-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-white">Mis grupos</h1>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        (click)="showJoinForm.set(!showJoinForm())"
+        class="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+          />
+        </svg>
+        Unirme por código
+      </button>
+      <a
+        routerLink="/app/groups/new"
+        class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        Crear grupo
+      </a>
+    </div>
+  </div>
+
+  <!-- Join by code form -->
+  @if (showJoinForm()) {
+    <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-6">
+      <p class="text-white font-semibold text-sm mb-3">Ingresar código de invitación</p>
+      <div class="flex gap-3">
+        <input
+          type="text"
+          [(ngModel)]="joinCodeValue"
+          placeholder="Ej: ABC12345"
+          (keyup.enter)="onJoin()"
+          class="flex-1 px-4 py-2.5 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase"
+        />
+        <button
+          type="button"
+          (click)="onJoin()"
+          [disabled]="store.isLoading()"
+          class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          Unirme
+        </button>
+        <button
+          type="button"
+          (click)="showJoinForm.set(false)"
+          class="px-4 py-2.5 text-gray-400 hover:text-white text-sm transition-colors"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (store.isLoading()) {
+    <div class="flex justify-center py-20">
+      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+    </div>
+  }
+
+  <!-- Groups grid -->
+  @if (!store.isLoading()) {
+    @if (store.groups().length === 0) {
+      <div class="text-center py-20">
+        <svg
+          class="w-12 h-12 text-gray-700 mx-auto mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+        <p class="text-gray-400 font-medium mb-1">No participás en ningún grupo todavía</p>
+        <p class="text-gray-600 text-sm">
+          Creá uno nuevo o unite a uno con un código de invitación
+        </p>
+      </div>
+    } @else {
+      <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        @for (group of store.groups(); track group.id) {
+          <a
+            [routerLink]="['/app/groups', group.id]"
+            class="block bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition-colors group/card"
+          >
+            <!-- Tournament badge -->
+            <span
+              class="inline-block px-2 py-0.5 rounded-md bg-gray-800 text-gray-400 text-xs font-medium mb-3"
+            >
+              {{ group.tournament.name }}
+            </span>
+            <!-- Group name -->
+            <p
+              class="text-white font-semibold text-base mb-3 group-hover/card:text-indigo-300 transition-colors"
+            >
+              {{ group.name }}
+            </p>
+            <!-- Metadata -->
+            <div class="flex items-center gap-2">
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                [class]="joinModeClass(group.join_mode)"
+              >
+                {{ joinModeLabel(group.join_mode) }}
+              </span>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  }
+</div>

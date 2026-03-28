@@ -1,0 +1,285 @@
+<div class="p-8">
+  <!-- Loading -->
+  @if (store.isLoading() && !store.selected()) {
+    <div class="flex justify-center py-20">
+      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+    </div>
+  }
+
+  @if (store.selected(); as g) {
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <a
+          routerLink="/app/groups"
+          class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </a>
+        <div>
+          @if (!editing()) {
+            <div class="flex items-center gap-3">
+              <h1 class="text-2xl font-bold text-white">{{ g.name }}</h1>
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                [class]="joinModeClass(g.join_mode)"
+              >
+                {{ joinModeLabel(g.join_mode) }}
+              </span>
+            </div>
+            <p class="text-gray-400 text-sm mt-0.5">{{ g.tournament.name }}</p>
+          } @else {
+            <!-- Inline edit form -->
+            <div class="flex items-center gap-3">
+              <input
+                type="text"
+                [(ngModel)]="editName"
+                class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64"
+              />
+              <select
+                [(ngModel)]="editJoinMode"
+                class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="open">Abierto</option>
+                <option value="closed">Cerrado</option>
+              </select>
+              <button
+                type="button"
+                (click)="saveEdit()"
+                class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg transition-colors"
+              >
+                Guardar
+              </button>
+              <button
+                type="button"
+                (click)="cancelEdit()"
+                class="text-gray-500 hover:text-gray-300 text-xs transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2">
+        <a
+          [routerLink]="['/app/groups', id, 'ranking']"
+          class="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            />
+          </svg>
+          Ranking
+        </a>
+        <a
+          [routerLink]="['/app/groups', id, 'predictions']"
+          class="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+            />
+          </svg>
+          Predicciones
+        </a>
+        @if (isLeader && !editing()) {
+          <button
+            type="button"
+            (click)="openEdit()"
+            class="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            Editar
+          </button>
+          <button
+            type="button"
+            (click)="onDelete()"
+            class="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            Eliminar grupo
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Invite code -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6">
+      <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+        Código de invitación
+      </p>
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-xl font-bold text-white tracking-widest">{{
+          g.invite_code
+        }}</span>
+        <button
+          type="button"
+          (click)="copyInviteCode(g.invite_code)"
+          class="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition-colors"
+          [class]="
+            copied()
+              ? 'bg-green-900 text-green-300'
+              : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+          "
+        >
+          @if (copied()) {
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            Copiado
+          } @else {
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
+            </svg>
+            Copiar
+          }
+        </button>
+      </div>
+      <p class="text-gray-600 text-xs mt-1.5">
+        Compartí este código para que otros se unan al grupo
+      </p>
+    </div>
+
+    <!-- ── Pending approvals (leader only) ── -->
+    @if (isLeader && store.pendingMembers().length > 0) {
+      <div class="mb-6">
+        <h2 class="text-sm font-semibold text-yellow-400 uppercase tracking-wider mb-3">
+          Solicitudes pendientes ({{ store.pendingMembers().length }})
+        </h2>
+        <div class="bg-gray-900 border border-yellow-900 rounded-xl overflow-hidden">
+          @for (member of store.pendingMembers(); track member.id) {
+            <div
+              class="flex items-center justify-between px-5 py-3 border-b border-gray-800 last:border-0"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm font-bold"
+                >
+                  {{ avatarLetter(member.profile.username) }}
+                </div>
+                <span class="text-white text-sm">{{ member.profile.username }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  (click)="store.approveMember(member.id, id)"
+                  class="px-3 py-1.5 bg-green-900 hover:bg-green-800 text-green-300 text-xs font-medium rounded-lg transition-colors"
+                >
+                  Aprobar
+                </button>
+                <button
+                  type="button"
+                  (click)="store.rejectMember(member.id, id)"
+                  class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-red-400 text-xs font-medium rounded-lg transition-colors"
+                >
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── Active members ── -->
+    <div>
+      <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
+        Miembros ({{ store.activeMembers().length }})
+      </h2>
+
+      @if (store.activeMembers().length === 0) {
+        <div class="text-center py-10 text-gray-600 text-sm">Todavía no hay miembros activos</div>
+      } @else {
+        <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+          @for (member of store.activeMembers(); track member.id) {
+            <div
+              class="flex items-center justify-between px-5 py-3 border-b border-gray-800 last:border-0"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold"
+                >
+                  {{ avatarLetter(member.profile.username) }}
+                </div>
+                <div>
+                  <span class="text-white text-sm">{{ member.profile.username }}</span>
+                  @if (member.user_id === g.leader_id) {
+                    <span
+                      class="ml-2 px-1.5 py-0.5 rounded text-xs bg-indigo-900 text-indigo-300 font-medium"
+                      >Líder</span
+                    >
+                  }
+                </div>
+              </div>
+              <!-- Remove button: leader only, not for themselves -->
+              @if (isLeader && member.user_id !== g.leader_id) {
+                <button
+                  type="button"
+                  (click)="store.removeMember(member.id, id)"
+                  class="p-1.5 text-gray-600 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"
+                    />
+                  </svg>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

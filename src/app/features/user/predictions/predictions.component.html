@@ -1,0 +1,241 @@
+<div class="p-8 max-w-3xl">
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6">
+    <a
+      [routerLink]="['/app/groups', id]"
+      class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+    >
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-white">Predicciones</h1>
+      @if (group()) {
+        <p class="text-gray-400 text-sm mt-0.5">
+          {{ group()!.name }} · {{ group()!.tournament.name }}
+        </p>
+      }
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="flex justify-center py-20">
+      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+    </div>
+  }
+
+  @if (!isLoading()) {
+    <!-- Stats bar -->
+    @if (rows().length > 0) {
+      <div class="flex items-center gap-4 mb-6 text-sm">
+        <span class="text-gray-400">
+          <span class="text-white font-semibold">{{ predictedCount }}</span> /
+          {{ rows().length }} predichas
+        </span>
+        @if (openCount > 0) {
+          <span
+            class="px-2 py-0.5 rounded-full bg-indigo-950 border border-indigo-800 text-indigo-400 text-xs font-medium"
+          >
+            {{ openCount }} abiertas
+          </span>
+        }
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (rows().length === 0) {
+      <div class="text-center py-16 text-gray-500 text-sm">
+        No hay partidos cargados en este torneo todavía.
+      </div>
+    }
+
+    <!-- Rounds -->
+    @for (round of rounds; track round.label) {
+      <section class="mb-8">
+        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+          {{ round.label }}
+        </h2>
+        <div class="space-y-3">
+          @for (row of round.rows; track row.id) {
+            <div
+              class="bg-gray-900 border rounded-xl overflow-hidden transition-colors"
+              [class]="row.isOpen ? 'border-gray-800' : 'border-gray-900'"
+            >
+              <!-- Match header -->
+              <div class="px-5 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <!-- Status dot -->
+                  @if (row.status === 'finished') {
+                    <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                  } @else if (row.isOpen) {
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                  } @else {
+                    <span class="w-1.5 h-1.5 rounded-full bg-yellow-600"></span>
+                  }
+                  <span class="text-gray-500 text-xs">{{ formatDate(row.match_date) }}</span>
+                </div>
+                @if (!row.isOpen && row.status !== 'finished') {
+                  <span class="text-xs text-yellow-600 font-medium">Deadline pasado</span>
+                }
+                @if (row.status === 'finished') {
+                  <span class="text-xs text-gray-600 font-medium">Finalizado</span>
+                }
+                @if (row.isOpen) {
+                  <span class="text-xs text-gray-600"
+                    >Cierra: {{ formatDeadline(row.prediction_deadline) }}</span
+                  >
+                }
+              </div>
+
+              <!-- Teams + forms -->
+              <div class="px-5 pb-4">
+                <div class="flex items-center gap-4">
+                  <!-- Home team -->
+                  <div class="flex-1 flex items-center justify-end gap-3">
+                    <span class="text-white font-semibold text-sm text-right">
+                      {{ row.home_team.short_name ?? row.home_team.name }}
+                    </span>
+
+                    <!-- Home score input or result -->
+                    @if (row.status === 'finished') {
+                      <span
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-800 text-white font-black text-lg"
+                      >
+                        {{ row.home_score ?? '–' }}
+                      </span>
+                    } @else if (row.isOpen) {
+                      <input
+                        type="number"
+                        min="0"
+                        max="99"
+                        [(ngModel)]="formValues[row.id].home"
+                        [name]="'home-' + row.id"
+                        class="w-10 h-10 text-center rounded-lg bg-gray-800 border border-gray-700 text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    } @else {
+                      <span
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-900 border border-gray-800 text-gray-500 font-bold text-sm"
+                      >
+                        {{ row.prediction?.predicted_home ?? '–' }}
+                      </span>
+                    }
+                  </div>
+
+                  <span class="text-gray-600 font-medium text-sm">vs</span>
+
+                  <!-- Away team -->
+                  <div class="flex-1 flex items-center gap-3">
+                    <!-- Away score input or result -->
+                    @if (row.status === 'finished') {
+                      <span
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-800 text-white font-black text-lg"
+                      >
+                        {{ row.away_score ?? '–' }}
+                      </span>
+                    } @else if (row.isOpen) {
+                      <input
+                        type="number"
+                        min="0"
+                        max="99"
+                        [(ngModel)]="formValues[row.id].away"
+                        [name]="'away-' + row.id"
+                        class="w-10 h-10 text-center rounded-lg bg-gray-800 border border-gray-700 text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    } @else {
+                      <span
+                        class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-900 border border-gray-800 text-gray-500 font-bold text-sm"
+                      >
+                        {{ row.prediction?.predicted_away ?? '–' }}
+                      </span>
+                    }
+
+                    <span class="text-white font-semibold text-sm">
+                      {{ row.away_team.short_name ?? row.away_team.name }}
+                    </span>
+                  </div>
+
+                  <!-- Save button / feedback / points -->
+                  <div class="w-24 flex justify-end">
+                    @if (row.status === 'finished') {
+                      <!-- Points earned -->
+                      @if (row.prediction) {
+                        <div class="text-right">
+                          <span class="text-xs text-gray-500">Tu prode</span>
+                          <p class="text-white font-bold text-sm">
+                            {{ row.prediction.predicted_home }}–{{ row.prediction.predicted_away }}
+                          </p>
+                          @if (row.prediction.points_earned !== null) {
+                            <span class="text-indigo-400 text-xs font-semibold">
+                              +{{ row.prediction.points_earned }} pts
+                            </span>
+                          }
+                        </div>
+                      } @else {
+                        <span class="text-gray-700 text-xs">Sin prode</span>
+                      }
+                    } @else if (row.isOpen) {
+                      @if (isSaved(row.id)) {
+                        <span class="flex items-center gap-1 text-green-400 text-xs font-medium">
+                          <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2.5"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          Guardado
+                        </span>
+                      } @else {
+                        <button
+                          type="button"
+                          (click)="save(row)"
+                          [disabled]="isSaving(row.id)"
+                          class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+                        >
+                          @if (isSaving(row.id)) {
+                            <svg class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                              <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                              />
+                              <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              />
+                            </svg>
+                          } @else {
+                            {{ hasPrediction(row) ? 'Actualizar' : 'Guardar' }}
+                          }
+                        </button>
+                      }
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
