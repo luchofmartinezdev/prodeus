@@ -15,6 +15,8 @@ export interface HistorialRow {
   round: string | null;
   homeTeam: string;
   awayTeam: string;
+  homeTeamLogo: string | null;
+  awayTeamLogo: string | null;
   actualHome: number | null;
   actualAway: number | null;
   predictedHome: number;
@@ -68,8 +70,8 @@ export class RankingRepository {
           status,
           home_score,
           away_score,
-          home_team:teams!matches_home_team_id_fkey(name, short_name),
-          away_team:teams!matches_away_team_id_fkey(name, short_name)
+          home_team:teams!matches_home_team_id_fkey(name, short_name, logo_url),
+          away_team:teams!matches_away_team_id_fkey(name, short_name, logo_url)
         )
       `,
       )
@@ -85,8 +87,8 @@ export class RankingRepository {
       status: 'scheduled' | 'in_progress' | 'finished';
       home_score: number | null;
       away_score: number | null;
-      home_team: { name: string; short_name: string | null } | null;
-      away_team: { name: string; short_name: string | null } | null;
+      home_team: { name: string; short_name: string | null; logo_url: string | null } | null;
+      away_team: { name: string; short_name: string | null; logo_url: string | null } | null;
     }
 
     return (data ?? []).map((row) => {
@@ -97,6 +99,8 @@ export class RankingRepository {
         round: m?.round ?? null,
         homeTeam: m?.home_team?.name ?? '?',
         awayTeam: m?.away_team?.name ?? '?',
+        homeTeamLogo: m?.home_team?.logo_url ?? null,
+        awayTeamLogo: m?.away_team?.logo_url ?? null,
         actualHome: m?.home_score ?? null,
         actualAway: m?.away_score ?? null,
         predictedHome: row.predicted_home,

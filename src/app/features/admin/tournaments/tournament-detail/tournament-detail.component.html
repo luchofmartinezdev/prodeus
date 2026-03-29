@@ -212,7 +212,18 @@
                   <tr
                     class="border-b border-gray-800 last:border-0 hover:bg-gray-800/50 transition-colors"
                   >
-                    <td class="px-5 py-3 text-white">{{ team.name }}</td>
+                    <td class="px-5 py-3 text-white">
+                      <div class="flex items-center gap-2">
+                        @if (team.logo_url) {
+                          <img
+                            [src]="team.logo_url"
+                            [alt]="team.name"
+                            class="w-6 h-4 object-cover rounded-sm"
+                          />
+                        }
+                        {{ team.name }}
+                      </div>
+                    </td>
                     <td class="px-5 py-3 text-gray-400 font-mono">{{ team.short_name ?? '—' }}</td>
                     <td class="px-5 py-3">
                       <div class="flex gap-2 justify-end">
@@ -405,8 +416,15 @@
                   <div class="flex-1">
                     <!-- Teams + score -->
                     <div class="flex items-center gap-3 mb-1">
-                      <span class="text-white font-semibold">
-                        {{ match.home_team?.short_name ?? match.home_team?.name ?? '?' }}
+                      <span class="text-white font-semibold flex items-center gap-1.5">
+                        @if (match.home_team?.logo_url) {
+                          <img
+                            [src]="match.home_team!.logo_url"
+                            [alt]="match.home_team!.name"
+                            class="w-6 h-4 object-cover rounded-sm shrink-0"
+                          />
+                        }
+                        {{ match.home_team?.name ?? '?' }}
                       </span>
                       @if (match.status === 'finished') {
                         <span class="text-xl font-black text-white"
@@ -415,8 +433,15 @@
                       } @else {
                         <span class="text-gray-500 text-sm font-medium">vs</span>
                       }
-                      <span class="text-white font-semibold">
-                        {{ match.away_team?.short_name ?? match.away_team?.name ?? '?' }}
+                      <span class="text-white font-semibold flex items-center gap-1.5">
+                        @if (match.away_team?.logo_url) {
+                          <img
+                            [src]="match.away_team!.logo_url"
+                            [alt]="match.away_team!.name"
+                            class="w-6 h-4 object-cover rounded-sm shrink-0"
+                          />
+                        }
+                        {{ match.away_team?.name ?? '?' }}
                       </span>
                       <span
                         class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"

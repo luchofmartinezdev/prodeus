@@ -165,9 +165,17 @@
               <div class="flex items-center gap-4">
                 <!-- Home team -->
                 <div class="flex-1 flex items-center justify-end gap-3">
-                  <span class="text-white font-semibold text-sm text-right leading-tight">
-                    @if (getFlag(row.home_team?.name)) {
-                      <span class="mr-1">{{ getFlag(row.home_team?.name) }}</span>
+                  <span
+                    class="text-white font-semibold text-sm text-right leading-tight flex items-center justify-end gap-1.5"
+                  >
+                    @if (row.home_team?.logo_url) {
+                      <img
+                        [src]="row.home_team!.logo_url"
+                        [alt]="row.home_team!.name"
+                        class="w-6 h-4 object-cover rounded-sm shrink-0"
+                      />
+                    } @else if (getFlag(row.home_team?.name)) {
+                      <span>{{ getFlag(row.home_team?.name) }}</span>
                     }
                     {{ row.home_team?.name ?? '?' }}
                   </span>
@@ -225,9 +233,17 @@
                     </span>
                   }
 
-                  <span class="text-white font-semibold text-sm leading-tight">
-                    @if (getFlag(row.away_team?.name)) {
-                      <span class="mr-1">{{ getFlag(row.away_team?.name) }}</span>
+                  <span
+                    class="text-white font-semibold text-sm leading-tight flex items-center gap-1.5"
+                  >
+                    @if (row.away_team?.logo_url) {
+                      <img
+                        [src]="row.away_team!.logo_url"
+                        [alt]="row.away_team!.name"
+                        class="w-6 h-4 object-cover rounded-sm shrink-0"
+                      />
+                    } @else if (getFlag(row.away_team?.name)) {
+                      <span>{{ getFlag(row.away_team?.name) }}</span>
                     }
                     {{ row.away_team?.name ?? '?' }}
                   </span>

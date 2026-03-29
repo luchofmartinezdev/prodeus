@@ -147,16 +147,28 @@
             <!-- Match -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 text-sm">
-                <span class="text-gray-300 truncate">
-                  @if (getFlag(row.homeTeam)) {
-                    <span class="mr-0.5">{{ getFlag(row.homeTeam) }}</span>
+                <span class="text-gray-300 truncate flex items-center gap-1">
+                  @if (row.homeTeamLogo) {
+                    <img
+                      [src]="row.homeTeamLogo"
+                      [alt]="row.homeTeam"
+                      class="w-5 h-3.5 object-cover rounded-sm shrink-0"
+                    />
+                  } @else if (getFlag(row.homeTeam)) {
+                    <span>{{ getFlag(row.homeTeam) }}</span>
                   }
                   {{ row.homeTeam }}
                 </span>
                 <span class="text-gray-600 text-xs">vs</span>
-                <span class="text-gray-300 truncate">
-                  @if (getFlag(row.awayTeam)) {
-                    <span class="mr-0.5">{{ getFlag(row.awayTeam) }}</span>
+                <span class="text-gray-300 truncate flex items-center gap-1">
+                  @if (row.awayTeamLogo) {
+                    <img
+                      [src]="row.awayTeamLogo"
+                      [alt]="row.awayTeam"
+                      class="w-5 h-3.5 object-cover rounded-sm shrink-0"
+                    />
+                  } @else if (getFlag(row.awayTeam)) {
+                    <span>{{ getFlag(row.awayTeam) }}</span>
                   }
                   {{ row.awayTeam }}
                 </span>

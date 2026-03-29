@@ -52,8 +52,18 @@ export interface MatchWithTeams {
   home_source_groups: string | null;
   away_source_groups: string | null;
   // Joined team data — null when team not yet resolved
-  home_team: { id: string; name: string; short_name: string | null } | null;
-  away_team: { id: string; name: string; short_name: string | null } | null;
+  home_team: {
+    id: string;
+    name: string;
+    short_name: string | null;
+    logo_url: string | null;
+  } | null;
+  away_team: {
+    id: string;
+    name: string;
+    short_name: string | null;
+    logo_url: string | null;
+  } | null;
   // Computed helpers
   isPlaceholder: boolean;
 }
@@ -68,8 +78,8 @@ export class MatchRepository {
       .select(
         `
         *,
-        home_team:teams!matches_home_team_id_fkey(id, name, short_name),
-        away_team:teams!matches_away_team_id_fkey(id, name, short_name)
+        home_team:teams!matches_home_team_id_fkey(id, name, short_name, logo_url),
+        away_team:teams!matches_away_team_id_fkey(id, name, short_name, logo_url)
       `,
       )
       .eq('tournament_id', tournamentId)
