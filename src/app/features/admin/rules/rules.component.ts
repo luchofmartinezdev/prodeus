@@ -28,11 +28,8 @@ export class AdminRulesComponent implements OnInit {
     this.isLoading.set(true);
     try {
       const rules = await this.rulesService.getAll();
-      const seen = new Map<string, ScoringRule>();
-      for (const r of rules) seen.set(r.rule_key, r);
-      const unique = Array.from(seen.values()).sort((a, b) => b.points_value - a.points_value);
-      this.rules.set(unique);
-      this.ruleValues = Object.fromEntries(unique.map((r) => [r.id, r.points_value]));
+      this.rules.set(rules);
+      this.ruleValues = Object.fromEntries(rules.map((r) => [r.id, r.points_value]));
     } catch (e: unknown) {
       this.toast.error(e instanceof Error ? e.message : 'Error al cargar reglas');
     } finally {

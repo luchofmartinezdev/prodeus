@@ -7,14 +7,6 @@ export class ScoringRulesRepository {
     return supabase.from('scoring_rules').select('*').order('points_value', { ascending: false });
   }
 
-  findByTournament(tournamentId: string) {
-    return supabase
-      .from('scoring_rules')
-      .select('*')
-      .eq('tournament_id', tournamentId)
-      .order('points_value', { ascending: false });
-  }
-
   update(id: string, pointsValue: number, description?: string) {
     return supabase
       .from('scoring_rules')

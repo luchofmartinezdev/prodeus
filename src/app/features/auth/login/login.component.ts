@@ -1,14 +1,14 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
 import { AuthStore } from '../../../state/auth.store';
 
-type AuthTab = 'login' | 'register' | 'magic-link';
+type AuthTab = 'login' | 'register';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, ThemeToggleComponent, RouterLink],
+  imports: [FormsModule, ThemeToggleComponent],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
@@ -18,7 +18,6 @@ export class LoginComponent {
   // ─── UI State ───────────────────────────────────────────────
   readonly activeTab = signal<AuthTab>('login');
   readonly showPassword = signal(false);
-  readonly magicLinkSent = signal(false);
   readonly confirmationPending = signal(false);
   readonly fieldErrors = signal<Record<string, string>>({});
 
@@ -26,10 +25,8 @@ export class LoginComponent {
   email = '';
   password = '';
   username = '';
-  magicEmail = '';
 
   constructor() {
-    // Redirigir si ya está autenticado
     effect(() => {
       if (!this.authStore.isLoading() && this.authStore.isAuthenticated()) {
         this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/app']);
@@ -43,7 +40,6 @@ export class LoginComponent {
     this.activeTab.set(tab);
     this.authStore.clearError();
     this.fieldErrors.set({});
-    this.magicLinkSent.set(false);
     this.confirmationPending.set(false);
   }
 
@@ -91,16 +87,6 @@ export class LoginComponent {
     if (ok && !this.authStore.isAuthenticated()) {
       this.confirmationPending.set(true);
     }
-  }
-
-  async onMagicLinkSubmit(): Promise<void> {
-    this.fieldErrors.set({});
-    if (!this.magicEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.magicEmail)) {
-      this.fieldErrors.set({ magicEmail: 'Ingresá un email válido' });
-      return;
-    }
-    const ok = await this.authStore.signInWithMagicLink(this.magicEmail);
-    if (ok) this.magicLinkSent.set(true);
   }
 
   async onGoogleLogin(): Promise<void> {
