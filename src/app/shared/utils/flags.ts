@@ -104,7 +104,6 @@ const FLAG_MAP: Record<string, string> = {
   'macedonia del norte': '🇲🇰',
   azerbaiyán: '🇦🇿',
   azerbaiyan: '🇦🇿',
-  eslovenia: '🇸🇮',
   bielorrusia: '🇧🇾',
   // África
   marruecos: '🇲🇦',
@@ -126,7 +125,6 @@ const FLAG_MAP: Record<string, string> = {
   sudáfrica: '🇿🇦',
   sudafrica: '🇿🇦',
   'south africa': '🇿🇦',
-  mali: '🇲🇱',
   mali: '🇲🇱',
   angola: '🇦🇴',
   mozambique: '🇲🇿',
