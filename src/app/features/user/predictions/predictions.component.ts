@@ -173,7 +173,7 @@ export class PredictionsComponent implements OnInit {
 
       // Initialize sub-tabs with first available option
       const f = this.fechas();
-      if (f.length > 0) this.activeFechaTab.set(f[0].dateKey);
+      if (f.length > 0) this.activeFechaTab.set(f[0].label);
       const p = this.fases();
       if (p.length > 0) this.activeFaseTab.set(p[0].label);
     } catch (e: unknown) {
