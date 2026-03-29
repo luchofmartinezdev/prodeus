@@ -7,7 +7,9 @@ import { TournamentRepository } from '../../data/repositories/tournament.reposit
 const PHASE_ORDER = ['GROUP', 'R16', 'R8', 'QF', 'SF', 'FINAL'] as const;
 type PlayablePhase = (typeof PHASE_ORDER)[number];
 
-const NEXT_PHASE: Record<PlayablePhase, PlayablePhase | null> = {
+type NextPhase = 'R16' | 'R8' | 'QF' | 'SF' | 'FINAL' | null;
+
+const NEXT_PHASE: Record<PlayablePhase, NextPhase> = {
   GROUP: 'R16',
   R16: 'R8',
   R8: 'QF',

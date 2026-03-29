@@ -102,7 +102,7 @@
                   <!-- Home team -->
                   <div class="flex-1 flex items-center justify-end gap-3">
                     <span class="text-white font-semibold text-sm text-right">
-                      {{ row.home_team.short_name ?? row.home_team.name }}
+                      {{ row.home_team?.short_name ?? row.home_team?.name ?? '?' }}
                     </span>
 
                     <!-- Home score input or result -->
@@ -159,7 +159,7 @@
                     }
 
                     <span class="text-white font-semibold text-sm">
-                      {{ row.away_team.short_name ?? row.away_team.name }}
+                      {{ row.away_team?.short_name ?? row.away_team?.name ?? '?' }}
                     </span>
                   </div>
 
