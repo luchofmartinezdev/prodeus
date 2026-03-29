@@ -57,7 +57,7 @@ export class CallbackComponent implements OnInit {
       // falling back to a timeout so we never hang indefinitely.
       const timeout = setTimeout(resolve, 5000);
 
-      const { data } = this.authRepo.onAuthStateChange((_event, session) => {
+      const { data } = this.authRepo.onAuthStateChange(async (_event, session) => {
         if (session !== undefined) {
           clearTimeout(timeout);
           data.subscription.unsubscribe();
