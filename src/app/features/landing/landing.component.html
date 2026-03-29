@@ -6,7 +6,7 @@
       <app-theme-toggle />
       <a
         routerLink="/auth/login"
-        class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+        class="hidden sm:inline px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
       >
         Iniciar sesión
       </a>
@@ -38,16 +38,16 @@
       ranking en tiempo real.
     </p>
 
-    <div class="flex items-center gap-4">
+    <div class="flex flex-col sm:flex-row items-center gap-4">
       <a
         routerLink="/auth/login"
-        class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-colors text-sm"
+        class="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-colors text-sm text-center"
       >
         Empezar gratis
       </a>
       <a
         routerLink="/auth/login"
-        class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-xl transition-colors text-sm"
+        class="w-full sm:w-auto px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-xl transition-colors text-sm text-center"
       >
         Ya tengo cuenta
       </a>
@@ -135,9 +135,9 @@
 
   <!-- Footer -->
   <footer class="border-t border-gray-800 bg-gray-950">
-    <div class="max-w-5xl mx-auto px-8 py-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-8 py-10">
       <!-- Two-column row -->
-      <div class="grid grid-cols-2 gap-8 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
         <!-- Col 1: Prodeus brand -->
         <div>
           <p class="text-white font-black text-2xl tracking-tight mb-2">PRODEUS</p>

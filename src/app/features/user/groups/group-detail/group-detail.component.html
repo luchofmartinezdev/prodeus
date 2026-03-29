@@ -1,4 +1,4 @@
-<div class="p-8">
+<div class="p-4 sm:p-8">
   <!-- Loading -->
   @if (store.isLoading() && !store.selected()) {
     <div class="flex justify-center py-20">
@@ -44,11 +44,11 @@
             <p class="text-gray-400 text-sm mt-0.5">{{ g.tournament.name }}</p>
           } @else {
             <!-- Inline edit form -->
-            <div class="flex items-center gap-3">
+            <div class="flex flex-col sm:flex-row items-center gap-3">
               <input
                 type="text"
                 [(ngModel)]="editName"
-                class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64"
+                class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-64"
               />
               <select
                 [(ngModel)]="editJoinMode"
@@ -77,7 +77,7 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap gap-2 items-center">
         <a
           [routerLink]="['/app/groups', id, 'ranking']"
           class="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium rounded-lg transition-colors"
@@ -211,14 +211,14 @@
                 <button
                   type="button"
                   (click)="store.approveMember(member.id, id)"
-                  class="px-3 py-1.5 bg-green-900 hover:bg-green-800 text-green-300 text-xs font-medium rounded-lg transition-colors"
+                  class="px-3 py-2 bg-green-900 hover:bg-green-800 text-green-300 text-xs font-medium rounded-lg transition-colors"
                 >
                   Aprobar
                 </button>
                 <button
                   type="button"
                   (click)="store.rejectMember(member.id, id)"
-                  class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-red-400 text-xs font-medium rounded-lg transition-colors"
+                  class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-red-400 text-xs font-medium rounded-lg transition-colors"
                 >
                   Rechazar
                 </button>

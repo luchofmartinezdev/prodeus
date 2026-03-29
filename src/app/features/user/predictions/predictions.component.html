@@ -89,7 +89,7 @@
 
       <!-- Sub-tabs: Por Fecha -->
       @if (activeMainTab() === 'fecha') {
-        <div class="flex flex-wrap gap-2 mb-5">
+        <div class="flex flex-nowrap gap-2 mb-5 overflow-x-auto pb-2">
           @for (f of fechas(); track f.label) {
             <button
               type="button"
@@ -109,7 +109,7 @@
 
       <!-- Sub-tabs: Por Fase -->
       @if (activeMainTab() === 'fase') {
-        <div class="flex flex-wrap gap-2 mb-5">
+        <div class="flex flex-nowrap gap-2 mb-5 overflow-x-auto pb-2">
           @for (fase of fases(); track fase.label) {
             <button
               type="button"
@@ -166,7 +166,7 @@
                 <!-- Home team -->
                 <div class="flex-1 flex items-center justify-end gap-3">
                   <span
-                    class="text-white font-semibold text-xs sm:text-sm text-right leading-tight flex items-center justify-end gap-1 min-w-0"
+                    class="text-white font-semibold text-xs sm:text-sm text-right leading-tight flex items-center justify-end gap-1 min-w-0 truncate"
                   >
                     @if (row.home_team?.logo_url) {
                       <img
@@ -177,7 +177,7 @@
                     } @else if (getFlag(row.home_team?.name)) {
                       <span>{{ getFlag(row.home_team?.name) }}</span>
                     }
-                    {{ row.home_team?.name ?? '?' }}
+                    <span class="truncate">{{ row.home_team?.name ?? '?' }}</span>
                   </span>
 
                   <!-- Home score input or result -->
@@ -234,7 +234,7 @@
                   }
 
                   <span
-                    class="text-white font-semibold text-xs sm:text-sm leading-tight flex items-center gap-1 min-w-0"
+                    class="text-white font-semibold text-xs sm:text-sm leading-tight flex items-center gap-1 min-w-0 truncate"
                   >
                     @if (row.away_team?.logo_url) {
                       <img
@@ -245,7 +245,7 @@
                     } @else if (getFlag(row.away_team?.name)) {
                       <span>{{ getFlag(row.away_team?.name) }}</span>
                     }
-                    {{ row.away_team?.name ?? '?' }}
+                    <span class="truncate">{{ row.away_team?.name ?? '?' }}</span>
                   </span>
                 </div>
 
@@ -291,7 +291,7 @@
                         type="button"
                         (click)="save(row)"
                         [disabled]="isSaving(row.id)"
-                        class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+                        class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
                       >
                         @if (isSaving(row.id)) {
                           <svg class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
