@@ -26,20 +26,36 @@ export const matchResultSchema = z.object({
 export type MatchDto = z.infer<typeof matchSchema>;
 export type MatchResultDto = z.infer<typeof matchResultSchema>;
 
-// Tipo extendido con datos de equipos para visualización
+// ─── Tipo extendido con datos de equipos para visualización ───
+// home_team / away_team son null en partidos placeholder (bracket sin equipos
+// resueltos todavía).
+
 export interface MatchWithTeams {
   id: string;
   tournament_id: string;
-  home_team_id: string;
-  away_team_id: string;
+  home_team_id: string | null;
+  away_team_id: string | null;
   match_date: string;
   prediction_deadline: string;
   status: 'scheduled' | 'in_progress' | 'finished';
   home_score: number | null;
   away_score: number | null;
   round: string | null;
-  home_team: { id: string; name: string; short_name: string | null };
-  away_team: { id: string; name: string; short_name: string | null };
+  // Bracket fields (null for group-stage matches)
+  bracket_id: string | null;
+  home_source_match_id: string | null;
+  away_source_match_id: string | null;
+  home_source_result: 'winner' | 'loser' | null;
+  away_source_result: 'winner' | 'loser' | null;
+  home_source_position: '1st' | '2nd' | '3rd' | null;
+  away_source_position: '1st' | '2nd' | '3rd' | null;
+  home_source_groups: string | null;
+  away_source_groups: string | null;
+  // Joined team data — null when team not yet resolved
+  home_team: { id: string; name: string; short_name: string | null } | null;
+  away_team: { id: string; name: string; short_name: string | null } | null;
+  // Computed helpers
+  isPlaceholder: boolean;
 }
 
 // ─── Repository ───────────────────────────────────────────────

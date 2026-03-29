@@ -7,12 +7,13 @@ import { MatchService } from '../../../../core/services/match.service';
 import { TeamService } from '../../../../core/services/team.service';
 import type { MatchWithTeams } from '../../../../data/repositories/match.repository';
 import { TournamentStore } from '../../../../state/tournament.store';
+import { GeneratePhaseButtonComponent } from '../generate-phase-button/generate-phase-button.component';
 
 type DetailTab = 'teams' | 'matches';
 
 @Component({
   selector: 'app-tournament-detail',
-  imports: [RouterLink, FormsModule, SlicePipe],
+  imports: [RouterLink, FormsModule, SlicePipe, GeneratePhaseButtonComponent],
   templateUrl: './tournament-detail.component.html',
 })
 export class TournamentDetailComponent implements OnInit {
@@ -188,6 +189,7 @@ export class TournamentDetailComponent implements OnInit {
     this.editingMatch.set(match ?? null);
     this.matchHomeTeamId = match?.home_team_id ?? '';
     this.matchAwayTeamId = match?.away_team_id ?? '';
+    // Bracket/placeholder matches cannot be edited via this form
     this.matchDate = match ? this.toDatetimeLocal(match.match_date) : '';
     this.matchDeadline = match ? this.toDatetimeLocal(match.prediction_deadline) : '';
     this.matchRound = match?.round ?? '';
@@ -265,12 +267,9 @@ export class TournamentDetailComponent implements OnInit {
   }
 
   async deleteMatch(match: MatchWithTeams): Promise<void> {
-    if (
-      !confirm(
-        `¿Eliminar el partido ${match.home_team.short_name ?? match.home_team.name} vs ${match.away_team.short_name ?? match.away_team.name}?`,
-      )
-    )
-      return;
+    const home = match.home_team?.short_name ?? match.home_team?.name ?? '?';
+    const away = match.away_team?.short_name ?? match.away_team?.name ?? '?';
+    if (!confirm(`¿Eliminar el partido ${home} vs ${away}?`)) return;
     try {
       await this.matchService.remove(match.id);
       this.matches.set(this.matches().filter((m) => m.id !== match.id));

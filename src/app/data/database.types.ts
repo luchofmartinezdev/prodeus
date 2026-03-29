@@ -92,41 +92,141 @@ export interface Database {
           },
         ];
       };
+      group_standings: {
+        Row: {
+          calculated_at: string;
+          drawn: number;
+          goal_difference: number;
+          goals_against: number;
+          goals_for: number;
+          group_name: string;
+          id: string;
+          lost: number;
+          played: number;
+          points: number;
+          position: number;
+          team_id: string;
+          tournament_id: string;
+          won: number;
+        };
+        Insert: {
+          calculated_at?: string;
+          drawn?: number;
+          goals_against?: number;
+          goals_for?: number;
+          group_name: string;
+          id?: string;
+          lost?: number;
+          played?: number;
+          points?: number;
+          position: number;
+          team_id: string;
+          tournament_id: string;
+          won?: number;
+        };
+        Update: {
+          calculated_at?: string;
+          drawn?: number;
+          goals_against?: number;
+          goals_for?: number;
+          group_name?: string;
+          id?: string;
+          lost?: number;
+          played?: number;
+          points?: number;
+          position?: number;
+          team_id?: string;
+          tournament_id?: string;
+          won?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'group_standings_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'group_standings_tournament_id_fkey';
+            columns: ['tournament_id'];
+            isOneToOne: false;
+            referencedRelation: 'tournaments';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       matches: {
         Row: {
           away_score: number | null;
-          away_team_id: string;
+          away_source_groups: string | null;
+          away_source_match_id: string | null;
+          away_source_position: '1st' | '2nd' | '3rd' | null;
+          away_source_result: 'winner' | 'loser' | null;
+          away_team_id: string | null;
+          bracket_id: string | null;
           home_score: number | null;
-          home_team_id: string;
+          home_source_groups: string | null;
+          home_source_match_id: string | null;
+          home_source_position: '1st' | '2nd' | '3rd' | null;
+          home_source_result: 'winner' | 'loser' | null;
+          home_team_id: string | null;
           id: string;
           match_date: string;
           prediction_deadline: string;
+          qualifier_team_id: string | null;
+          requires_tiebreak: boolean;
           round: string | null;
           status: Database['public']['Enums']['match_status'];
+          tiebreak_method: 'extra_time' | 'penalties' | null;
           tournament_id: string;
         };
         Insert: {
           away_score?: number | null;
-          away_team_id: string;
+          away_source_groups?: string | null;
+          away_source_match_id?: string | null;
+          away_source_position?: '1st' | '2nd' | '3rd' | null;
+          away_source_result?: 'winner' | 'loser' | null;
+          away_team_id?: string | null;
+          bracket_id?: string | null;
           home_score?: number | null;
-          home_team_id: string;
+          home_source_groups?: string | null;
+          home_source_match_id?: string | null;
+          home_source_position?: '1st' | '2nd' | '3rd' | null;
+          home_source_result?: 'winner' | 'loser' | null;
+          home_team_id?: string | null;
           id?: string;
           match_date: string;
           prediction_deadline: string;
+          qualifier_team_id?: string | null;
+          requires_tiebreak?: boolean;
           round?: string | null;
           status?: Database['public']['Enums']['match_status'];
+          tiebreak_method?: 'extra_time' | 'penalties' | null;
           tournament_id: string;
         };
         Update: {
           away_score?: number | null;
-          away_team_id?: string;
+          away_source_groups?: string | null;
+          away_source_match_id?: string | null;
+          away_source_position?: '1st' | '2nd' | '3rd' | null;
+          away_source_result?: 'winner' | 'loser' | null;
+          away_team_id?: string | null;
+          bracket_id?: string | null;
           home_score?: number | null;
-          home_team_id?: string;
+          home_source_groups?: string | null;
+          home_source_match_id?: string | null;
+          home_source_position?: '1st' | '2nd' | '3rd' | null;
+          home_source_result?: 'winner' | 'loser' | null;
+          home_team_id?: string | null;
           id?: string;
           match_date?: string;
           prediction_deadline?: string;
+          qualifier_team_id?: string | null;
+          requires_tiebreak?: boolean;
           round?: string | null;
           status?: Database['public']['Enums']['match_status'];
+          tiebreak_method?: 'extra_time' | 'penalties' | null;
           tournament_id?: string;
         };
         Relationships: [
@@ -162,6 +262,7 @@ export interface Database {
           points_earned: number | null;
           predicted_away: number;
           predicted_home: number;
+          predicted_qualifier_team_id: string | null;
           submitted_at: string;
           user_id: string;
         };
@@ -173,6 +274,7 @@ export interface Database {
           points_earned?: number | null;
           predicted_away: number;
           predicted_home: number;
+          predicted_qualifier_team_id?: string | null;
           submitted_at?: string;
           user_id: string;
         };
@@ -184,6 +286,7 @@ export interface Database {
           points_earned?: number | null;
           predicted_away?: number;
           predicted_home?: number;
+          predicted_qualifier_team_id?: string | null;
           submitted_at?: string;
           user_id?: string;
         };
@@ -399,6 +502,30 @@ export interface Database {
             referencedColumns: ['id'];
           },
         ];
+      };
+      third_place_lookup: {
+        Row: {
+          bracket_slot: string;
+          groups_key: string;
+          id: string;
+          source_group: string;
+          source_side: 'home' | 'away';
+        };
+        Insert: {
+          bracket_slot: string;
+          groups_key: string;
+          id?: string;
+          source_group: string;
+          source_side: 'home' | 'away';
+        };
+        Update: {
+          bracket_slot?: string;
+          groups_key?: string;
+          id?: string;
+          source_group?: string;
+          source_side?: 'home' | 'away';
+        };
+        Relationships: [];
       };
       tournaments: {
         Row: {
@@ -631,3 +758,26 @@ export type Prode = Tables<'prodes'>;
 export type Prediction = Tables<'predictions'>;
 export type Score = Tables<'scores'>;
 export type GroupRanking = Tables<'group_ranking'>;
+export type GroupStanding = Tables<'group_standings'>;
+export type ThirdPlaceLookup = Tables<'third_place_lookup'>;
+
+// ─── Tipos de fase eliminatoria ───────────────────────────────
+
+export type MatchPhase = 'GROUP' | 'R16' | 'R8' | 'QF' | 'SF' | 'FINAL' | 'THIRD';
+export type SourceResult = 'winner' | 'loser';
+export type SourcePosition = '1st' | '2nd' | '3rd';
+
+export interface PhaseStatus {
+  currentPhase: 'GROUP' | 'R16' | 'R8' | 'QF' | 'SF' | 'FINAL';
+  currentPhaseComplete: boolean;
+  nextPhase: 'R16' | 'R8' | 'QF' | 'SF' | 'FINAL' | null;
+  pendingMatches: number;
+  pendingBracketIds: string[];
+}
+
+export interface GeneratePhaseResult {
+  success: boolean;
+  resolved: number;
+  pending: string[];
+  errors: string[];
+}

@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { z } from 'zod';
-import type { TablesInsert, TablesUpdate } from '../database.types';
+import type {
+  GeneratePhaseResult,
+  GroupStanding,
+  TablesInsert,
+  TablesUpdate,
+} from '../database.types';
 import { supabase } from '../supabase.client';
 
 // ─── Schemas ──────────────────────────────────────────────────
@@ -52,5 +57,46 @@ export class TournamentRepository {
 
   createDefaultRules(tournamentId: string) {
     return supabase.rpc('create_default_scoring_rules', { p_tournament_id: tournamentId });
+  }
+
+  // ─── Playoff methods ─────────────────────────────────────────
+
+  /** Lee todos los partidos del torneo con sus bracket_id y equipos resueltos */
+  findMatchesForPhaseStatus(tournamentId: string) {
+    return supabase
+      .from('matches')
+      .select('id, bracket_id, status, home_team_id, away_team_id')
+      .eq('tournament_id', tournamentId)
+      .order('match_date', { ascending: true });
+  }
+
+  /** Retorna las posiciones de grupos calculadas */
+  async getGroupStandings(tournamentId: string): Promise<GroupStanding[]> {
+    const { data, error } = await supabase
+      .from('group_standings')
+      .select('*')
+      .eq('tournament_id', tournamentId)
+      .order('group_name')
+      .order('position');
+    if (error) throw new Error('No se pudieron cargar las posiciones');
+    return (data ?? []) as GroupStanding[];
+  }
+
+  /** Invoca la Edge Function generate-next-phase */
+  async invokeGenerateNextPhase(tournamentId: string, phase: string): Promise<GeneratePhaseResult> {
+    const { data, error } = await supabase.functions.invoke<GeneratePhaseResult>(
+      'generate-next-phase',
+      { body: { tournament_id: tournamentId, phase } },
+    );
+    if (error) throw new Error(error.message ?? 'Error al invocar generate-next-phase');
+    if (!data) throw new Error('Respuesta vacía de generate-next-phase');
+    return data;
+  }
+
+  /** Invoca la Edge Function calculate-group-standings */
+  invokeCalculateGroupStandings(tournamentId: string) {
+    return supabase.functions.invoke('calculate-group-standings', {
+      body: { tournament_id: tournamentId },
+    });
   }
 }

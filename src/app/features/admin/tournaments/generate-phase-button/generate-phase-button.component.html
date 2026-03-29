@@ -1,0 +1,68 @@
+@if (!isLoading() && status(); as s) {
+  <div class="flex items-center gap-3 px-4 py-3 bg-gray-900 border border-gray-800 rounded-xl">
+    <!-- Estado de fase -->
+    <div class="flex-1 min-w-0">
+      <p class="text-xs font-medium text-gray-400">
+        Fase actual:
+        <span class="text-white">{{ s.currentPhase }}</span>
+        @if (s.currentPhaseComplete) {
+          <span
+            class="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-900 text-green-300"
+          >
+            completa
+          </span>
+        }
+      </p>
+
+      @if (!s.currentPhaseComplete && s.pendingMatches > 0) {
+        <p class="text-xs text-gray-500 mt-0.5 truncate">
+          Faltan {{ s.pendingMatches }} resultado(s) para calcular {{ s.nextPhase }}
+        </p>
+      }
+
+      @if (s.currentPhaseComplete && s.nextPhase) {
+        <p class="text-xs text-gray-500 mt-0.5">Lista para calcular {{ s.nextPhase }}</p>
+      }
+
+      @if (!s.nextPhase) {
+        <p class="text-xs text-gray-500 mt-0.5">Torneo finalizado</p>
+      }
+    </div>
+
+    <!-- Botón -->
+    @if (s.nextPhase) {
+      <button
+        type="button"
+        (click)="generate()"
+        [disabled]="!canGenerate || isGenerating()"
+        class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        [class]="
+          canGenerate && !isGenerating()
+            ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
+            : 'bg-gray-800 text-gray-400'
+        "
+      >
+        @if (isGenerating()) {
+          <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
+          <span>Calculando...</span>
+        } @else {
+          <span>Calcular {{ s.nextPhase }} →</span>
+        }
+      </button>
+    }
+  </div>
+}
