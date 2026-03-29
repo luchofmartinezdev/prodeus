@@ -55,6 +55,17 @@ export const GroupStore = signalStore(
       async loadMyGroups(): Promise<void> {
         const userId = authStore.user()?.id;
         if (!userId) return;
+        // Skip refetch if we already have groups loaded (avoid blank screen)
+        if (store.groups().length > 0) {
+          // Refresh in background without showing loading spinner
+          groupService
+            .getMyGroups(userId)
+            .then((groups) => patchState(store, { groups }))
+            .catch((_e: unknown) => {
+              /* background refresh — ignore errors */
+            });
+          return;
+        }
         patchState(store, { isLoading: true, error: null });
         try {
           const groups = await groupService.getMyGroups(userId);
@@ -66,7 +77,13 @@ export const GroupStore = signalStore(
       },
 
       async loadOne(id: string): Promise<void> {
-        patchState(store, { isLoading: true, error: null, selected: null });
+        // Keep showing previous data while loading to avoid blank screen
+        const isSameGroup = store.selected()?.id === id;
+        patchState(store, {
+          isLoading: !isSameGroup,
+          error: null,
+          selected: isSameGroup ? store.selected() : null,
+        });
         try {
           const selected = await groupService.getOne(id);
           patchState(store, { selected, isLoading: false });

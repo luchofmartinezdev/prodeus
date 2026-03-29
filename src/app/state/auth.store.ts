@@ -31,6 +31,11 @@ const initialState: AuthState = {
 
 // ─── Store ───────────────────────────────────────────────────
 
+// Promise that resolves once the initial session check completes.
+// Guards can `await sessionReady` instead of polling isLoading.
+let _resolveSession: (() => void) | null = null;
+export const sessionReady = new Promise<void>((r) => (_resolveSession = r));
+
 export const AuthStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
@@ -79,6 +84,7 @@ export const AuthStore = signalStore(
         } else {
           patchState(store, { isLoading: false });
         }
+        _resolveSession?.();
       },
 
       updateAuthState(user: User | null, profile: Profile | null): void {
