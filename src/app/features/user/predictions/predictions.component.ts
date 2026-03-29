@@ -78,15 +78,41 @@ export class PredictionsComponent implements OnInit {
   readonly saved = signal<Set<string>>(new Set());
 
   readonly fechas = computed(() => {
-    const map = new Map<string, MatchRow[]>();
+    // Determine group-stage matchday per match (1st, 2nd or 3rd game of its group)
+    const groupBuckets = new Map<string, MatchRow[]>();
     for (const row of this.rows()) {
-      const dateKey = row.match_date.substring(0, 10);
-      if (!map.has(dateKey)) map.set(dateKey, []);
-      map.get(dateKey)!.push(row);
+      if (!row.bracket_id) {
+        const g = row.round ?? 'Sin fase';
+        if (!groupBuckets.has(g)) groupBuckets.set(g, []);
+        groupBuckets.get(g)!.push(row);
+      }
     }
-    return Array.from(map.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([dateKey, rows], i) => ({ label: `Fecha ${i + 1}`, dateKey, rows }));
+    const matchDayMap = new Map<string, number>(); // matchId → 1 | 2 | 3
+    for (const matches of groupBuckets.values()) {
+      matches.sort((a, b) => a.match_date.localeCompare(b.match_date));
+      matches.forEach((m, i) => matchDayMap.set(m.id, i + 1));
+    }
+
+    // Assign each match to one of 8 fechas
+    const buckets = new Map<number, MatchRow[]>();
+    for (const row of this.rows()) {
+      let n: number;
+      if (row.bracket_id) {
+        if (row.bracket_id.startsWith('R16_')) n = 4;
+        else if (row.bracket_id.startsWith('R8_')) n = 5;
+        else if (row.bracket_id.startsWith('QF_')) n = 6;
+        else if (row.bracket_id.startsWith('SF_')) n = 7;
+        else n = 8; // THIRD, FINAL
+      } else {
+        n = matchDayMap.get(row.id) ?? 1;
+      }
+      if (!buckets.has(n)) buckets.set(n, []);
+      buckets.get(n)!.push(row);
+    }
+
+    return Array.from(buckets.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([n, rows]) => ({ label: `Fecha ${n}`, rows }));
   });
 
   readonly fases = computed(() => {
@@ -107,7 +133,7 @@ export class PredictionsComponent implements OnInit {
 
   get currentRows(): MatchRow[] {
     if (this.activeMainTab() === 'fecha') {
-      return this.fechas().find((f) => f.dateKey === this.activeFechaTab())?.rows ?? [];
+      return this.fechas().find((f) => f.label === this.activeFechaTab())?.rows ?? [];
     }
     return this.fases().find((f) => f.label === this.activeFaseTab())?.rows ?? [];
   }
