@@ -55,14 +55,21 @@ import { AuthStore } from '../../../state/auth.store';
         <div class="px-4 py-4 border-t border-gray-800 space-y-2">
           <!-- User info + theme toggle on same row -->
           <div class="flex items-center gap-2">
-            <div
-              class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
-            >
-              {{ authStore.profile()?.username?.charAt(0)?.toUpperCase() ?? 'U' }}
-            </div>
-            <span class="text-gray-300 text-sm truncate flex-1">{{
-              authStore.profile()?.username
-            }}</span>
+            @if (authStore.avatarUrl()) {
+              <img
+                [src]="authStore.avatarUrl()"
+                alt="Avatar"
+                class="w-7 h-7 rounded-full object-cover shrink-0"
+                referrerpolicy="no-referrer"
+              />
+            } @else {
+              <div
+                class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
+              >
+                {{ authStore.displayName()?.charAt(0)?.toUpperCase() ?? 'U' }}
+              </div>
+            }
+            <span class="text-gray-300 text-sm truncate flex-1">{{ authStore.displayName() }}</span>
             <app-theme-toggle />
           </div>
 

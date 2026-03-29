@@ -38,6 +38,29 @@ export const AuthStore = signalStore(
   withComputed(({ user, profile }) => ({
     isAuthenticated: computed(() => user() !== null),
     isSuperadmin: computed(() => profile()?.role === 'superadmin'),
+    displayName: computed(() => {
+      const u = user();
+      if (!u) return null;
+      if (u.app_metadata?.['provider'] === 'google') {
+        return (
+          (u.user_metadata?.['full_name'] as string) ??
+          (u.user_metadata?.['name'] as string) ??
+          null
+        );
+      }
+      return profile()?.username ?? null;
+    }),
+    avatarUrl: computed(() => {
+      const u = user();
+      if (u?.app_metadata?.['provider'] === 'google') {
+        return (
+          (u.user_metadata?.['avatar_url'] as string) ??
+          (u.user_metadata?.['picture'] as string) ??
+          null
+        );
+      }
+      return null;
+    }),
   })),
 
   withMethods((store) => {
@@ -159,11 +182,13 @@ export const AuthStore = signalStore(
       onInit() {
         store.loadSession();
 
-        const { data } = authRepo.onAuthStateChange(async (_event, session) => {
+        const { data } = authRepo.onAuthStateChange(async (event, session) => {
           if (session?.user) {
             const { data: profile } = await authRepo.getProfile(session.user.id);
-            // Only update if we haven't signed out while getProfile was in-flight
-            if (store.user()) {
+            // SIGNED_IN always wins (new login — store.user() is null at this point for OAuth).
+            // For other events (TOKEN_REFRESHED, USER_UPDATED) only update if the user
+            // hasn't signed out while getProfile was in-flight.
+            if (event === 'SIGNED_IN' || store.user()) {
               store.updateAuthState(session.user, profile);
             }
           } else {

@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { supabase } from '../../../data/supabase.client';
+import { AuthStore } from '../../../state/auth.store';
+import { AuthRepository } from '../../../data/repositories/auth.repository';
 
 @Component({
   selector: 'app-callback',
@@ -33,15 +34,37 @@ import { supabase } from '../../../data/supabase.client';
 })
 export class CallbackComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly authStore = inject(AuthStore);
+  private readonly authRepo = inject(AuthRepository);
 
   async ngOnInit(): Promise<void> {
-    // Supabase procesa el hash/code de la URL automáticamente via onAuthStateChange.
-    // Solo necesitamos esperar a que la sesión esté lista y redirigir.
-    const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      this.router.navigate(['/app']);
+    // Wait for the AuthStore to finish processing the session.
+    // onAuthStateChange in the store handles the SIGNED_IN event and loads the profile,
+    // so we poll until isLoading settles and user is resolved.
+    await this.waitForSession();
+
+    if (this.authStore.isAuthenticated()) {
+      this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/app']);
     } else {
       this.router.navigate(['/auth/login']);
     }
+  }
+
+  private waitForSession(): Promise<void> {
+    return new Promise((resolve) => {
+      // Give onAuthStateChange time to fire and update the store.
+      // We subscribe to the auth state change and resolve once it fires,
+      // falling back to a timeout so we never hang indefinitely.
+      const timeout = setTimeout(resolve, 5000);
+
+      const { data } = this.authRepo.onAuthStateChange((_event, session) => {
+        if (session !== undefined) {
+          clearTimeout(timeout);
+          data.subscription.unsubscribe();
+          // Small delay so the store's own onAuthStateChange handler finishes patching state.
+          setTimeout(resolve, 100);
+        }
+      });
+    });
   }
 }
