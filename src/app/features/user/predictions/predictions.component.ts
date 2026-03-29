@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, Input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PredictionService } from '../../../core/services/prediction.service';
@@ -6,6 +6,7 @@ import { MatchService } from '../../../core/services/match.service';
 import { GroupService } from '../../../core/services/group.service';
 import { AuthStore } from '../../../state/auth.store';
 import { ToastService } from '../../../core/services/toast.service';
+import { getFlagEmoji } from '../../../shared/utils/flags';
 import type { Prediction } from '../../../data/database.types';
 import type { GroupWithTournament } from '../../../data/repositories/group.repository';
 import type { MatchWithTeams } from '../../../data/repositories/match.repository';
@@ -14,6 +15,37 @@ export type MatchRow = MatchWithTeams & {
   prediction: Prediction | null;
   isOpen: boolean;
 };
+
+const PHASE_ORDER = [
+  'Grupo A',
+  'Grupo B',
+  'Grupo C',
+  'Grupo D',
+  'Grupo E',
+  'Grupo F',
+  'Grupo G',
+  'Grupo H',
+  'Grupo I',
+  'Grupo J',
+  'Grupo K',
+  'Grupo L',
+  '16avos de Final',
+  'Octavos de Final',
+  'Cuartos de Final',
+  'Semifinales',
+  'Tercer Puesto',
+  'Final',
+];
+
+function bracketPhaseLabel(bracketId: string): string {
+  if (bracketId.startsWith('R16_')) return '16avos de Final';
+  if (bracketId.startsWith('R8_')) return 'Octavos de Final';
+  if (bracketId.startsWith('QF_')) return 'Cuartos de Final';
+  if (bracketId.startsWith('SF_')) return 'Semifinales';
+  if (bracketId === 'THIRD') return 'Tercer Puesto';
+  if (bracketId === 'FINAL') return 'Final';
+  return bracketId;
+}
 
 @Component({
   selector: 'app-predictions',
@@ -33,12 +65,52 @@ export class PredictionsComponent implements OnInit {
   readonly rows = signal<MatchRow[]>([]);
   readonly isLoading = signal(true);
 
+  // View tabs
+  readonly activeMainTab = signal<'fecha' | 'fase'>('fecha');
+  readonly activeFechaTab = signal<string>('');
+  readonly activeFaseTab = signal<string>('');
+
   // form values: matchId → { home, away }
   readonly formValues: Record<string, { home: number; away: number }> = {};
   // saving state per matchId
   readonly saving = signal<Set<string>>(new Set());
   // saved feedback per matchId
   readonly saved = signal<Set<string>>(new Set());
+
+  readonly fechas = computed(() => {
+    const map = new Map<string, MatchRow[]>();
+    for (const row of this.rows()) {
+      const dateKey = row.match_date.substring(0, 10);
+      if (!map.has(dateKey)) map.set(dateKey, []);
+      map.get(dateKey)!.push(row);
+    }
+    return Array.from(map.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([dateKey, rows], i) => ({ label: `Fecha ${i + 1}`, dateKey, rows }));
+  });
+
+  readonly fases = computed(() => {
+    const map = new Map<string, MatchRow[]>();
+    for (const row of this.rows()) {
+      const key = row.bracket_id ? bracketPhaseLabel(row.bracket_id) : (row.round ?? 'Sin fase');
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(row);
+    }
+    const result = Array.from(map.entries()).map(([label, rows]) => ({ label, rows }));
+    result.sort((a, b) => {
+      const ai = PHASE_ORDER.indexOf(a.label);
+      const bi = PHASE_ORDER.indexOf(b.label);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
+    return result;
+  });
+
+  get currentRows(): MatchRow[] {
+    if (this.activeMainTab() === 'fecha') {
+      return this.fechas().find((f) => f.dateKey === this.activeFechaTab())?.rows ?? [];
+    }
+    return this.fases().find((f) => f.label === this.activeFaseTab())?.rows ?? [];
+  }
 
   ngOnInit(): void {
     this.load();
@@ -72,11 +144,21 @@ export class PredictionsComponent implements OnInit {
       });
 
       this.rows.set(rows);
+
+      // Initialize sub-tabs with first available option
+      const f = this.fechas();
+      if (f.length > 0) this.activeFechaTab.set(f[0].dateKey);
+      const p = this.fases();
+      if (p.length > 0) this.activeFaseTab.set(p[0].label);
     } catch (e: unknown) {
       this.toast.error(e instanceof Error ? e.message : 'Error al cargar predicciones');
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  switchMainTab(tab: 'fecha' | 'fase'): void {
+    this.activeMainTab.set(tab);
   }
 
   async save(row: MatchRow): Promise<void> {
@@ -99,10 +181,8 @@ export class PredictionsComponent implements OnInit {
         row.prediction_deadline,
       );
 
-      // Update the row with the saved prediction
       this.rows.set(this.rows().map((r) => (r.id === row.id ? { ...r, prediction: pred } : r)));
 
-      // Show saved feedback briefly
       const savedSet = new Set(this.saved());
       savedSet.add(row.id);
       this.saved.set(savedSet);
@@ -132,6 +212,10 @@ export class PredictionsComponent implements OnInit {
     return row.prediction !== null;
   }
 
+  getFlag(name: string | null | undefined): string {
+    return name ? getFlagEmoji(name) : '';
+  }
+
   formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString('es-AR', {
       weekday: 'short',
@@ -149,17 +233,6 @@ export class PredictionsComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit',
     });
-  }
-
-  // Group matches by round, preserving order
-  get rounds(): { label: string; rows: MatchRow[] }[] {
-    const map = new Map<string, MatchRow[]>();
-    for (const row of this.rows()) {
-      const key = row.round ?? 'Sin jornada';
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(row);
-    }
-    return Array.from(map.entries()).map(([label, rows]) => ({ label, rows }));
   }
 
   get openCount(): number {

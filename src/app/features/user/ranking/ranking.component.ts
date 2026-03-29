@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../state/auth.store';
 import { GroupStore } from '../../../state/group.store';
 import { RankingStore } from '../../../state/ranking.store';
+import { getFlagEmoji } from '../../../shared/utils/flags';
 
 @Component({
   selector: 'app-ranking',
@@ -61,6 +62,10 @@ export class RankingComponent implements OnInit, OnDestroy {
     if (pos === 2) return '🥈';
     if (pos === 3) return '🥉';
     return `${pos}°`;
+  }
+
+  getFlag(name: string): string {
+    return getFlagEmoji(name);
   }
 
   get currentUserId(): string | undefined {

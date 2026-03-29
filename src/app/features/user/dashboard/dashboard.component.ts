@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MatchService } from '../../../core/services/match.service';
 import { AuthStore } from '../../../state/auth.store';
 import { GroupStore } from '../../../state/group.store';
+import { getFlagEmoji } from '../../../shared/utils/flags';
 import type { GroupWithTournament } from '../../../data/repositories/group.repository';
 import type { MatchWithTeams } from '../../../data/repositories/match.repository';
 
@@ -62,5 +63,9 @@ export class DashboardComponent implements OnInit {
 
   formatTime(iso: string): string {
     return new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  getFlag(name: string | null | undefined): string {
+    return name ? getFlagEmoji(name) : '';
   }
 }

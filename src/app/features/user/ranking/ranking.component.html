@@ -147,9 +147,19 @@
             <!-- Match -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 text-sm">
-                <span class="text-gray-300 truncate">{{ row.homeTeam }}</span>
+                <span class="text-gray-300 truncate">
+                  @if (getFlag(row.homeTeam)) {
+                    <span class="mr-0.5">{{ getFlag(row.homeTeam) }}</span>
+                  }
+                  {{ row.homeTeam }}
+                </span>
                 <span class="text-gray-600 text-xs">vs</span>
-                <span class="text-gray-300 truncate">{{ row.awayTeam }}</span>
+                <span class="text-gray-300 truncate">
+                  @if (getFlag(row.awayTeam)) {
+                    <span class="mr-0.5">{{ getFlag(row.awayTeam) }}</span>
+                  }
+                  {{ row.awayTeam }}
+                </span>
               </div>
 
               <!-- Result vs prediction -->

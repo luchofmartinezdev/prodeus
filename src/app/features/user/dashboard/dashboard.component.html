@@ -185,11 +185,17 @@
                 <!-- Teams -->
                 <div class="flex items-center gap-3">
                   <span class="text-white font-semibold text-sm">
-                    {{ match.home_team?.short_name ?? match.home_team?.name ?? '?' }}
+                    @if (getFlag(match.home_team?.name)) {
+                      <span class="mr-1">{{ getFlag(match.home_team?.name) }}</span>
+                    }
+                    {{ match.home_team?.name ?? '?' }}
                   </span>
                   <span class="text-gray-600 text-xs font-medium">vs</span>
                   <span class="text-white font-semibold text-sm">
-                    {{ match.away_team?.short_name ?? match.away_team?.name ?? '?' }}
+                    @if (getFlag(match.away_team?.name)) {
+                      <span class="mr-1">{{ getFlag(match.away_team?.name) }}</span>
+                    }
+                    {{ match.away_team?.name ?? '?' }}
                   </span>
                   @if (match.round) {
                     <span class="text-gray-600 text-xs hidden sm:inline">· {{ match.round }}</span>
