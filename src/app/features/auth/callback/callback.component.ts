@@ -52,16 +52,18 @@ export class CallbackComponent implements OnInit {
 
   private waitForSession(): Promise<void> {
     return new Promise((resolve) => {
-      // Give onAuthStateChange time to fire and update the store.
-      // We subscribe to the auth state change and resolve once it fires,
-      // falling back to a timeout so we never hang indefinitely.
+      // Fallback timeout so we never hang indefinitely.
       const timeout = setTimeout(resolve, 5000);
 
       const { data } = this.authRepo.onAuthStateChange(async (_event, session) => {
-        if (session !== undefined) {
+        // Only resolve when we have an actual authenticated session.
+        // session can be null on the initial state-change emission — ignoring that
+        // is critical to avoid resolving before SIGNED_IN fires.
+        if (session?.user) {
           clearTimeout(timeout);
           data.subscription.unsubscribe();
-          // Small delay so the store's own onAuthStateChange handler finishes patching state.
+          // Small delay so the store's own onAuthStateChange handler finishes
+          // calling getProfile before we check isAuthenticated().
           setTimeout(resolve, 100);
         }
       });
