@@ -1,4 +1,4 @@
-<div class="p-8 max-w-3xl">
+<div class="p-8 max-w-5xl">
   <!-- Header -->
   <div class="flex items-center gap-3 mb-6">
     <a
@@ -89,7 +89,7 @@
 
       <!-- Sub-tabs: Por Fecha -->
       @if (activeMainTab() === 'fecha') {
-        <div class="flex gap-2 overflow-x-auto pb-1 mb-5 scrollbar-none">
+        <div class="flex flex-wrap gap-2 mb-5">
           @for (f of fechas(); track f.label) {
             <button
               type="button"
@@ -109,7 +109,7 @@
 
       <!-- Sub-tabs: Por Fase -->
       @if (activeMainTab() === 'fase') {
-        <div class="flex gap-2 overflow-x-auto pb-1 mb-5 scrollbar-none">
+        <div class="flex flex-wrap gap-2 mb-5">
           @for (fase of fases(); track fase.label) {
             <button
               type="button"
