@@ -8,8 +8,10 @@ import { AuthStore } from '../../../state/auth.store';
   imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent],
   template: `
     <div class="flex h-screen bg-gray-950 overflow-hidden">
-      <!-- Sidebar -->
-      <aside class="w-56 flex-shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
+      <!-- Sidebar — desktop only -->
+      <aside
+        class="hidden md:flex w-56 flex-shrink-0 bg-gray-900 border-r border-gray-800 flex-col"
+      >
         <!-- Logo -->
         <div class="px-5 py-5 border-b border-gray-800">
           <span class="text-white font-black text-xl tracking-tight">PRODEUS</span>
@@ -53,7 +55,6 @@ import { AuthStore } from '../../../state/auth.store';
 
         <!-- Footer: user info + theme + logout -->
         <div class="px-4 py-4 border-t border-gray-800 space-y-2">
-          <!-- User info + theme toggle on same row -->
           <div class="flex items-center gap-2">
             @if (authStore.avatarUrl()) {
               <img
@@ -72,8 +73,6 @@ import { AuthStore } from '../../../state/auth.store';
             <span class="text-gray-300 text-sm truncate flex-1">{{ authStore.displayName() }}</span>
             <app-theme-toggle />
           </div>
-
-          <!-- Sign out -->
           <button
             type="button"
             (click)="authStore.signOut()"
@@ -93,9 +92,70 @@ import { AuthStore } from '../../../state/auth.store';
       </aside>
 
       <!-- Content -->
-      <main class="flex-1 overflow-y-auto">
+      <main class="flex-1 overflow-y-auto pb-16 md:pb-0">
         <router-outlet />
       </main>
+
+      <!-- Bottom nav — mobile only -->
+      <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex items-stretch z-50"
+      >
+        <a
+          routerLink="/app"
+          routerLinkActive="text-indigo-400"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-500 hover:text-white transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+            />
+          </svg>
+          <span class="text-xs font-medium">Inicio</span>
+        </a>
+        <a
+          routerLink="/app/groups"
+          routerLinkActive="text-indigo-400"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-500 hover:text-white transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+          <span class="text-xs font-medium">Mis grupos</span>
+        </a>
+        <div class="flex-1 flex flex-col items-center justify-center gap-1 py-2">
+          @if (authStore.avatarUrl()) {
+            <img
+              [src]="authStore.avatarUrl()"
+              alt="Avatar"
+              class="w-6 h-6 rounded-full object-cover"
+              referrerpolicy="no-referrer"
+            />
+          } @else {
+            <div
+              class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold"
+            >
+              {{ authStore.displayName()?.charAt(0)?.toUpperCase() ?? 'U' }}
+            </div>
+          }
+          <button
+            type="button"
+            (click)="authStore.signOut()"
+            class="text-xs text-gray-500 hover:text-white transition-colors"
+          >
+            Salir
+          </button>
+        </div>
+      </nav>
     </div>
   `,
 })
