@@ -90,7 +90,8 @@ export class PredictionsComponent implements OnInit {
     const matchDayMap = new Map<string, number>(); // matchId → 1 | 2 | 3
     for (const matches of groupBuckets.values()) {
       matches.sort((a, b) => a.match_date.localeCompare(b.match_date));
-      matches.forEach((m, i) => matchDayMap.set(m.id, i + 1));
+      // 4-team groups: 2 matches per matchday → indices 0-1=Fecha1, 2-3=Fecha2, 4-5=Fecha3
+      matches.forEach((m, i) => matchDayMap.set(m.id, Math.floor(i / 2) + 1));
     }
 
     // Assign each match to one of 8 fechas
