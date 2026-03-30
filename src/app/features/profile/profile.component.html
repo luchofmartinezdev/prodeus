@@ -1,0 +1,117 @@
+<div class="p-4 sm:p-8 max-w-2xl w-full">
+  <h1 class="text-2xl font-bold text-white mb-8">Mi perfil</h1>
+
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
+    <!-- Avatar + name -->
+    <div class="flex items-center gap-5">
+      @if (authStore.avatarUrl()) {
+        <img
+          [src]="authStore.avatarUrl()"
+          alt="Avatar"
+          class="w-16 h-16 rounded-full object-cover shrink-0"
+          referrerpolicy="no-referrer"
+        />
+      } @else {
+        <div
+          class="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold shrink-0"
+        >
+          {{ authStore.displayName()?.charAt(0)?.toUpperCase() ?? 'U' }}
+        </div>
+      }
+      <div>
+        <p class="text-white font-semibold text-lg">{{ authStore.displayName() }}</p>
+        <span class="text-xs px-2 py-0.5 rounded font-medium" [class]="roleClass">
+          {{ roleLabel }}
+        </span>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-800"></div>
+
+    <!-- Info fields -->
+    <div class="space-y-4">
+      <!-- Email -->
+      <div>
+        <p class="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Email</p>
+        <p class="text-gray-300 text-sm">{{ email }}</p>
+      </div>
+
+      <!-- Username -->
+      <div>
+        <p class="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Usuario</p>
+        @if (editing()) {
+          <div class="flex items-center gap-3">
+            <input
+              type="text"
+              name="username"
+              [(ngModel)]="usernameValue"
+              placeholder="jugador_123"
+              maxlength="30"
+              class="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              type="button"
+              (click)="saveEdit()"
+              [disabled]="saving()"
+              class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium transition-colors flex items-center gap-2"
+            >
+              @if (saving()) {
+                <svg class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+              }
+              Guardar
+            </button>
+            <button
+              type="button"
+              (click)="cancelEdit()"
+              class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        } @else {
+          <div class="flex items-center gap-3">
+            <p class="text-gray-300 text-sm">
+              {{ authStore.profile()?.username ?? '—' }}
+            </p>
+            @if (!isGoogleUser) {
+              <button
+                type="button"
+                (click)="openEdit()"
+                class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
+                Editar
+              </button>
+            }
+          </div>
+        }
+        @if (isGoogleUser) {
+          <p class="text-xs text-gray-600 mt-1">El nombre se sincroniza con tu cuenta de Google.</p>
+        }
+      </div>
+
+      <!-- Joined date -->
+      @if (joinedDate) {
+        <div>
+          <p class="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">
+            Miembro desde
+          </p>
+          <p class="text-gray-300 text-sm">{{ joinedDate }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

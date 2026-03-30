@@ -76,6 +76,21 @@ import { AuthStore } from '../../../state/auth.store';
             </svg>
             Estadísticas
           </a>
+          <a
+            routerLink="/admin/profile"
+            routerLinkActive="bg-indigo-600 text-white"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+            Mi perfil
+          </a>
         </nav>
 
         <!-- Footer: user info + theme + logout -->
@@ -197,6 +212,21 @@ import { AuthStore } from '../../../state/auth.store';
               />
             </svg>
             Estadísticas
+          </a>
+          <a
+            routerLink="/admin/profile"
+            routerLinkActive="bg-indigo-600 text-white"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+            Mi perfil
           </a>
         </nav>
 

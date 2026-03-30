@@ -174,6 +174,19 @@ export const AuthStore = signalStore(
         router.navigate(['/']);
       },
 
+      async updateProfile(updates: { username?: string }): Promise<boolean> {
+        const userId = store.user()?.id;
+        if (!userId) return false;
+        try {
+          const { data: profile, error } = await authRepo.updateProfile(userId, updates);
+          if (error) return false;
+          patchState(store, { profile });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+
       clearError(): void {
         patchState(store, { error: null });
       },

@@ -43,6 +43,11 @@ export const ADMIN_ROUTES: Routes = [
         path: 'stats',
         loadComponent: () => import('./stats/stats.component').then((m) => m.AdminStatsComponent),
       },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('../../features/profile/profile.component').then((m) => m.ProfileComponent),
+      },
     ],
   },
 ];

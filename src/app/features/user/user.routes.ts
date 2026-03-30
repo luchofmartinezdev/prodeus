@@ -37,6 +37,11 @@ export const USER_ROUTES: Routes = [
         path: 'groups/:id/ranking',
         loadComponent: () => import('./ranking/ranking.component').then((m) => m.RankingComponent),
       },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('../../features/profile/profile.component').then((m) => m.ProfileComponent),
+      },
     ],
   },
 ];
