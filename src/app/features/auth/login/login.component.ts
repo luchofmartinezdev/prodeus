@@ -20,6 +20,7 @@ export class LoginComponent {
   readonly showPassword = signal(false);
   readonly confirmationPending = signal(false);
   readonly fieldErrors = signal<Record<string, string>>({});
+  readonly submitting = signal(false);
 
   // ─── Form values ────────────────────────────────────────────
   email = '';
@@ -57,7 +58,9 @@ export class LoginComponent {
       return;
     }
 
+    this.submitting.set(true);
     await this.authStore.signInWithEmail({ email: this.email, password: this.password });
+    this.submitting.set(false);
   }
 
   async onRegisterSubmit(): Promise<void> {
@@ -78,11 +81,13 @@ export class LoginComponent {
       return;
     }
 
+    this.submitting.set(true);
     const ok = await this.authStore.signUp({
       email: this.email,
       password: this.password,
       username: this.username,
     });
+    this.submitting.set(false);
 
     if (ok && !this.authStore.isAuthenticated()) {
       this.confirmationPending.set(true);
