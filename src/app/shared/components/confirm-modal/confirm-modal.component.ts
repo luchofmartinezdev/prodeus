@@ -1,0 +1,44 @@
+import { Component, input, output } from '@angular/core';
+
+@Component({
+  selector: 'app-confirm-modal',
+  template: `
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/60" (click)="cancelled.emit()"></div>
+
+      <!-- Dialog -->
+      <div
+        class="relative bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-sm p-6"
+      >
+        <h2 class="text-white font-semibold text-lg mb-2">{{ title() }}</h2>
+        <p class="text-gray-400 text-sm mb-6">{{ message() }}</p>
+
+        <div class="flex gap-3 justify-end">
+          <button
+            type="button"
+            (click)="cancelled.emit()"
+            class="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="confirmed.emit()"
+            class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-500 transition-colors"
+          >
+            {{ confirmLabel() }}
+          </button>
+        </div>
+      </div>
+    </div>
+  `,
+})
+export class ConfirmModalComponent {
+  readonly title = input<string>('¿Estás seguro?');
+  readonly message = input<string>('');
+  readonly confirmLabel = input<string>('Confirmar');
+
+  readonly confirmed = output<void>();
+  readonly cancelled = output<void>();
+}

@@ -1,12 +1,19 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, NavigationEnd, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
 import { AuthStore } from '../../../state/auth.store';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ThemeToggleComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    ThemeToggleComponent,
+    ConfirmModalComponent,
+  ],
   template: `
     <div class="flex h-screen bg-gray-950 overflow-hidden">
       <!-- Sidebar — desktop only -->
@@ -89,7 +96,7 @@ import { AuthStore } from '../../../state/auth.store';
           <!-- Sign out -->
           <button
             type="button"
-            (click)="authStore.signOut()"
+            (click)="showSignOutModal.set(true)"
             class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -208,7 +215,7 @@ import { AuthStore } from '../../../state/auth.store';
           </div>
           <button
             type="button"
-            (click)="authStore.signOut()"
+            (click)="showSignOutModal.set(true)"
             class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -277,6 +284,17 @@ import { AuthStore } from '../../../state/auth.store';
         </button>
       </nav>
 
+      <!-- Sign out confirmation modal -->
+      @if (showSignOutModal()) {
+        <app-confirm-modal
+          title="Cerrar sesión"
+          message="¿Estás seguro que querés cerrar la sesión?"
+          confirmLabel="Cerrar sesión"
+          (confirmed)="authStore.signOut()"
+          (cancelled)="showSignOutModal.set(false)"
+        />
+      }
+
       <!-- Content -->
       <main class="flex-1 overflow-y-auto pb-16 md:pb-0">
         <router-outlet />
@@ -287,6 +305,7 @@ import { AuthStore } from '../../../state/auth.store';
 export class AdminLayoutComponent {
   protected readonly authStore = inject(AuthStore);
   protected readonly sidebarOpen = signal(false);
+  protected readonly showSignOutModal = signal(false);
   private readonly router = inject(Router);
 
   constructor() {
