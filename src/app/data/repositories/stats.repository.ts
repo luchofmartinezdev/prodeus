@@ -33,7 +33,10 @@ export class StatsRepository {
   }
 
   countRegisteredUsers() {
-    return supabase.from('profiles').select('id', { count: 'exact', head: true });
+    return supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .neq('role', 'superadmin');
   }
 
   countTournamentsByStatus(status: 'draft' | 'active' | 'closed') {
