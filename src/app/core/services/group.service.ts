@@ -94,4 +94,9 @@ export class GroupService {
     const { error } = await this.repo.updateMemberStatus(memberId, 'removed');
     if (error) throw new Error('No se pudo remover el miembro');
   }
+
+  async leave(groupId: string, userId: string): Promise<void> {
+    const { error } = await this.repo.leave(groupId, userId);
+    if (error) throw new Error('No se pudo salir del grupo');
+  }
 }

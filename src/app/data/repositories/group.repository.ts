@@ -106,7 +106,7 @@ export class GroupRepository {
       joined_at: status === 'active' ? new Date().toISOString() : null,
     };
     // No .select() — avoids evaluating RLS on other group members rows
-    return supabase.from('group_members').insert(insert);
+    return supabase.from('group_members').upsert(insert, { onConflict: 'group_id,user_id' });
   }
 
   updateMemberStatus(memberId: string, status: 'active' | 'removed') {
@@ -117,5 +117,23 @@ export class GroupRepository {
     // No .select() — the updated row may belong to another user,
     // which would trigger RLS recursion on group_members
     return supabase.from('group_members').update(update).eq('id', memberId);
+  }
+
+  // Get first the memberId for the current user and group, then update its status to 'removed'
+  leave(groupId: string, userId: string) {
+    try {
+      if (!groupId || !userId) {
+        return Promise.reject(new Error('Group ID and User ID are required to leave a group'));
+      }
+
+      return supabase
+        .from('group_members')
+        .update({ status: 'removed' })
+        .eq('group_id', groupId)
+        .eq('user_id', userId);
+    } catch (error) {
+      console.error('Error leaving group:', error);
+      return Promise.reject(new Error('No se pudo salir del grupo'));
+    }
   }
 }

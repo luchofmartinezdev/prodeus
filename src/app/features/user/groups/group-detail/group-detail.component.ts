@@ -3,10 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../../state/auth.store';
 import { GroupStore } from '../../../../state/group.store';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-group-detail',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, ConfirmModalComponent],
   templateUrl: './group-detail.component.html',
 })
 export class GroupDetailComponent implements OnInit {
@@ -18,6 +19,9 @@ export class GroupDetailComponent implements OnInit {
   // Inline edit state
   readonly editing = signal(false);
   readonly copied = signal(false);
+  //Agregá el estado para el Modal de Abandonar Grupo
+  readonly showLeaveModal = signal(false);
+
   editName = '';
   editJoinMode: 'open' | 'closed' = 'open';
 
@@ -74,5 +78,23 @@ export class GroupDetailComponent implements OnInit {
 
   avatarLetter(username: string): string {
     return username.charAt(0).toUpperCase();
+  }
+
+  openLeaveModal(): void {
+    this.showLeaveModal.set(true);
+  }
+
+  closeLeaveModal(): void {
+    this.showLeaveModal.set(false);
+  }
+
+  async confirmLeave(): Promise<void> {
+    const currentUser = this.authStore.user();
+    if (!currentUser) return;
+    // Acá llamás al método de tu store para abandonar.
+    // (Asegurate de tener el método leaveGroup definido en tu GroupStore)
+    await this.store.leave(this.id, currentUser.id);
+
+    this.closeLeaveModal();
   }
 }

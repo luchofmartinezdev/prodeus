@@ -155,9 +155,7 @@ export const GroupStore = signalStore(
       async joinByCode(code: string): Promise<'pending' | 'active' | null> {
         patchState(store, { isLoading: true, error: null });
         try {
-          console.log('Joining group with code:', code);
           const result = await groupService.joinByCode(code, currentUserId());
-          console.log('Result of joining group:', result);
           if (result.status === 'active') {
             // Add the joined group directly — no extra query needed
             patchState(store, { groups: [result.group, ...store.groups()], isLoading: false });
@@ -206,6 +204,16 @@ export const GroupStore = signalStore(
           toast.info('Miembro removido del grupo');
         } catch (e: unknown) {
           toast.error(e instanceof Error ? e.message : 'Error al remover miembro');
+        }
+      },
+
+      async leave(groupId: string, userId: string): Promise<void> {
+        try {
+          await groupService.leave(groupId, userId);
+          toast.success('Has salido del grupo');
+          router.navigate(['/app/groups']);
+        } catch (e: unknown) {
+          toast.error(e instanceof Error ? e.message : 'Error al salir del grupo');
         }
       },
 
