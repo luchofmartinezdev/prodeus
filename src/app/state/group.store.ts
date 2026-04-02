@@ -69,7 +69,12 @@ export const GroupStore = signalStore(
         patchState(store, { isLoading: true, error: null });
         try {
           const groups = await groupService.getMyGroups(userId);
-          patchState(store, { groups, isLoading: false });
+          if (groups) {
+            patchState(store, { groups, isLoading: false });
+          } else {
+            patchState(store, { isLoading: false });
+            toast.error('Error al cargar grupos');
+          }
         } catch (e: unknown) {
           patchState(store, { isLoading: false });
           toast.error(e instanceof Error ? e.message : 'Error al cargar grupos');
@@ -150,7 +155,9 @@ export const GroupStore = signalStore(
       async joinByCode(code: string): Promise<'pending' | 'active' | null> {
         patchState(store, { isLoading: true, error: null });
         try {
+          console.log('Joining group with code:', code);
           const result = await groupService.joinByCode(code, currentUserId());
+          console.log('Result of joining group:', result);
           if (result.status === 'active') {
             // Add the joined group directly — no extra query needed
             patchState(store, { groups: [result.group, ...store.groups()], isLoading: false });
@@ -161,6 +168,7 @@ export const GroupStore = signalStore(
           }
           return result.status;
         } catch (e: unknown) {
+          console.error('Error while joining group:', e);
           patchState(store, { isLoading: false });
           toast.error(e instanceof Error ? e.message : 'Error al unirse al grupo');
           return null;

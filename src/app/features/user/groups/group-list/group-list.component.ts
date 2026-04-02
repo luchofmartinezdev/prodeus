@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { GroupStore } from '../../../../state/group.store';
@@ -18,8 +18,14 @@ export class GroupListComponent {
 
   constructor() {
     effect(() => {
-      if (!this.authStore.isLoading() && this.authStore.isAuthenticated()) {
-        this.store.loadMyGroups();
+      const isAuth = this.authStore.isAuthenticated();
+      const isLoadingAuth = this.authStore.isLoading();
+
+      if (!isLoadingAuth && isAuth) {
+        // 2. Envolvemos la ejecución en untracked
+        untracked(() => {
+          this.store.loadMyGroups();
+        });
       }
     });
   }
