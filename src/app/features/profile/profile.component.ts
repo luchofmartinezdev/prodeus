@@ -40,7 +40,7 @@ export class ProfileComponent {
 
   get roleClass(): string {
     return this.authStore.isSuperadmin()
-      ? 'bg-indigo-900 text-indigo-300'
+      ? 'bg-blue-900 text-blue-300'
       : 'bg-gray-800 text-gray-400';
   }
 

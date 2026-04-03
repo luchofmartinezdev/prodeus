@@ -1,31 +1,14 @@
-import { Component, effect, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
 import { AuthStore } from '../../../state/auth.store';
-
-type AuthTab = 'login' | 'register';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, ThemeToggleComponent],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
   protected readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
-
-  // ─── UI State ───────────────────────────────────────────────
-  readonly activeTab = signal<AuthTab>('login');
-  readonly showPassword = signal(false);
-  readonly confirmationPending = signal(false);
-  readonly fieldErrors = signal<Record<string, string>>({});
-  readonly submitting = signal(false);
-
-  // ─── Form values ────────────────────────────────────────────
-  email = '';
-  password = '';
-  username = '';
 
   constructor() {
     effect(() => {
@@ -33,65 +16,6 @@ export class LoginComponent {
         this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/app']);
       }
     });
-  }
-
-  // ─── Handlers ───────────────────────────────────────────────
-
-  setTab(tab: AuthTab): void {
-    this.activeTab.set(tab);
-    this.authStore.clearError();
-    this.fieldErrors.set({});
-    this.confirmationPending.set(false);
-  }
-
-  async onLoginSubmit(): Promise<void> {
-    this.fieldErrors.set({});
-    const errors: Record<string, string> = {};
-
-    if (!this.email) errors['email'] = 'El email es requerido';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) errors['email'] = 'Email inválido';
-    if (!this.password) errors['password'] = 'La contraseña es requerida';
-    else if (this.password.length < 6) errors['password'] = 'Mínimo 6 caracteres';
-
-    if (Object.keys(errors).length) {
-      this.fieldErrors.set(errors);
-      return;
-    }
-
-    this.submitting.set(true);
-    await this.authStore.signInWithEmail({ email: this.email, password: this.password });
-    this.submitting.set(false);
-  }
-
-  async onRegisterSubmit(): Promise<void> {
-    this.fieldErrors.set({});
-    const errors: Record<string, string> = {};
-
-    if (!this.email) errors['email'] = 'El email es requerido';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) errors['email'] = 'Email inválido';
-    if (!this.password) errors['password'] = 'La contraseña es requerida';
-    else if (this.password.length < 6) errors['password'] = 'Mínimo 6 caracteres';
-    if (!this.username) errors['username'] = 'El usuario es requerido';
-    else if (this.username.length < 3) errors['username'] = 'Mínimo 3 caracteres';
-    else if (!/^[a-zA-Z0-9_]+$/.test(this.username))
-      errors['username'] = 'Solo letras, números y guión bajo';
-
-    if (Object.keys(errors).length) {
-      this.fieldErrors.set(errors);
-      return;
-    }
-
-    this.submitting.set(true);
-    const ok = await this.authStore.signUp({
-      email: this.email,
-      password: this.password,
-      username: this.username,
-    });
-    this.submitting.set(false);
-
-    if (ok && !this.authStore.isAuthenticated()) {
-      this.confirmationPending.set(true);
-    }
   }
 
   async onGoogleLogin(): Promise<void> {

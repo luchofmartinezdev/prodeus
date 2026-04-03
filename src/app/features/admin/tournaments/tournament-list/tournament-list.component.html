@@ -7,7 +7,7 @@
     </div>
     <a
       routerLink="/admin/tournaments/new"
-      class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors"
+      class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
     >
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -19,7 +19,7 @@
   <!-- Loading -->
   @if (store.isLoading()) {
     <div class="flex justify-center py-20">
-      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path
           class="opacity-75"
@@ -38,7 +38,7 @@
       <p class="text-gray-400 text-sm mb-4">Creá el primero para empezar</p>
       <a
         routerLink="/admin/tournaments/new"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
       >
         Crear torneo
       </a>
@@ -66,7 +66,7 @@
               <td class="px-5 py-4">
                 <a
                   [routerLink]="['/admin/tournaments', tournament.id]"
-                  class="text-white font-medium hover:text-indigo-400 transition-colors"
+                  class="text-white font-medium hover:text-blue-400 transition-colors"
                 >
                   {{ tournament.name }}
                 </a>

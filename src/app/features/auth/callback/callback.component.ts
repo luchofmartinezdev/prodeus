@@ -9,7 +9,7 @@ import { AuthRepository } from '../../../data/repositories/auth.repository';
     <div class="min-h-screen bg-gray-950 flex items-center justify-center">
       <div class="text-center">
         <svg
-          class="animate-spin h-8 w-8 text-indigo-500 mx-auto mb-4"
+          class="animate-spin h-8 w-8 text-blue-500 mx-auto mb-4"
           fill="none"
           viewBox="0 0 24 24"
         >

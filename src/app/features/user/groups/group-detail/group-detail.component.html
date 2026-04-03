@@ -2,7 +2,7 @@
   <!-- Loading -->
   @if (store.isLoading() && !store.selected()) {
     <div class="flex justify-center py-20">
-      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path
           class="opacity-75"
@@ -48,11 +48,11 @@
               <input
                 type="text"
                 [(ngModel)]="editName"
-                class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-64"
+                class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
               />
               <select
                 [(ngModel)]="editJoinMode"
-                class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="open">Abierto</option>
                 <option value="closed">Cerrado</option>
@@ -60,7 +60,7 @@
               <button
                 type="button"
                 (click)="saveEdit()"
-                class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-lg transition-colors"
+                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
               >
                 Guardar
               </button>
@@ -94,7 +94,7 @@
         </a>
         <a
           [routerLink]="['/app/groups', id, 'predictions']"
-          class="flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-colors"
+          class="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
         >
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -245,7 +245,7 @@
             >
               <div class="flex items-center gap-3">
                 <div
-                  class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold"
+                  class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold"
                 >
                   {{ avatarLetter(member.profile.username) }}
                 </div>
@@ -253,7 +253,7 @@
                   <span class="text-white text-sm">{{ member.profile.username }}</span>
                   @if (member.user_id === g.leader_id) {
                     <span
-                      class="ml-2 px-1.5 py-0.5 rounded text-xs bg-indigo-900 text-indigo-300 font-medium"
+                      class="ml-2 px-1.5 py-0.5 rounded text-xs bg-blue-900 text-blue-300 font-medium"
                       >Líder</span
                     >
                   }

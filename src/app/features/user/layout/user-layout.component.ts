@@ -29,7 +29,7 @@ import { AuthStore } from '../../../state/auth.store';
         <nav class="flex-1 px-3 py-4 space-y-1">
           <a
             routerLink="/app"
-            routerLinkActive="bg-indigo-600 text-white"
+            routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: true }"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
@@ -45,7 +45,7 @@ import { AuthStore } from '../../../state/auth.store';
           </a>
           <a
             routerLink="/app/groups"
-            routerLinkActive="bg-indigo-600 text-white"
+            routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: false }"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
@@ -61,7 +61,7 @@ import { AuthStore } from '../../../state/auth.store';
           </a>
           <a
             routerLink="/app/profile"
-            routerLinkActive="bg-indigo-600 text-white"
+            routerLinkActive="bg-blue-600 text-white"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,7 +88,7 @@ import { AuthStore } from '../../../state/auth.store';
               />
             } @else {
               <div
-                class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
+                class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
               >
                 {{ authStore.displayName()?.charAt(0)?.toUpperCase() ?? 'U' }}
               </div>
@@ -156,7 +156,7 @@ import { AuthStore } from '../../../state/auth.store';
         <nav class="flex-1 px-3 py-4 space-y-1">
           <a
             routerLink="/app"
-            routerLinkActive="bg-indigo-600 text-white"
+            routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: true }"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
@@ -172,7 +172,7 @@ import { AuthStore } from '../../../state/auth.store';
           </a>
           <a
             routerLink="/app/groups"
-            routerLinkActive="bg-indigo-600 text-white"
+            routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: false }"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
@@ -188,7 +188,7 @@ import { AuthStore } from '../../../state/auth.store';
           </a>
           <a
             routerLink="/app/profile"
-            routerLinkActive="bg-indigo-600 text-white"
+            routerLinkActive="bg-blue-600 text-white"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -215,7 +215,7 @@ import { AuthStore } from '../../../state/auth.store';
               />
             } @else {
               <div
-                class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
+                class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
               >
                 {{ authStore.displayName()?.charAt(0)?.toUpperCase() ?? 'U' }}
               </div>
@@ -258,7 +258,7 @@ import { AuthStore } from '../../../state/auth.store';
       >
         <a
           routerLink="/app"
-          routerLinkActive="text-indigo-400"
+          routerLinkActive="text-blue-400"
           [routerLinkActiveOptions]="{ exact: true }"
           class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-500 hover:text-white transition-colors"
         >
@@ -274,7 +274,7 @@ import { AuthStore } from '../../../state/auth.store';
         </a>
         <a
           routerLink="/app/groups"
-          routerLinkActive="text-indigo-400"
+          routerLinkActive="text-blue-400"
           [routerLinkActiveOptions]="{ exact: false }"
           class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-500 hover:text-white transition-colors"
         >

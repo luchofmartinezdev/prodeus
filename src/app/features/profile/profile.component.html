@@ -3,11 +3,11 @@
     <!-- Banner + avatar hero -->
     <div class="bg-gray-900 border border-gray-800 rounded-2xl">
       <div
-        class="h-40 bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-950 relative rounded-t-2xl overflow-hidden"
+        class="h-40 bg-gradient-to-br from-blue-950 via-blue-900 to-orange-950 relative rounded-t-2xl overflow-hidden"
       >
         <!-- decorative circles -->
-        <div class="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-indigo-800/20"></div>
-        <div class="absolute -bottom-12 left-20 w-32 h-32 rounded-full bg-purple-800/20"></div>
+        <div class="absolute -top-8 -right-8 w-48 h-48 rounded-full bg-blue-800/20"></div>
+        <div class="absolute -bottom-12 left-20 w-32 h-32 rounded-full bg-orange-800/20"></div>
       </div>
       <div class="px-8 pb-7">
         <div
@@ -23,7 +23,7 @@
             />
           } @else {
             <div
-              class="w-24 h-24 rounded-2xl bg-indigo-600 ring-4 ring-gray-900 flex items-center justify-center text-white text-4xl font-black shrink-0"
+              class="w-24 h-24 rounded-2xl bg-blue-600 ring-4 ring-gray-900 flex items-center justify-center text-white text-4xl font-black shrink-0"
             >
               {{ authStore.displayName()?.charAt(0)?.toUpperCase() ?? 'U' }}
             </div>
@@ -63,7 +63,7 @@
           <div class="px-5 py-4 flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center shrink-0">
               <svg
-                class="w-4 h-4 text-indigo-400"
+                class="w-4 h-4 text-blue-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -86,7 +86,7 @@
             <div class="px-5 py-4 flex items-center gap-3">
               <div class="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center shrink-0">
                 <svg
-                  class="w-4 h-4 text-indigo-400"
+                  class="w-4 h-4 text-blue-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -203,14 +203,14 @@
                     [(ngModel)]="usernameValue"
                     placeholder="jugador_123"
                     maxlength="30"
-                    class="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                    class="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   />
                   <div class="flex items-center gap-2">
                     <button
                       type="button"
                       (click)="saveEdit()"
                       [disabled]="saving()"
-                      class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold transition-colors flex items-center gap-1.5"
+                      class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold transition-colors flex items-center gap-1.5"
                     >
                       @if (saving()) {
                         <svg class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
@@ -247,7 +247,7 @@
                     <button
                       type="button"
                       (click)="openEdit()"
-                      class="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-indigo-400 hover:text-indigo-300 bg-indigo-950 hover:bg-indigo-900 border border-indigo-800 px-3 py-1.5 rounded-lg transition-colors"
+                      class="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-950 hover:bg-blue-900 border border-blue-800 px-3 py-1.5 rounded-lg transition-colors"
                     >
                       <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path

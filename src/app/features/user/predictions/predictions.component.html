@@ -22,7 +22,7 @@
   <!-- Loading -->
   @if (isLoading()) {
     <div class="flex justify-center py-20">
-      <svg class="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path
           class="opacity-75"
@@ -43,7 +43,7 @@
         </span>
         @if (openCount > 0) {
           <span
-            class="px-2 py-0.5 rounded-full bg-indigo-950 border border-indigo-800 text-indigo-400 text-xs font-medium"
+            class="px-2 py-0.5 rounded-full bg-blue-950 border border-blue-800 text-blue-400 text-xs font-medium"
           >
             {{ openCount }} abiertas
           </span>
@@ -67,7 +67,7 @@
           class="flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors"
           [class]="
             activeMainTab() === 'fecha'
-              ? 'bg-indigo-600 text-white'
+              ? 'bg-blue-600 text-white'
               : 'text-gray-400 hover:text-white'
           "
         >
@@ -78,9 +78,7 @@
           (click)="switchMainTab('fase')"
           class="flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors"
           [class]="
-            activeMainTab() === 'fase'
-              ? 'bg-indigo-600 text-white'
-              : 'text-gray-400 hover:text-white'
+            activeMainTab() === 'fase' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
           "
         >
           Por Fase
@@ -97,7 +95,7 @@
               class="shrink-0 px-3 py-1 rounded-lg text-xs font-medium transition-colors border"
               [class]="
                 activeFechaTab() === f.label
-                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  ? 'bg-blue-600 border-blue-600 text-white'
                   : 'bg-gray-900 border-gray-700 text-gray-400 hover:text-white hover:border-gray-500'
               "
             >
@@ -117,7 +115,7 @@
               class="shrink-0 px-3 py-1 rounded-lg text-xs font-medium transition-colors border"
               [class]="
                 activeFaseTab() === fase.label
-                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  ? 'bg-blue-600 border-blue-600 text-white'
                   : 'bg-gray-900 border-gray-700 text-gray-400 hover:text-white hover:border-gray-500'
               "
             >
@@ -194,7 +192,7 @@
                       max="99"
                       [(ngModel)]="formValues[row.id].home"
                       [name]="'home-' + row.id"
-                      class="w-10 h-10 text-center rounded-lg bg-gray-800 border border-gray-700 text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      class="w-10 h-10 text-center rounded-lg bg-gray-800 border border-gray-700 text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   } @else {
                     <span
@@ -223,7 +221,7 @@
                       max="99"
                       [(ngModel)]="formValues[row.id].away"
                       [name]="'away-' + row.id"
-                      class="w-10 h-10 text-center rounded-lg bg-gray-800 border border-gray-700 text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      class="w-10 h-10 text-center rounded-lg bg-gray-800 border border-gray-700 text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   } @else {
                     <span
@@ -260,7 +258,7 @@
                           {{ row.prediction.predicted_home }}–{{ row.prediction.predicted_away }}
                         </p>
                         @if (row.prediction.points_earned !== null) {
-                          <span class="text-indigo-400 text-xs font-semibold">
+                          <span class="text-blue-400 text-xs font-semibold">
                             +{{ row.prediction.points_earned }} pts
                           </span>
                         }
@@ -291,7 +289,7 @@
                         type="button"
                         (click)="save(row)"
                         [disabled]="isSaving(row.id)"
-                        class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+                        class="px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
                       >
                         @if (isSaving(row.id)) {
                           <svg class="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">

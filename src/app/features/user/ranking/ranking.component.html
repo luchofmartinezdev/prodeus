@@ -21,7 +21,7 @@
       (click)="switchTab('ranking')"
       [class]="
         activeTab() === 'ranking'
-          ? 'flex-1 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white transition-colors'
+          ? 'flex-1 py-2 text-sm font-medium rounded-md bg-blue-600 text-white transition-colors'
           : 'flex-1 py-2 text-sm font-medium rounded-md text-gray-400 hover:text-white transition-colors'
       "
     >
@@ -32,7 +32,7 @@
       (click)="switchTab('historial')"
       [class]="
         activeTab() === 'historial'
-          ? 'flex-1 py-2 text-sm font-medium rounded-md bg-indigo-600 text-white transition-colors'
+          ? 'flex-1 py-2 text-sm font-medium rounded-md bg-blue-600 text-white transition-colors'
           : 'flex-1 py-2 text-sm font-medium rounded-md text-gray-400 hover:text-white transition-colors'
       "
     >
@@ -44,7 +44,7 @@
   @if (activeTab() === 'ranking') {
     @if (rankingStore.isLoading()) {
       <div class="flex items-center justify-center py-16">
-        <svg class="animate-spin w-8 h-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24">
           <circle
             class="opacity-25"
             cx="12"
@@ -69,7 +69,7 @@
           <div
             [class]="
               row.userId === currentUserId
-                ? 'flex items-center gap-4 p-4 rounded-xl bg-indigo-900/40 border border-indigo-700'
+                ? 'flex items-center gap-4 p-4 rounded-xl bg-blue-900/40 border border-blue-700'
                 : 'flex items-center gap-4 p-4 rounded-xl bg-gray-800/60 border border-gray-700'
             "
           >
@@ -80,7 +80,7 @@
 
             <!-- Avatar -->
             <div
-              class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold shrink-0"
+              class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0"
             >
               @if (row.avatarUrl) {
                 <img
@@ -98,7 +98,7 @@
               <p class="text-white text-sm font-medium truncate">
                 {{ row.username }}
                 @if (row.userId === currentUserId) {
-                  <span class="text-indigo-400 text-xs ml-1">(vos)</span>
+                  <span class="text-blue-400 text-xs ml-1">(vos)</span>
                 }
               </p>
             </div>
@@ -127,7 +127,7 @@
         <p class="text-gray-500 text-lg">Todavía no tenés predicciones en este grupo.</p>
         <a
           [routerLink]="['/app/groups', id, 'predictions']"
-          class="inline-block mt-4 text-indigo-400 hover:text-indigo-300 text-sm"
+          class="inline-block mt-4 text-blue-400 hover:text-blue-300 text-sm"
         >
           Ir a predicciones →
         </a>
@@ -186,7 +186,7 @@
                 }
                 <span class="text-xs text-gray-500">
                   Pred:
-                  <span class="text-indigo-300 font-medium"
+                  <span class="text-blue-300 font-medium"
                     >{{ row.predictedHome }} - {{ row.predictedAway }}</span
                   >
                 </span>
