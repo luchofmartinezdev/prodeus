@@ -197,6 +197,17 @@ export class TournamentDetailComponent implements OnInit {
     this.showMatchForm.set(true);
   }
 
+  onMatchDateChange(): void {
+    if (!this.matchDate) {
+      this.matchDeadline = '';
+      return;
+    }
+    // Calculate deadline as 5 minutes before match_date
+    const matchDateTime = new Date(this.matchDate);
+    const deadlineDateTime = new Date(matchDateTime.getTime() - 5 * 60 * 1000);
+    this.matchDeadline = this.toDatetimeLocal(deadlineDateTime.toISOString());
+  }
+
   cancelMatchForm(): void {
     this.showMatchForm.set(false);
     this.editingMatch.set(null);
@@ -215,6 +226,12 @@ export class TournamentDetailComponent implements OnInit {
       errors['away'] = 'Los equipos no pueden ser iguales';
     if (!this.matchDate) errors['date'] = 'Seleccioná la fecha';
     if (!this.matchDeadline) errors['deadline'] = 'Seleccioná el deadline';
+    if (
+      this.matchDate &&
+      this.matchDeadline &&
+      new Date(this.matchDeadline) >= new Date(this.matchDate)
+    )
+      errors['deadline'] = 'El deadline debe ser antes de la fecha del partido';
     if (Object.keys(errors).length) {
       this.matchErrors.set(errors);
       return;

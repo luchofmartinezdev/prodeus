@@ -259,12 +259,13 @@
                   }
                 </div>
               </div>
-              <!-- Remove button: leader only, not for themselves -->
+              <!-- Remove button: leader only, not for themselves. Disable button for now-->
               @if (isLeader && member.user_id !== g.leader_id) {
                 <button
                   type="button"
                   (click)="store.removeMember(member.id, id)"
-                  class="p-1.5 text-gray-600 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
+                  class="p-1.5 text-gray-600 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
+                  disabled
                 >
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path
