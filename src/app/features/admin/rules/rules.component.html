@@ -7,7 +7,7 @@
         Configuración global de puntos por tipo de acierto. Se aplica a todos los torneos.
       </p>
     </div>
-    @if (!isEditing() && !isLoading()) {
+    @if (!isEditing() && !isLoading() && authStore.isSuperadmin()) {
       <button
         type="button"
         (click)="isEditing.set(true)"

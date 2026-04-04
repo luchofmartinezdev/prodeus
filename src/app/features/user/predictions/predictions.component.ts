@@ -244,7 +244,7 @@ export class PredictionsComponent implements OnInit {
   }
 
   formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('es-AR', {
+    return new Date(iso).toLocaleString('es-AR', {
       weekday: 'short',
       day: 'numeric',
       month: 'short',
@@ -254,7 +254,7 @@ export class PredictionsComponent implements OnInit {
   }
 
   formatDeadline(iso: string): string {
-    return new Date(iso).toLocaleDateString('es-AR', {
+    return new Date(iso).toLocaleString('es-AR', {
       day: 'numeric',
       month: 'short',
       hour: '2-digit',

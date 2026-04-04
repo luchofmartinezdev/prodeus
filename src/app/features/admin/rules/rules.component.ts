@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import type { ScoringRule } from '../../../data/database.types';
 import { ScoringRulesService } from '../../../core/services/scoring-rules.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AuthStore } from '../../../state/auth.store';
 
 @Component({
   selector: 'app-admin-rules',
@@ -12,6 +13,7 @@ import { ToastService } from '../../../core/services/toast.service';
 export class AdminRulesComponent implements OnInit {
   private readonly rulesService = inject(ScoringRulesService);
   private readonly toast = inject(ToastService);
+  protected readonly authStore = inject(AuthStore);
 
   readonly rules = signal<ScoringRule[]>([]);
   readonly isLoading = signal(true);

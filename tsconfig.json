@@ -21,6 +21,7 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   },
+  "exclude": ["supabase"],
   "files": [],
   "references": [
     {

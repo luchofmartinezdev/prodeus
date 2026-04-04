@@ -38,6 +38,11 @@ export const USER_ROUTES: Routes = [
         loadComponent: () => import('./ranking/ranking.component').then((m) => m.RankingComponent),
       },
       {
+        path: 'rules',
+        loadComponent: () =>
+          import('../admin/rules/rules.component').then((m) => m.AdminRulesComponent),
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('../../features/profile/profile.component').then((m) => m.ProfileComponent),

@@ -29,6 +29,22 @@ const initialState: AuthState = {
   error: null,
 };
 
+// ─── Helpers ─────────────────────────────────────────────────
+
+async function syncGoogleNames(user: User, authRepo: AuthRepository): Promise<void> {
+  if (user.app_metadata?.['provider'] !== 'google') return;
+  const meta = user.user_metadata ?? {};
+  let firstName = (meta['given_name'] as string) || null;
+  let lastName = (meta['family_name'] as string) || null;
+  if (!firstName && !lastName) {
+    const full = (meta['full_name'] as string) || (meta['name'] as string) || '';
+    const parts = full.trim().split(/\s+/);
+    firstName = parts[0] || null;
+    lastName = parts.length > 1 ? parts.slice(1).join(' ') : null;
+  }
+  await authRepo.updateProfile(user.id, { first_name: firstName, last_name: lastName });
+}
+
 // ─── Store ───────────────────────────────────────────────────
 
 // Promise that resolves once the initial session check completes.
@@ -81,6 +97,7 @@ export const AuthStore = signalStore(
         if (session?.user) {
           const { data: profile } = await authRepo.getProfile(session.user.id);
           patchState(store, { user: session.user, profile, isLoading: false });
+          await syncGoogleNames(session.user, authRepo);
         } else {
           patchState(store, { isLoading: false });
         }
@@ -209,6 +226,9 @@ export const AuthStore = signalStore(
             // hasn't signed out while getProfile was in-flight.
             if (event === 'SIGNED_IN' || store.user()) {
               store.updateAuthState(session.user, profile);
+            }
+            if (event === 'SIGNED_IN') {
+              await syncGoogleNames(session.user, authRepo);
             }
           } else {
             store.updateAuthState(null, null);

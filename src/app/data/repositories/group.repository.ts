@@ -98,15 +98,37 @@ export class GroupRepository {
     return supabase.from('groups').delete().eq('id', id);
   }
 
-  joinGroup(groupId: string, userId: string, status: 'pending' | 'active') {
-    const insert: TablesInsert<'group_members'> = {
+  async joinGroup(
+    groupId: string,
+    userId: string,
+    status: 'pending' | 'active',
+  ): Promise<{ error: { code: string; message: string } | null }> {
+    const joinedAt = status === 'active' ? new Date().toISOString() : null;
+
+    // Check if the user has a previous (removed) record to avoid a 409 on INSERT
+    const { data: existing } = await supabase
+      .from('group_members')
+      .select('id')
+      .eq('group_id', groupId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await supabase
+        .from('group_members')
+        .update({ status, joined_at: joinedAt })
+        .eq('group_id', groupId)
+        .eq('user_id', userId);
+      return { error: error ? { code: error.code, message: error.message } : null };
+    }
+
+    const { error } = await supabase.from('group_members').insert({
       group_id: groupId,
       user_id: userId,
       status,
-      joined_at: status === 'active' ? new Date().toISOString() : null,
-    };
-    // No .select() — avoids evaluating RLS on other group members rows
-    return supabase.from('group_members').upsert(insert, { onConflict: 'group_id,user_id' });
+      joined_at: joinedAt,
+    });
+    return { error: error ? { code: error.code, message: error.message } : null };
   }
 
   updateMemberStatus(memberId: string, status: 'active' | 'removed') {

@@ -370,21 +370,27 @@ export interface Database {
         Row: {
           avatar_url: string | null;
           created_at: string;
+          first_name: string | null;
           id: string;
+          last_name: string | null;
           role: Database['public']['Enums']['user_role'];
           username: string;
         };
         Insert: {
           avatar_url?: string | null;
           created_at?: string;
+          first_name?: string | null;
           id: string;
+          last_name?: string | null;
           role?: Database['public']['Enums']['user_role'];
           username: string;
         };
         Update: {
           avatar_url?: string | null;
           created_at?: string;
+          first_name?: string | null;
           id?: string;
+          last_name?: string | null;
           role?: Database['public']['Enums']['user_role'];
           username?: string;
         };

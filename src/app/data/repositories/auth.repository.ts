@@ -78,7 +78,10 @@ export class AuthRepository {
     return supabase.from('profiles').select('*').eq('id', userId).single();
   }
 
-  updateProfile(userId: string, updates: { username?: string }) {
+  updateProfile(
+    userId: string,
+    updates: { username?: string; first_name?: string | null; last_name?: string | null },
+  ) {
     return supabase.from('profiles').update(updates).eq('id', userId).select().single();
   }
 }

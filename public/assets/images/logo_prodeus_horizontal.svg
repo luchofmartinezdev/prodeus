@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="728" height="90" viewBox="0 0 728 90">
+
+  <!-- Icon: 80x80, vertically centered in 90px (5px padding top/bottom) -->
+  <!-- Inner coordinate system: 0-100, scaled 0.8x and offset 5,5 -->
+  <g transform="translate(5,5) scale(0.8)">
+
+    <!-- Blue figure (left) -->
+    <circle cx="27" cy="17" r="12.5" fill="#1976d2"/>
+    <path fill="#1976d2" d="
+      M 38 24
+      C 41 33 38 47 32 59
+      C 26 71 24 81 30 88
+      C 38 93 50 93 57 91
+      C 45 90 35 86 33 77
+      C 30 67 33 55 38 45
+      C 43 35 44 25 42 19
+      Z
+    "/>
+
+    <!-- Orange figure (right) -->
+    <circle cx="73" cy="17" r="12.5" fill="#f5a623"/>
+    <path fill="#f5a623" d="
+      M 62 24
+      C 59 33 62 47 68 59
+      C 74 71 76 81 70 88
+      C 62 93 50 93 43 91
+      C 55 90 65 86 67 77
+      C 70 67 67 55 62 45
+      C 57 35 56 25 58 19
+      Z
+    "/>
+
+    <!-- Soccer ball -->
+    <circle cx="50" cy="65" r="22" fill="white" stroke="#455a64" stroke-width="2"/>
+
+    <!-- Center pentagon patch -->
+    <path fill="#455a64" d="M 50 47 L 57 52.5 L 54.5 60 L 45.5 60 L 43 52.5 Z"/>
+
+    <!-- Lines from center patch to edge -->
+    <line x1="50" y1="60" x2="50" y2="65.5" stroke="#455a64" stroke-width="1.5" opacity="0.65"/>
+    <line x1="54.5" y1="60" x2="58.5" y2="64.5" stroke="#455a64" stroke-width="1.5" opacity="0.65"/>
+    <line x1="45.5" y1="60" x2="41.5" y2="64.5" stroke="#455a64" stroke-width="1.5" opacity="0.65"/>
+
+    <!-- Left side patch -->
+    <path fill="#455a64" opacity="0.45" d="M 30 64 L 37 57.5 L 43 61.5 L 43 69 L 37 72.5 Z"/>
+
+    <!-- Right side patch -->
+    <path fill="#455a64" opacity="0.45" d="M 70 64 L 63 57.5 L 57 61.5 L 57 69 L 63 72.5 Z"/>
+
+    <!-- Bottom patch -->
+    <path fill="#455a64" opacity="0.3" d="M 50 83.5 L 56 78 L 54 71.5 L 46 71.5 L 44 78 Z"/>
+
+  </g>
+
+  <!-- "Prodeus" text, vertically centered -->
+  <text
+    x="97"
+    y="64"
+    font-family="'Segoe UI', 'Helvetica Neue', Arial, Helvetica, sans-serif"
+    font-weight="700"
+    font-size="54"
+    fill="#455a64"
+    letter-spacing="-0.5"
+  >Prodeus</text>
+
+</svg>
