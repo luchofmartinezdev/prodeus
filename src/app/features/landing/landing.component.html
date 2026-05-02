@@ -1,133 +1,286 @@
 <div class="min-h-screen bg-gray-950 flex flex-col">
   <!-- Nav -->
-  <header class="px-6 py-5 flex items-center justify-between border-b border-gray-900">
-    <span class="text-white font-black text-xl tracking-tight">PRODEUS</span>
+  <header
+    class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-gray-800 bg-gray-950 shadow-lg"
+  >
+    <div class="flex items-center gap-2.5">
+      <img src="assets/images/prodeus.png" alt="Prodeus" class="w-8 h-8 object-contain" />
+      <span class="font-black text-lg tracking-tight text-white">PRODEUS</span>
+    </div>
     <div class="flex items-center gap-3">
       <app-theme-toggle />
       <a
         routerLink="/auth/login"
-        class="hidden sm:inline px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+        class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer"
       >
         Iniciar sesión
-      </a>
-      <a
-        routerLink="/auth/login"
-        class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
-      >
-        Crear cuenta
       </a>
     </div>
   </header>
 
   <!-- Hero -->
-  <section class="flex-1 flex flex-col items-center justify-center text-center px-6 py-24">
-    <div
-      class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-950 border border-blue-800 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-6"
-    >
-      <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-      Prode online con tus amigos
-    </div>
+  <section class="px-6 py-20">
+    <div class="max-w-3xl mx-auto text-center">
+      <!-- copy -->
+      <div>
+        <!-- Badge -->
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold uppercase tracking-widest mb-6"
+          style="
+            background-color: rgba(249, 115, 22, 0.1);
+            border-color: rgba(249, 115, 22, 0.3);
+            color: #fb923c;
+          "
+        >
+          <span
+            class="w-1.5 h-1.5 rounded-full animate-pulse"
+            style="background-color: #f97316"
+          ></span>
+          Gratis · Online · En tiempo real
+        </div>
 
-    <h1 class="text-5xl sm:text-6xl font-black text-white leading-tight max-w-3xl mb-6">
-      El prode inteligente<br />
-      <span class="text-blue-400">para tus grupos</span>
-    </h1>
+        <!-- Headline -->
+        <h1
+          class="font-black text-white leading-tight tracking-tight mb-5"
+          style="font-size: clamp(2.4rem, 6vw, 3.8rem)"
+        >
+          El prode<br />
+          <span
+            style="
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              background-image: linear-gradient(90deg, #3b82f6, #60a5fa);
+            "
+            >inteligente</span
+          ><br />
+          de tu grupo.
+        </h1>
 
-    <p class="text-gray-400 text-lg max-w-xl mb-10">
-      Creá grupos con amigos, predecí los resultados de tus torneos favoritos y competí en un
-      ranking en tiempo real.
-    </p>
+        <!-- Subtext -->
+        <p class="text-gray-400 text-base leading-relaxed mb-8 max-w-lg mx-auto">
+          Predecí los partidos, competí con tus amigos y seguí el ranking en tiempo real. Sin costo,
+          sin complicaciones.
+        </p>
 
-    <div class="flex flex-col sm:flex-row items-center gap-4">
-      <a
-        routerLink="/auth/login"
-        class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors text-sm text-center"
-      >
-        Empezar gratis
-      </a>
-      <a
-        routerLink="/auth/login"
-        class="w-full sm:w-auto px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-xl transition-colors text-sm text-center"
-      >
-        Ya tengo cuenta
-      </a>
+        <!-- CTA -->
+        <a
+          routerLink="/auth/login"
+          class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg transition-colors cursor-pointer mb-10"
+        >
+          Entrar con Google →
+        </a>
+
+        <!-- Mini stats -->
+        <div class="flex items-center justify-center gap-8">
+          <div>
+            <p class="text-xl font-black text-white">100%</p>
+            <p class="text-gray-600 text-xs uppercase tracking-widest">Gratis</p>
+          </div>
+          <div class="w-px h-8 bg-gray-800"></div>
+          <div>
+            <p class="text-xl font-black text-orange-400">Live</p>
+            <p class="text-gray-600 text-xs uppercase tracking-widest">Rankings</p>
+          </div>
+          <div class="w-px h-8 bg-gray-800"></div>
+          <div>
+            <p class="text-xl font-black text-white">∞</p>
+            <p class="text-gray-600 text-xs uppercase tracking-widest">Grupos</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- Features -->
-  <section class="px-6 py-16 border-t border-gray-900">
+  <section class="px-6 py-20 border-t border-gray-800">
     <div class="max-w-4xl mx-auto">
-      <p class="text-center text-gray-600 text-xs font-semibold uppercase tracking-widest mb-10">
-        Cómo funciona
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <div class="w-10 h-10 rounded-xl bg-blue-950 flex items-center justify-center mb-4">
+      <div class="text-center mb-12">
+        <p class="text-xs font-semibold uppercase tracking-widest mb-2" style="color: #f97316">
+          Por qué Prodeus
+        </p>
+        <h2 class="text-white text-2xl font-black">Todo lo que necesitás para el prode</h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div
+          class="bg-gray-900 border border-gray-800 hover:border-blue-800 rounded-2xl p-6 transition-colors"
+        >
+          <div
+            class="w-10 h-10 rounded-xl bg-blue-950 border border-blue-900 flex items-center justify-center mb-4"
+          >
             <svg
               class="w-5 h-5 text-blue-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              stroke-width="2"
             >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                stroke-width="2"
                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
           </div>
-          <h3 class="text-white font-bold mb-2">Creá tu grupo</h3>
+          <h3 class="text-white font-bold mb-2">Grupos privados</h3>
           <p class="text-gray-500 text-sm leading-relaxed">
-            Armá un grupo con tus amigos o familia. Compartí el código de invitación y empezá a
-            jugar.
+            Creá un grupo con código de invitación. Solo entran los que vos querés: amigos, familia,
+            trabajo.
           </p>
         </div>
 
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <div class="w-10 h-10 rounded-xl bg-blue-950 flex items-center justify-center mb-4">
+        <div
+          class="bg-gray-900 border border-gray-800 hover:border-orange-800 rounded-2xl p-6 transition-colors"
+        >
+          <div
+            class="w-10 h-10 rounded-xl border flex items-center justify-center mb-4"
+            style="background-color: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.3)"
+          >
             <svg
-              class="w-5 h-5 text-blue-400"
+              class="w-5 h-5"
+              style="color: #f97316"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              stroke-width="2"
             >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-              />
-            </svg>
-          </div>
-          <h3 class="text-white font-bold mb-2">Predecí los resultados</h3>
-          <p class="text-gray-500 text-sm leading-relaxed">
-            Antes de cada partido, ingresá tu predicción. Cada acierto suma puntos según las reglas
-            del torneo.
-          </p>
-        </div>
-
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <div class="w-10 h-10 rounded-xl bg-blue-950 flex items-center justify-center mb-4">
-            <svg
-              class="w-5 h-5 text-blue-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
                 d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
               />
             </svg>
           </div>
-          <h3 class="text-white font-bold mb-2">Seguí el ranking</h3>
+          <h3 class="text-white font-bold mb-2">Rankings en vivo</h3>
           <p class="text-gray-500 text-sm leading-relaxed">
-            El puntaje se actualiza automáticamente. Mirá cómo quedás respecto a tus amigos en
-            tiempo real.
+            Los puntos se actualizan solos después de cada resultado. Siempre sabés exactamente
+            dónde estás.
           </p>
+        </div>
+
+        <div
+          class="bg-gray-900 border border-gray-800 hover:border-blue-800 rounded-2xl p-6 transition-colors"
+        >
+          <div
+            class="w-10 h-10 rounded-xl bg-blue-950 border border-blue-900 flex items-center justify-center mb-4"
+          >
+            <svg
+              class="w-5 h-5 text-blue-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+              />
+            </svg>
+          </div>
+          <h3 class="text-white font-bold mb-2">Cualquier torneo</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            Liga Profesional, Champions, Mundial. Elegís el torneo y armás el prode fecha a fecha.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="px-6 py-20 border-t border-gray-800">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <p class="text-blue-400 text-xs font-semibold uppercase tracking-widest mb-2">
+          Cómo funciona
+        </p>
+        <h2 class="text-white text-2xl font-black">Tres pasos para empezar</h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div class="relative bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          <div class="flex items-center gap-3 mb-5">
+            <div
+              class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center flex-shrink-0"
+            >
+              <span class="text-white text-xs font-black">01</span>
+            </div>
+            <div class="h-px flex-1 bg-gray-800"></div>
+          </div>
+          <h3 class="text-white font-bold text-sm mb-2">Creá tu grupo</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            Entrá con Google, nombrá tu grupo y compartí el código con tus amigos.
+          </p>
+        </div>
+
+        <div class="relative bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          <div class="flex items-center gap-3 mb-5">
+            <div
+              class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center flex-shrink-0"
+            >
+              <span class="text-white text-xs font-black">02</span>
+            </div>
+            <div class="h-px flex-1 bg-gray-800"></div>
+          </div>
+          <h3 class="text-white font-bold text-sm mb-2">Predecí los partidos</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            Antes de cada fecha cargás tu predicción. Solo hasta que empiece el primer partido.
+          </p>
+        </div>
+
+        <div class="relative bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          <div class="flex items-center gap-3 mb-5">
+            <div
+              class="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+              style="background-color: #ea580c"
+            >
+              <span class="text-white text-xs font-black">03</span>
+            </div>
+            <div class="h-px flex-1 bg-gray-800"></div>
+          </div>
+          <h3 class="text-white font-bold text-sm mb-2">Ganá el ranking</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            Los resultados se cargan y el ranking se actualiza solo. A ver quién la sabe más.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="px-6 py-20">
+    <div class="max-w-3xl mx-auto">
+      <div
+        class="relative rounded-2xl px-8 py-14 text-center overflow-hidden"
+        style="background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #9a3412 100%)"
+      >
+        <div
+          class="absolute inset-0"
+          style="
+            background-image:
+              radial-gradient(circle at 10% 50%, rgba(96, 165, 250, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 90% 50%, rgba(249, 115, 22, 0.15) 0%, transparent 50%);
+          "
+        ></div>
+        <div class="relative z-10">
+          <img
+            src="assets/images/prodeus.png"
+            alt="Prodeus"
+            class="w-14 h-14 object-contain mx-auto mb-4"
+          />
+          <h2 class="text-white text-2xl font-black mb-2 leading-tight">
+            ¿Listo para el próximo torneo?
+          </h2>
+          <p class="text-blue-100 mb-8 text-sm leading-relaxed max-w-sm mx-auto">
+            Entrá con Google y empezá a competir en segundos. Es 100% gratis.
+          </p>
+          <a
+            routerLink="/auth/login"
+            class="inline-block px-7 py-3 bg-white hover:bg-gray-100 text-blue-700 text-sm font-bold rounded-lg transition-colors cursor-pointer"
+          >
+            Entrar con Google
+          </a>
         </div>
       </div>
     </div>
@@ -135,30 +288,37 @@
 
   <!-- Footer -->
   <footer class="border-t border-gray-800 bg-gray-950">
-    <div class="max-w-5xl mx-auto px-4 sm:px-8 py-10">
-      <!-- Two-column row -->
+    <div class="max-w-5xl mx-auto px-6 py-10">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
-        <!-- Col 1: Prodeus brand -->
-        <div>
-          <p class="text-white font-black text-2xl tracking-tight mb-2">PRODEUS</p>
-          <p class="text-gray-500 text-sm leading-relaxed max-w-xs">
-            El prode online para tus grupos. Predecí resultados, sumá puntos y competí con tus
-            amigos en tiempo real.
-          </p>
+        <!-- Brand -->
+        <div class="flex items-start gap-3">
+          <img
+            src="assets/images/prodeus.png"
+            alt="Prodeus"
+            class="w-10 h-10 object-contain flex-shrink-0 mt-0.5"
+          />
+          <div>
+            <p class="text-white font-black text-sm tracking-tight mb-1">PRODEUS</p>
+            <p class="text-gray-500 text-sm leading-relaxed max-w-xs">
+              El prode online para tus grupos. Predecí, sumá puntos y competí con tus amigos en
+              tiempo real.
+            </p>
+          </div>
         </div>
 
-        <!-- Col 2: Kernel Studio + socials -->
-        <div class="flex flex-col items-end">
-          <p class="text-white text-sm font-bold mb-0.5">Kernel Studio</p>
-          <p class="text-gray-500 text-xs italic mb-4">Software simple para negocios reales</p>
-
+        <!-- Kernel Studio + socials -->
+        <div class="flex flex-col sm:items-end justify-between gap-4">
+          <div>
+            <p class="text-white text-sm font-bold mb-0.5">Kernel Studio</p>
+            <p class="text-gray-500 text-xs italic">Software simple para negocios reales</p>
+          </div>
           <div class="flex items-center gap-2">
             <a
               href="https://www.instagram.com/kernelstudio.solutions/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              class="w-9 h-9 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-700 transition-all"
+              class="w-9 h-9 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-700 transition-colors cursor-pointer"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -171,7 +331,7 @@
               target="_blank"
               rel="noopener noreferrer"
               aria-label="LinkedIn"
-              class="w-9 h-9 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-700 transition-all"
+              class="w-9 h-9 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-700 transition-colors cursor-pointer"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -184,7 +344,7 @@
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Sitio web"
-              class="w-9 h-9 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-700 transition-all"
+              class="w-9 h-9 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-700 transition-colors cursor-pointer"
             >
               <svg
                 class="w-4 h-4"
@@ -204,9 +364,8 @@
         </div>
       </div>
 
-      <!-- Divider + copyright -->
       <div class="border-t border-gray-800 pt-6 text-center">
-        <p class="text-gray-700 text-xs">© 2026 Prodeus. Todos los derechos reservados.</p>
+        <p class="text-gray-700 text-xs">© 2026 Prodeus · Hecho con ♥ por Kernel Studio</p>
       </div>
     </div>
   </footer>

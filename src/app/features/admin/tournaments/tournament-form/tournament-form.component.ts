@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import type { Tournament } from '../../../../data/database.types';
@@ -8,6 +8,7 @@ import { TournamentStore } from '../../../../state/tournament.store';
   selector: 'app-tournament-form',
   imports: [FormsModule, RouterLink],
   templateUrl: './tournament-form.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TournamentFormComponent implements OnInit {
   @Input() id?: string;

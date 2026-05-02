@@ -1,5 +1,5 @@
 import { SlicePipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { Tournament } from '../../../../data/database.types';
 import { TournamentStore } from '../../../../state/tournament.store';
@@ -8,6 +8,7 @@ import { TournamentStore } from '../../../../state/tournament.store';
   selector: 'app-tournament-list',
   imports: [RouterLink, SlicePipe],
   templateUrl: './tournament-list.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TournamentListComponent implements OnInit {
   protected readonly store = inject(TournamentStore);

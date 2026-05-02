@@ -1,4 +1,12 @@
-import { Component, inject, Input, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../state/auth.store';
 import { GroupStore } from '../../../state/group.store';
@@ -9,6 +17,7 @@ import { getFlagEmoji } from '../../../shared/utils/flags';
   selector: 'app-ranking',
   imports: [RouterLink],
   templateUrl: './ranking.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RankingComponent implements OnInit, OnDestroy {
   @Input() id!: string; // group id

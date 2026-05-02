@@ -1,4 +1,12 @@
-import { Component, computed, inject, Input, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  Input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PredictionService } from '../../../core/services/prediction.service';
@@ -51,6 +59,7 @@ function bracketPhaseLabel(bracketId: string): string {
   selector: 'app-predictions',
   imports: [RouterLink, FormsModule],
   templateUrl: './predictions.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PredictionsComponent implements OnInit {
   @Input() id!: string; // group id

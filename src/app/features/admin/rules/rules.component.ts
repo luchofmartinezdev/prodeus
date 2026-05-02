@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { ScoringRule } from '../../../data/database.types';
 import { ScoringRulesService } from '../../../core/services/scoring-rules.service';
@@ -9,6 +9,7 @@ import { AuthStore } from '../../../state/auth.store';
   selector: 'app-admin-rules',
   imports: [FormsModule],
   templateUrl: './rules.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminRulesComponent implements OnInit {
   private readonly rulesService = inject(ScoringRulesService);
@@ -45,7 +46,7 @@ export class AdminRulesComponent implements OnInit {
       await Promise.all(
         this.rules().map((r) => this.rulesService.update(r.id, this.ruleValues[r.id])),
       );
-      await this.load();
+      this.rules.set(this.rules().map((r) => ({ ...r, points_value: this.ruleValues[r.id] })));
       this.isEditing.set(false);
       this.toast.success('Reglas guardadas');
     } catch (e: unknown) {

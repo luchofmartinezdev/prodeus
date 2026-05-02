@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatchService } from '../../../core/services/match.service';
 import { AuthStore } from '../../../state/auth.store';
@@ -11,6 +11,7 @@ import type { MatchWithTeams } from '../../../data/repositories/match.repository
   selector: 'app-dashboard',
   imports: [RouterLink],
   templateUrl: './dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent implements OnInit {
   protected readonly authStore = inject(AuthStore);

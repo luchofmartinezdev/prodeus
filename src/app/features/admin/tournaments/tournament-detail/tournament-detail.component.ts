@@ -1,5 +1,5 @@
 import { SlicePipe } from '@angular/common';
-import { Component, inject, Input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { Match, Team, Tournament } from '../../../../data/database.types';
@@ -15,6 +15,7 @@ type DetailTab = 'teams' | 'matches';
   selector: 'app-tournament-detail',
   imports: [RouterLink, FormsModule, SlicePipe, GeneratePhaseButtonComponent],
   templateUrl: './tournament-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TournamentDetailComponent implements OnInit {
   @Input() id!: string;
@@ -163,11 +164,24 @@ export class TournamentDetailComponent implements OnInit {
     try {
       const editing = this.editingTeam();
       if (editing) {
-        await this.teamService.update(editing.id, {
+        const updated = {
           name: this.teamName.trim(),
           short_name: this.teamShortName || undefined,
           logo_url: this.teamLogoUrl || undefined,
-        });
+        };
+        await this.teamService.update(editing.id, updated);
+        this.teams.set(
+          this.teams().map((t) =>
+            t.id === editing.id
+              ? {
+                  ...t,
+                  name: updated.name,
+                  short_name: updated.short_name ?? null,
+                  logo_url: updated.logo_url ?? null,
+                }
+              : t,
+          ),
+        );
       } else {
         await this.teamService.create({
           tournament_id: this.id,
@@ -175,9 +189,9 @@ export class TournamentDetailComponent implements OnInit {
           short_name: this.teamShortName || undefined,
           logo_url: this.teamLogoUrl || undefined,
         });
+        this.teams.set(await this.teamService.getByTournament(this.id));
       }
       this.cancelTeamForm();
-      this.teams.set(await this.teamService.getByTournament(this.id));
     } catch (e: unknown) {
       this.tabError.set(e instanceof Error ? e.message : 'Error al guardar');
     }
@@ -250,13 +264,25 @@ export class TournamentDetailComponent implements OnInit {
     try {
       const editing = this.editingMatch();
       if (editing) {
-        await this.matchService.update(editing.id, {
+        const updated = {
           home_team_id: this.matchHomeTeamId,
           away_team_id: this.matchAwayTeamId,
           match_date: this.matchDate,
           prediction_deadline: this.matchDeadline,
           round: this.matchRound,
-        });
+        };
+        await this.matchService.update(editing.id, updated);
+        const homeTeam =
+          this.teams().find((t) => t.id === this.matchHomeTeamId) ?? editing.home_team;
+        const awayTeam =
+          this.teams().find((t) => t.id === this.matchAwayTeamId) ?? editing.away_team;
+        this.matches.set(
+          this.matches().map((m) =>
+            m.id === editing.id
+              ? { ...m, ...updated, home_team: homeTeam, away_team: awayTeam }
+              : m,
+          ),
+        );
       } else {
         await this.matchService.create({
           tournament_id: this.id,
@@ -266,9 +292,9 @@ export class TournamentDetailComponent implements OnInit {
           prediction_deadline: this.matchDeadline,
           round: this.matchRound,
         });
+        this.matches.set(await this.matchService.getByTournament(this.id));
       }
       this.cancelMatchForm();
-      this.matches.set(await this.matchService.getByTournament(this.id));
     } catch (e: unknown) {
       this.tabError.set(e instanceof Error ? e.message : 'Error al guardar');
     }
@@ -287,7 +313,18 @@ export class TournamentDetailComponent implements OnInit {
         away_score: this.resultAway,
       });
       this.resultMatchId.set(null);
-      this.matches.set(await this.matchService.getByTournament(this.id));
+      this.matches.set(
+        this.matches().map((m) =>
+          m.id === matchId
+            ? {
+                ...m,
+                home_score: this.resultHome,
+                away_score: this.resultAway,
+                status: 'finished' as const,
+              }
+            : m,
+        ),
+      );
     } catch (e: unknown) {
       this.tabError.set(e instanceof Error ? e.message : 'Error al cargar resultado');
     }

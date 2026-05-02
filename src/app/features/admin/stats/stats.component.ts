@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import type { GlobalStats } from '../../../core/services/stats.service';
 import { StatsService } from '../../../core/services/stats.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -6,6 +6,7 @@ import { ToastService } from '../../../core/services/toast.service';
 @Component({
   selector: 'app-admin-stats',
   templateUrl: './stats.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminStatsComponent implements OnInit {
   private readonly statsService = inject(StatsService);

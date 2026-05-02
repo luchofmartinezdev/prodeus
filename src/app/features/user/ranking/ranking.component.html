@@ -43,18 +43,15 @@
   <!-- ── RANKING TAB ── -->
   @if (activeTab() === 'ranking') {
     @if (rankingStore.isLoading()) {
-      <div class="flex items-center justify-center py-16">
-        <svg class="animate-spin w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24">
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          />
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-        </svg>
+      <div class="space-y-2">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="flex items-center gap-4 p-4 rounded-xl bg-gray-800/60 border border-gray-700">
+            <div class="w-8 h-5 bg-gray-700 rounded animate-pulse shrink-0"></div>
+            <div class="w-9 h-9 rounded-full bg-gray-700 animate-pulse shrink-0"></div>
+            <div class="flex-1 h-4 bg-gray-700 rounded animate-pulse"></div>
+            <div class="w-16 h-6 bg-gray-700 rounded animate-pulse shrink-0"></div>
+          </div>
+        }
       </div>
     } @else if (rankingStore.ranking().length === 0) {
       <div class="text-center py-16">

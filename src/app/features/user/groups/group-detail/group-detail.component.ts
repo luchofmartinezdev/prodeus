@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../../state/auth.store';
@@ -9,6 +9,7 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
   selector: 'app-group-detail',
   imports: [RouterLink, FormsModule, ConfirmModalComponent],
   templateUrl: './group-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupDetailComponent implements OnInit {
   @Input() id!: string;

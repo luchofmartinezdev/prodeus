@@ -1,4 +1,11 @@
-import { Component, effect, inject, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { GroupStore } from '../../../../state/group.store';
@@ -8,6 +15,7 @@ import { AuthStore } from '../../../../state/auth.store';
   selector: 'app-group-list',
   imports: [RouterLink, FormsModule],
   templateUrl: './group-list.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupListComponent {
   protected readonly store = inject(GroupStore);
@@ -37,6 +45,10 @@ export class GroupListComponent {
       this.joinCodeValue = '';
       this.showJoinForm.set(false);
     }
+  }
+
+  get currentUserId(): string | undefined {
+    return this.authStore.user()?.id;
   }
 
   joinModeLabel(mode: 'open' | 'closed'): string {

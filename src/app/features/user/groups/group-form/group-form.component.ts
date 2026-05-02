@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { GroupStore } from '../../../../state/group.store';
@@ -8,6 +8,7 @@ import { TournamentStore } from '../../../../state/tournament.store';
   selector: 'app-group-form',
   imports: [RouterLink, FormsModule],
   templateUrl: './group-form.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupFormComponent implements OnInit {
   protected readonly store = inject(GroupStore);

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthStore } from '../../state/auth.store';
 import { ToastService } from '../../core/services/toast.service';
@@ -7,6 +7,7 @@ import { ToastService } from '../../core/services/toast.service';
   selector: 'app-profile',
   imports: [FormsModule],
   templateUrl: './profile.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileComponent {
   protected readonly authStore = inject(AuthStore);

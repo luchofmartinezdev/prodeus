@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, OnInit, signal } from '@angular/core';
 import type { PhaseStatus } from '../../../../data/database.types';
 import { TournamentService } from '../../../../core/services/tournament.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -7,6 +7,7 @@ import { ToastService } from '../../../../core/services/toast.service';
   selector: 'app-generate-phase-button',
   imports: [],
   templateUrl: './generate-phase-button.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GeneratePhaseButtonComponent implements OnInit {
   @Input({ required: true }) tournamentId!: string;
