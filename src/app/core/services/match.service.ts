@@ -5,10 +5,12 @@ import {
   type MatchResultDto,
   type MatchWithTeams,
 } from '../../data/repositories/match.repository';
+import { ToastService } from './toast.service';
 
 @Injectable({ providedIn: 'root' })
 export class MatchService {
   private readonly repo = inject(MatchRepository);
+  private readonly toast = inject(ToastService);
 
   async getByTournament(tournamentId: string): Promise<MatchWithTeams[]> {
     const { data, error } = await this.repo.findByTournament(tournamentId);
@@ -33,9 +35,16 @@ export class MatchService {
   async loadResult(id: string, dto: MatchResultDto): Promise<void> {
     const { error } = await this.repo.loadResult(id, dto);
     if (error) throw new Error('No se pudo cargar el resultado');
-    // Trigger scoring asynchronously — failure doesn't block result loading
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    this.repo.scoreMatch(id).catch(() => {});
+    try {
+      const { error: scoreErr } = await this.repo.scoreMatch(id);
+      if (scoreErr) {
+        console.error('score-match error:', scoreErr);
+        this.toast.error('Resultado guardado, pero falló el cálculo de puntos');
+      }
+    } catch (e) {
+      console.error('score-match exception:', e);
+      this.toast.error('Resultado guardado, pero falló el cálculo de puntos');
+    }
   }
 
   async remove(id: string): Promise<void> {
