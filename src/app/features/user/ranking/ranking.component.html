@@ -49,12 +49,12 @@
       <div class="space-y-2">
         @for (i of [1, 2, 3, 4, 5]; track i) {
           <div
-            class="flex items-center gap-4 px-4 py-3 rounded-xl bg-gray-900 border border-gray-800"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-900 border border-gray-800"
           >
-            <div class="w-8 h-4 bg-gray-800 rounded animate-pulse shrink-0"></div>
+            <div class="w-7 h-4 bg-gray-800 rounded animate-pulse shrink-0"></div>
             <div class="w-9 h-9 rounded-full bg-gray-800 animate-pulse shrink-0"></div>
             <div class="flex-1 h-4 bg-gray-800 rounded animate-pulse"></div>
-            <div class="w-14 h-5 bg-gray-800 rounded animate-pulse shrink-0"></div>
+            <div class="w-12 h-5 bg-gray-800 rounded animate-pulse shrink-0"></div>
           </div>
         }
       </div>
@@ -69,7 +69,7 @@
       <div class="space-y-2">
         @for (row of rankingStore.ranking(); track row.userId) {
           <div
-            class="flex items-center gap-4 px-4 py-3 rounded-xl border transition-colors"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors"
             [class]="
               row.userId === currentUserId
                 ? 'bg-blue-950 border-blue-800'
@@ -77,7 +77,7 @@
             "
           >
             <!-- Position -->
-            <span class="text-base w-8 text-center shrink-0" [class]="positionClass(row.position)">
+            <span class="text-sm w-7 text-center shrink-0" [class]="positionClass(row.position)">
               {{ positionIcon(row.position) }}
             </span>
 
@@ -107,7 +107,7 @@
             </div>
 
             <!-- Points -->
-            <span class="text-white font-bold text-base tabular-nums shrink-0">
+            <span class="text-white font-bold text-sm tabular-nums shrink-0">
               {{ row.totalPoints }}
               <span class="text-gray-500 text-xs font-normal">pts</span>
             </span>
@@ -136,28 +136,30 @@
         </a>
       </div>
     } @else {
-      <div class="space-y-2">
+      <div class="space-y-3">
         @for (row of rankingStore.historial(); track row.predictionId) {
           <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-            <!-- Match header -->
+            <!-- Card header: date · round + badge -->
             <div class="px-4 py-2.5 flex items-center justify-between border-b border-gray-800">
               <div class="flex items-center gap-2">
                 @if (row.matchStatus === 'finished') {
-                  <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-gray-600 shrink-0"></span>
                 } @else if (row.matchStatus === 'in_progress') {
-                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                  <span
+                    class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shrink-0"
+                  ></span>
                 } @else {
-                  <span class="w-1.5 h-1.5 rounded-full bg-yellow-600"></span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-yellow-600 shrink-0"></span>
                 }
                 <span class="text-gray-500 text-xs">{{ formatDate(row.matchDate) }}</span>
                 @if (row.round) {
-                  <span class="text-gray-600 text-xs">· {{ row.round }}</span>
+                  <span class="text-gray-600 text-xs hidden sm:inline">· {{ row.round }}</span>
                 }
               </div>
-              <!-- Points badge -->
+
               @if (row.matchStatus === 'finished') {
                 <span
-                  class="px-2 py-0.5 rounded-full text-xs font-bold"
+                  class="px-2 py-0.5 rounded-full text-xs font-bold shrink-0"
                   [class]="pointsBadgeClass(row.pointsEarned)"
                 >
                   @if (row.pointsEarned !== null) {
@@ -168,21 +170,23 @@
                 </span>
               } @else if (row.matchStatus === 'in_progress') {
                 <span
-                  class="flex items-center gap-1.5 text-xs text-orange-400 font-semibold bg-orange-950 border border-orange-900 px-2 py-0.5 rounded-full"
+                  class="flex items-center gap-1 text-xs text-orange-400 font-semibold bg-orange-950 border border-orange-900 px-2 py-0.5 rounded-full shrink-0"
                 >
                   <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
                   En curso
                 </span>
               } @else {
-                <span class="text-xs text-gray-600">Pendiente</span>
+                <span class="text-xs text-gray-600 shrink-0">Pendiente</span>
               }
             </div>
 
-            <!-- Teams + scores -->
-            <div class="px-4 py-3 flex items-center gap-3">
+            <!-- Card body: home · scores · away -->
+            <div class="px-3 sm:px-4 py-3 flex items-center gap-2 sm:gap-3">
               <!-- Home team -->
-              <div class="flex-1 flex items-center justify-end gap-2 min-w-0">
-                <span class="text-white text-xs font-semibold truncate flex items-center gap-1">
+              <div class="flex-1 flex items-center justify-end gap-1.5 min-w-0">
+                <span
+                  class="text-white text-xs font-semibold leading-tight flex items-center justify-end gap-1 min-w-0"
+                >
                   @if (row.homeTeamLogo) {
                     <img
                       [src]="row.homeTeamLogo"
@@ -190,13 +194,13 @@
                       class="w-5 h-3.5 object-cover rounded-sm shrink-0"
                     />
                   } @else if (getFlag(row.homeTeam)) {
-                    <span>{{ getFlag(row.homeTeam) }}</span>
+                    <span class="shrink-0">{{ getFlag(row.homeTeam) }}</span>
                   }
-                  {{ row.homeTeam }}
+                  <span class="truncate">{{ row.homeTeam }}</span>
                 </span>
               </div>
 
-              <!-- Score block -->
+              <!-- Center: result + prediction -->
               <div class="shrink-0 flex flex-col items-center gap-1">
                 @if (row.matchStatus === 'finished') {
                   <div class="flex items-center gap-1">
@@ -213,19 +217,19 @@
                     </span>
                   </div>
                 } @else {
-                  <span class="text-gray-600 text-xs px-2">vs</span>
+                  <span class="text-gray-600 text-xs px-3">vs</span>
                 }
-                <div class="flex items-center gap-1">
-                  <span class="text-blue-400 text-xs font-medium">
-                    {{ row.predictedHome }}–{{ row.predictedAway }}
-                  </span>
-                  <span class="text-gray-600 text-xs">pred</span>
-                </div>
+                <span class="text-blue-400 text-xs font-medium tabular-nums">
+                  {{ row.predictedHome }}–{{ row.predictedAway }}
+                  <span class="text-gray-600 font-normal">pred</span>
+                </span>
               </div>
 
               <!-- Away team -->
-              <div class="flex-1 flex items-center gap-2 min-w-0">
-                <span class="text-white text-xs font-semibold truncate flex items-center gap-1">
+              <div class="flex-1 flex items-center gap-1.5 min-w-0">
+                <span
+                  class="text-white text-xs font-semibold leading-tight flex items-center gap-1 min-w-0"
+                >
                   @if (row.awayTeamLogo) {
                     <img
                       [src]="row.awayTeamLogo"
@@ -233,9 +237,9 @@
                       class="w-5 h-3.5 object-cover rounded-sm shrink-0"
                     />
                   } @else if (getFlag(row.awayTeam)) {
-                    <span>{{ getFlag(row.awayTeam) }}</span>
+                    <span class="shrink-0">{{ getFlag(row.awayTeam) }}</span>
                   }
-                  {{ row.awayTeam }}
+                  <span class="truncate">{{ row.awayTeam }}</span>
                 </span>
               </div>
             </div>
