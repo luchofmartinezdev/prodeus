@@ -358,12 +358,28 @@
                     </div>
                   </div>
                 </div>
+                <div class="px-4 pb-4">
+                  <a
+                    [routerLink]="['/app/groups', id, 'predictions']"
+                    class="w-full flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                    Ver mis predicciones
+                  </a>
+                </div>
               </div>
             </div>
 
             <!-- ── Info banner ── -->
             <div
-              class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4"
+              class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 mt-4 flex items-center gap-4"
             >
               <div
                 class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0"
