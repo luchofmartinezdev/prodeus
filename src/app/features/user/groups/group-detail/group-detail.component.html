@@ -302,17 +302,46 @@
     ══════════════════════════════════════════ -->
     @if (activeTab() === 'ranking') {
       @if (rankingStore.isLoading()) {
-        <div class="space-y-2">
-          @for (i of [1, 2, 3, 4, 5]; track i) {
-            <div
-              class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-900 border border-gray-800"
-            >
-              <div class="w-7 h-4 bg-gray-800 rounded animate-pulse shrink-0"></div>
-              <div class="w-9 h-9 rounded-full bg-gray-800 animate-pulse shrink-0"></div>
-              <div class="flex-1 h-4 bg-gray-800 rounded animate-pulse"></div>
-              <div class="w-12 h-5 bg-gray-800 rounded animate-pulse shrink-0"></div>
-            </div>
-          }
+        <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-800">
+                <th class="w-12 px-4 py-2.5">
+                  <div class="h-3 bg-gray-800 rounded animate-pulse w-4"></div>
+                </th>
+                <th class="px-3 py-2.5">
+                  <div class="h-3 bg-gray-800 rounded animate-pulse w-20"></div>
+                </th>
+                <th class="w-20 px-4 py-2.5 text-right">
+                  <div class="h-3 bg-gray-800 rounded animate-pulse w-12 ml-auto"></div>
+                </th>
+                <th class="w-20 px-4 py-2.5 text-right">
+                  <div class="h-3 bg-gray-800 rounded animate-pulse w-14 ml-auto"></div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (i of [1, 2, 3, 4, 5]; track i) {
+                <tr class="border-b border-gray-800 last:border-0">
+                  <td class="px-4 py-3.5">
+                    <div class="w-7 h-7 rounded-full bg-gray-800 animate-pulse"></div>
+                  </td>
+                  <td class="px-3 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-full bg-gray-800 animate-pulse shrink-0"></div>
+                      <div class="h-4 bg-gray-800 rounded animate-pulse w-28"></div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-4 bg-gray-800 rounded animate-pulse w-10 ml-auto"></div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="h-4 bg-gray-800 rounded animate-pulse w-10 ml-auto"></div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       } @else if (rankingStore.ranking().length === 0) {
         <div class="text-center py-16">
@@ -322,72 +351,121 @@
           </p>
         </div>
       } @else {
-        <div class="space-y-2">
-          @for (row of rankingStore.ranking(); track row.userId) {
-            <div
-              class="flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors"
-              [class]="
-                row.userId === currentUserId
-                  ? 'bg-blue-950 border-blue-800'
-                  : 'bg-gray-900 border-gray-800'
-              "
-            >
-              <!-- Position -->
-              <span
-                class="text-sm w-7 text-center shrink-0 font-semibold"
-                [class]="row.position <= 3 ? 'text-lg' : 'text-gray-400'"
-              >
-                {{ positionIcon(row.position) }}
-              </span>
-
-              <!-- Avatar -->
-              <div
-                class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0 overflow-hidden"
-              >
-                @if (row.avatarUrl) {
-                  <img
-                    [src]="row.avatarUrl"
-                    [alt]="row.username"
-                    class="w-full h-full object-cover"
-                  />
-                } @else {
-                  {{ row.username.charAt(0).toUpperCase() }}
-                }
-              </div>
-
-              <!-- Name -->
-              <div class="flex-1 min-w-0">
-                <p class="text-white text-sm font-medium truncate">
-                  <span class="truncate">{{ row.username }}</span>
-                  @if (row.userId === currentUserId) {
-                    <span class="text-blue-400 text-xs ml-1">(vos)</span>
-                  }
-                </p>
-              </div>
-
-              <!-- Diff -->
-              @if (pointDiff(row.position); as diff) {
-                <span
-                  class="text-xs tabular-nums shrink-0"
-                  [class]="diff >= 0 ? 'text-green-500' : 'text-red-400'"
+        <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-800">
+                <th class="w-12 px-4 py-3 text-left text-xs font-semibold text-gray-500">#</th>
+                <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500">Miembro</th>
+                <th class="w-20 px-4 py-3 text-right text-xs font-semibold text-gray-500">
+                  Puntos
+                </th>
+                <th class="w-20 px-4 py-3 text-right text-xs font-semibold text-gray-500">
+                  Dif. pts
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rankingStore.ranking(); track row.userId) {
+                <tr
+                  class="border-b border-gray-800 last:border-0 transition-colors"
+                  [class]="row.userId === currentUserId ? 'bg-blue-950/50' : ''"
                 >
-                  {{ diff > 0 ? '+' : '' }}{{ diff }}
-                </span>
-              }
+                  <!-- Position -->
+                  <td class="px-4 py-3.5">
+                    @if (row.position === 1) {
+                      <span
+                        class="w-7 h-7 rounded-full bg-yellow-500 flex items-center justify-center text-xs font-bold text-gray-900"
+                        >1</span
+                      >
+                    } @else if (row.position === 2) {
+                      <span
+                        class="w-7 h-7 rounded-full bg-gray-400 flex items-center justify-center text-xs font-bold text-gray-900"
+                        >2</span
+                      >
+                    } @else if (row.position === 3) {
+                      <span
+                        class="w-7 h-7 rounded-full bg-orange-700 flex items-center justify-center text-xs font-bold text-white"
+                        >3</span
+                      >
+                    } @else {
+                      <span class="text-sm font-semibold text-gray-500">{{ row.position }}</span>
+                    }
+                  </td>
 
-              <!-- Points -->
-              <span class="text-white font-bold text-sm tabular-nums shrink-0">
-                {{ row.totalPoints }}
-                <span class="text-gray-500 text-xs font-normal">pts</span>
-              </span>
-            </div>
-          }
+                  <!-- Member -->
+                  <td class="px-3 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0 overflow-hidden"
+                      >
+                        @if (row.avatarUrl) {
+                          <img
+                            [src]="row.avatarUrl"
+                            [alt]="row.username"
+                            class="w-full h-full object-cover"
+                          />
+                        } @else {
+                          {{ row.username.charAt(0).toUpperCase() }}
+                        }
+                      </div>
+                      <span class="text-white text-sm font-medium">{{ row.username }}</span>
+                      @if (row.userId === currentUserId) {
+                        <span
+                          class="px-1.5 py-0.5 rounded text-xs bg-blue-800 text-blue-200 font-medium"
+                          >Tú</span
+                        >
+                      }
+                    </div>
+                  </td>
+
+                  <!-- Points -->
+                  <td class="px-4 py-3.5 text-right">
+                    <span class="text-white font-bold text-sm tabular-nums">{{
+                      row.totalPoints
+                    }}</span>
+                  </td>
+
+                  <!-- Diff -->
+                  <td class="px-4 py-3.5 text-right">
+                    @if (pointDiff(row.position); as diff) {
+                      <span
+                        class="inline-flex items-center justify-end gap-1 text-sm font-medium tabular-nums"
+                        [class]="diff >= 0 ? 'text-green-500' : 'text-red-400'"
+                      >
+                        @if (diff > 0) {
+                          <svg class="w-2.5 h-2.5 shrink-0" viewBox="0 0 8 8" fill="currentColor">
+                            <polygon points="4,0 8,8 0,8" />
+                          </svg>
+                          {{ diff }}
+                        } @else {
+                          <svg class="w-2.5 h-2.5 shrink-0" viewBox="0 0 8 8" fill="currentColor">
+                            <polygon points="0,0 8,0 4,8" />
+                          </svg>
+                          {{ diff * -1 }}
+                        }
+                      </span>
+                    } @else {
+                      <span class="text-gray-500 text-sm">—</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
 
-        <!-- Live indicator -->
-        <p class="text-center text-gray-600 text-xs mt-4 flex items-center justify-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>
-          Actualización en tiempo real
+        <!-- Footer -->
+        <p class="text-gray-500 text-xs mt-3 flex items-center gap-1.5 px-1">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          El ranking se actualiza en tiempo real.
         </p>
       }
     }
