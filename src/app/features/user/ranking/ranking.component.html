@@ -1,28 +1,32 @@
-<div class="p-4 sm:p-6 max-w-2xl w-full mx-auto">
-  <!-- Back + title -->
+<div class="p-4 sm:p-8 max-w-3xl w-full">
+  <!-- Header -->
   <div class="flex items-center gap-3 mb-6">
-    <a [routerLink]="['/app/groups', id]" class="text-gray-400 hover:text-white transition-colors">
+    <a
+      [routerLink]="['/app/groups', id]"
+      class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+    >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
     </a>
     <div>
-      <h1 class="text-white font-bold text-xl">Ranking</h1>
+      <h1 class="text-2xl font-bold text-white">Ranking</h1>
       @if (groupStore.selected()) {
-        <p class="text-gray-400 text-sm">{{ groupStore.selected()!.name }}</p>
+        <p class="text-gray-400 text-sm mt-0.5">
+          {{ groupStore.selected()!.name }} · {{ groupStore.selected()!.tournament.name }}
+        </p>
       }
     </div>
   </div>
 
   <!-- Tabs -->
-  <div class="flex gap-1 bg-gray-800 rounded-lg p-1 mb-6">
+  <div class="flex gap-1 mb-5 bg-gray-900 border border-gray-800 rounded-xl p-1">
     <button
       type="button"
       (click)="switchTab('ranking')"
+      class="flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors"
       [class]="
-        activeTab() === 'ranking'
-          ? 'flex-1 py-2 text-sm font-medium rounded-md bg-blue-600 text-white transition-colors'
-          : 'flex-1 py-2 text-sm font-medium rounded-md text-gray-400 hover:text-white transition-colors'
+        activeTab() === 'ranking' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
       "
     >
       Tabla de posiciones
@@ -30,10 +34,9 @@
     <button
       type="button"
       (click)="switchTab('historial')"
+      class="flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors"
       [class]="
-        activeTab() === 'historial'
-          ? 'flex-1 py-2 text-sm font-medium rounded-md bg-blue-600 text-white transition-colors'
-          : 'flex-1 py-2 text-sm font-medium rounded-md text-gray-400 hover:text-white transition-colors'
+        activeTab() === 'historial' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
       "
     >
       Mi historial
@@ -45,18 +48,20 @@
     @if (rankingStore.isLoading()) {
       <div class="space-y-2">
         @for (i of [1, 2, 3, 4, 5]; track i) {
-          <div class="flex items-center gap-4 p-4 rounded-xl bg-gray-800/60 border border-gray-700">
-            <div class="w-8 h-5 bg-gray-700 rounded animate-pulse shrink-0"></div>
-            <div class="w-9 h-9 rounded-full bg-gray-700 animate-pulse shrink-0"></div>
-            <div class="flex-1 h-4 bg-gray-700 rounded animate-pulse"></div>
-            <div class="w-16 h-6 bg-gray-700 rounded animate-pulse shrink-0"></div>
+          <div
+            class="flex items-center gap-4 px-4 py-3 rounded-xl bg-gray-900 border border-gray-800"
+          >
+            <div class="w-8 h-4 bg-gray-800 rounded animate-pulse shrink-0"></div>
+            <div class="w-9 h-9 rounded-full bg-gray-800 animate-pulse shrink-0"></div>
+            <div class="flex-1 h-4 bg-gray-800 rounded animate-pulse"></div>
+            <div class="w-14 h-5 bg-gray-800 rounded animate-pulse shrink-0"></div>
           </div>
         }
       </div>
     } @else if (rankingStore.ranking().length === 0) {
       <div class="text-center py-16">
-        <p class="text-gray-500 text-lg">Aún no hay puntos registrados.</p>
-        <p class="text-gray-600 text-sm mt-1">
+        <p class="text-gray-500 text-sm">Aún no hay puntos registrados.</p>
+        <p class="text-gray-600 text-xs mt-1">
           Los puntos aparecen cuando se cargan resultados de partidos.
         </p>
       </div>
@@ -64,26 +69,27 @@
       <div class="space-y-2">
         @for (row of rankingStore.ranking(); track row.userId) {
           <div
+            class="flex items-center gap-4 px-4 py-3 rounded-xl border transition-colors"
             [class]="
               row.userId === currentUserId
-                ? 'flex items-center gap-4 p-4 rounded-xl bg-blue-900/40 border border-blue-700'
-                : 'flex items-center gap-4 p-4 rounded-xl bg-gray-800/60 border border-gray-700'
+                ? 'bg-blue-950 border-blue-800'
+                : 'bg-gray-900 border-gray-800'
             "
           >
             <!-- Position -->
-            <span class="text-lg w-8 text-center shrink-0" [class]="positionClass(row.position)">
+            <span class="text-base w-8 text-center shrink-0" [class]="positionClass(row.position)">
               {{ positionIcon(row.position) }}
             </span>
 
             <!-- Avatar -->
             <div
-              class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0"
+              class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0 overflow-hidden"
             >
               @if (row.avatarUrl) {
                 <img
                   [src]="row.avatarUrl"
                   [alt]="row.username"
-                  class="w-full h-full rounded-full object-cover"
+                  class="w-full h-full object-cover"
                 />
               } @else {
                 {{ row.username.charAt(0).toUpperCase() }}
@@ -101,7 +107,7 @@
             </div>
 
             <!-- Points -->
-            <span class="text-white font-bold text-lg tabular-nums">
+            <span class="text-white font-bold text-base tabular-nums shrink-0">
               {{ row.totalPoints }}
               <span class="text-gray-500 text-xs font-normal">pts</span>
             </span>
@@ -110,8 +116,8 @@
       </div>
 
       <!-- Live indicator -->
-      <p class="text-center text-gray-600 text-xs mt-4 flex items-center justify-center gap-1">
-        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block"></span>
+      <p class="text-center text-gray-600 text-xs mt-4 flex items-center justify-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>
         Actualización en tiempo real
       </p>
     }
@@ -121,10 +127,10 @@
   @if (activeTab() === 'historial') {
     @if (rankingStore.historial().length === 0) {
       <div class="text-center py-16">
-        <p class="text-gray-500 text-lg">Todavía no tenés predicciones en este grupo.</p>
+        <p class="text-gray-500 text-sm">Todavía no tenés predicciones en este grupo.</p>
         <a
           [routerLink]="['/app/groups', id, 'predictions']"
-          class="inline-block mt-4 text-blue-400 hover:text-blue-300 text-sm"
+          class="inline-block mt-3 text-blue-400 hover:text-blue-300 text-sm transition-colors"
         >
           Ir a predicciones →
         </a>
@@ -132,19 +138,51 @@
     } @else {
       <div class="space-y-2">
         @for (row of rankingStore.historial(); track row.predictionId) {
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-800/60 border border-gray-700">
-            <!-- Date + round -->
-            <div class="w-16 shrink-0 text-center">
-              <p class="text-gray-300 text-xs font-medium">{{ formatDate(row.matchDate) }}</p>
-              @if (row.round) {
-                <p class="text-gray-600 text-xs truncate">{{ row.round }}</p>
+          <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+            <!-- Match header -->
+            <div class="px-4 py-2.5 flex items-center justify-between border-b border-gray-800">
+              <div class="flex items-center gap-2">
+                @if (row.matchStatus === 'finished') {
+                  <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                } @else if (row.matchStatus === 'in_progress') {
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                } @else {
+                  <span class="w-1.5 h-1.5 rounded-full bg-yellow-600"></span>
+                }
+                <span class="text-gray-500 text-xs">{{ formatDate(row.matchDate) }}</span>
+                @if (row.round) {
+                  <span class="text-gray-600 text-xs">· {{ row.round }}</span>
+                }
+              </div>
+              <!-- Points badge -->
+              @if (row.matchStatus === 'finished') {
+                <span
+                  class="px-2 py-0.5 rounded-full text-xs font-bold"
+                  [class]="pointsBadgeClass(row.pointsEarned)"
+                >
+                  @if (row.pointsEarned !== null) {
+                    +{{ row.pointsEarned }} pts
+                  } @else {
+                    —
+                  }
+                </span>
+              } @else if (row.matchStatus === 'in_progress') {
+                <span
+                  class="flex items-center gap-1.5 text-xs text-orange-400 font-semibold bg-orange-950 border border-orange-900 px-2 py-0.5 rounded-full"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                  En curso
+                </span>
+              } @else {
+                <span class="text-xs text-gray-600">Pendiente</span>
               }
             </div>
 
-            <!-- Match -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 text-sm">
-                <span class="text-gray-300 truncate flex items-center gap-1">
+            <!-- Teams + scores -->
+            <div class="px-4 py-3 flex items-center gap-3">
+              <!-- Home team -->
+              <div class="flex-1 flex items-center justify-end gap-2 min-w-0">
+                <span class="text-white text-xs font-semibold truncate flex items-center gap-1">
                   @if (row.homeTeamLogo) {
                     <img
                       [src]="row.homeTeamLogo"
@@ -156,8 +194,38 @@
                   }
                   {{ row.homeTeam }}
                 </span>
-                <span class="text-gray-600 text-xs">vs</span>
-                <span class="text-gray-300 truncate flex items-center gap-1">
+              </div>
+
+              <!-- Score block -->
+              <div class="shrink-0 flex flex-col items-center gap-1">
+                @if (row.matchStatus === 'finished') {
+                  <div class="flex items-center gap-1">
+                    <span
+                      class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-800 text-white font-black text-base"
+                    >
+                      {{ row.actualHome }}
+                    </span>
+                    <span class="text-gray-600 text-xs">–</span>
+                    <span
+                      class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-800 text-white font-black text-base"
+                    >
+                      {{ row.actualAway }}
+                    </span>
+                  </div>
+                } @else {
+                  <span class="text-gray-600 text-xs px-2">vs</span>
+                }
+                <div class="flex items-center gap-1">
+                  <span class="text-blue-400 text-xs font-medium">
+                    {{ row.predictedHome }}–{{ row.predictedAway }}
+                  </span>
+                  <span class="text-gray-600 text-xs">pred</span>
+                </div>
+              </div>
+
+              <!-- Away team -->
+              <div class="flex-1 flex items-center gap-2 min-w-0">
+                <span class="text-white text-xs font-semibold truncate flex items-center gap-1">
                   @if (row.awayTeamLogo) {
                     <img
                       [src]="row.awayTeamLogo"
@@ -170,45 +238,6 @@
                   {{ row.awayTeam }}
                 </span>
               </div>
-
-              <!-- Result vs prediction -->
-              <div class="flex items-center gap-3 mt-1">
-                @if (row.matchStatus === 'finished') {
-                  <span class="text-xs text-gray-500">
-                    Real:
-                    <span class="text-white font-medium"
-                      >{{ row.actualHome }} - {{ row.actualAway }}</span
-                    >
-                  </span>
-                }
-                <span class="text-xs text-gray-500">
-                  Pred:
-                  <span class="text-blue-300 font-medium"
-                    >{{ row.predictedHome }} - {{ row.predictedAway }}</span
-                  >
-                </span>
-              </div>
-            </div>
-
-            <!-- Points badge -->
-            <div class="shrink-0">
-              @if (row.matchStatus === 'finished') {
-                <span
-                  [class]="
-                    'px-2 py-1 rounded-lg text-xs font-bold ' + pointsBadgeClass(row.pointsEarned)
-                  "
-                >
-                  @if (row.pointsEarned !== null) {
-                    +{{ row.pointsEarned }}
-                  } @else {
-                    —
-                  }
-                </span>
-              } @else {
-                <span class="px-2 py-1 rounded-lg text-xs bg-gray-700 text-gray-500">
-                  {{ row.matchStatus === 'in_progress' ? 'En juego' : 'Pendiente' }}
-                </span>
-              }
             </div>
           </div>
         }
@@ -218,7 +247,7 @@
 
   <!-- Error -->
   @if (rankingStore.error()) {
-    <div class="mt-4 p-3 rounded-lg bg-red-900/40 border border-red-700 text-red-300 text-sm">
+    <div class="mt-4 p-3 rounded-xl bg-red-950 border border-red-900 text-red-400 text-sm">
       {{ rankingStore.error() }}
     </div>
   }

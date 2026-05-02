@@ -39,6 +39,18 @@ Deno.serve(async (req) => {
     return new Response('Method not allowed', { status: 405, headers: corsHeaders });
   }
 
+  try {
+    return await handleRequest(req);
+  } catch (e) {
+    console.error('Unhandled error:', e);
+    return new Response(JSON.stringify({ error: String(e) }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
+
+async function handleRequest(req: Request): Promise<Response> {
   let matchId: string;
   try {
     const body = await req.json();
@@ -114,25 +126,32 @@ Deno.serve(async (req) => {
   }
 
   // 4. Calculate and update points_earned for each prediction
-  const updates = predictions.map((p) => {
-    const ruleKey = calcRuleKey(
-      p.predicted_home,
-      p.predicted_away,
-      match.home_score,
-      match.away_score,
-    );
-    return { id: p.id, points_earned: pointsMap[ruleKey] };
-  });
+  const updates = predictions.map((p) => ({
+    id: p.id,
+    user_id: p.user_id,
+    group_id: p.group_id,
+    points_earned:
+      pointsMap[
+        calcRuleKey(p.predicted_home, p.predicted_away, match.home_score, match.away_score)
+      ],
+  }));
 
-  const { error: updateErr } = await supabase
-    .from('predictions')
-    .upsert(updates, { onConflict: 'id' });
+  for (const { id, points_earned } of updates) {
+    const { error: updateErr } = await supabase
+      .from('predictions')
+      .update({ points_earned })
+      .eq('id', id);
 
-  if (updateErr) {
-    return new Response(JSON.stringify({ error: 'Could not update predictions' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    if (updateErr) {
+      console.error('Update prediction error:', id, updateErr);
+      return new Response(
+        JSON.stringify({ error: 'Could not update predictions', detail: updateErr.message }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
+    }
   }
 
   // 5. Recalculate total_points per user+group and upsert into scores
@@ -169,4 +188,4 @@ Deno.serve(async (req) => {
   return new Response(JSON.stringify({ scored: updates.length }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
-});
+}
