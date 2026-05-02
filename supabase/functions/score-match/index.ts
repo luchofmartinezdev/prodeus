@@ -5,6 +5,11 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 type ScoringRuleKey = 'exact_score' | 'correct_winner' | 'correct_goals_only' | 'no_match';
 
 function calcWinner(home: number, away: number): 'home' | 'away' | 'draw' {
@@ -26,8 +31,12 @@ function calcRuleKey(
 }
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response('Method not allowed', { status: 405, headers: corsHeaders });
   }
 
   let matchId: string;
@@ -38,7 +47,7 @@ Deno.serve(async (req) => {
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid request body' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -52,14 +61,14 @@ Deno.serve(async (req) => {
   if (matchErr || !match) {
     return new Response(JSON.stringify({ error: 'Match not found' }), {
       status: 404,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   if (match.status !== 'finished' || match.home_score === null || match.away_score === null) {
     return new Response(JSON.stringify({ error: 'Match is not finished or has no result' }), {
       status: 422,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -71,7 +80,7 @@ Deno.serve(async (req) => {
   if (rulesErr) {
     return new Response(JSON.stringify({ error: 'Could not load scoring rules' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -94,13 +103,13 @@ Deno.serve(async (req) => {
   if (predsErr) {
     return new Response(JSON.stringify({ error: 'Could not load predictions' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   if (!predictions || predictions.length === 0) {
     return new Response(JSON.stringify({ scored: 0 }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -122,12 +131,11 @@ Deno.serve(async (req) => {
   if (updateErr) {
     return new Response(JSON.stringify({ error: 'Could not update predictions' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
   // 5. Recalculate total_points per user+group and upsert into scores
-  // Group predictions by user_id + group_id
   const affectedPairs = new Map<string, { user_id: string; group_id: string }>();
   for (const p of predictions) {
     const key = `${p.user_id}:${p.group_id}`;
@@ -159,6 +167,6 @@ Deno.serve(async (req) => {
   }
 
   return new Response(JSON.stringify({ scored: updates.length }), {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 });
