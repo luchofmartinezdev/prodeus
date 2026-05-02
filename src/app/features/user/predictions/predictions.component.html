@@ -138,13 +138,21 @@
         @for (row of currentRows; track row.id) {
           <div
             class="bg-gray-900 border rounded-xl overflow-hidden transition-colors"
-            [class]="row.isOpen ? 'border-gray-800' : 'border-gray-900'"
+            [class]="
+              row.status === 'in_progress'
+                ? 'border-orange-900'
+                : row.isOpen
+                  ? 'border-gray-800'
+                  : 'border-gray-900'
+            "
           >
             <!-- Match header -->
             <div class="px-5 py-3 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 @if (row.status === 'finished') {
                   <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                } @else if (row.status === 'in_progress') {
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
                 } @else if (row.isOpen) {
                   <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
                 } @else {
@@ -165,7 +173,15 @@
                   </span>
                 }
               </div>
-              @if (!row.isOpen && row.status !== 'finished') {
+              <!-- Right badge -->
+              @if (row.status === 'in_progress') {
+                <span
+                  class="flex items-center gap-1.5 text-xs text-orange-400 font-semibold bg-orange-950 border border-orange-900 px-2 py-0.5 rounded-full"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                  En curso
+                </span>
+              } @else if (!row.isOpen && row.status !== 'finished') {
                 <span
                   class="flex items-center gap-1 text-xs text-yellow-700 font-medium bg-yellow-950 border border-yellow-900 px-2 py-0.5 rounded-full"
                 >
@@ -179,11 +195,9 @@
                   </svg>
                   Cerrado
                 </span>
-              }
-              @if (row.status === 'finished') {
+              } @else if (row.status === 'finished') {
                 <span class="text-xs text-gray-600 font-medium">Finalizado</span>
-              }
-              @if (row.isOpen) {
+              } @else if (row.isOpen) {
                 <span class="text-xs text-gray-600"
                   >Cierra: {{ formatDeadline(row.prediction_deadline) }}</span
                 >
