@@ -90,18 +90,23 @@ export const AuthStore = signalStore(
 
     return {
       async loadSession(): Promise<void> {
-        const {
-          data: { session },
-        } = await authRepo.getSession();
+        try {
+          const {
+            data: { session },
+          } = await authRepo.getSession();
 
-        if (session?.user) {
-          const { data: profile } = await authRepo.getProfile(session.user.id);
-          patchState(store, { user: session.user, profile, isLoading: false });
-          await syncGoogleNames(session.user, authRepo);
-        } else {
+          if (session?.user) {
+            const { data: profile } = await authRepo.getProfile(session.user.id);
+            patchState(store, { user: session.user, profile, isLoading: false });
+            await syncGoogleNames(session.user, authRepo);
+          } else {
+            patchState(store, { isLoading: false });
+          }
+        } catch {
           patchState(store, { isLoading: false });
+        } finally {
+          _resolveSession?.();
         }
-        _resolveSession?.();
       },
 
       updateAuthState(user: User | null, profile: Profile | null): void {
