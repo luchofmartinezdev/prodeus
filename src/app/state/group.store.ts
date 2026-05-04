@@ -51,6 +51,14 @@ export const GroupStore = signalStore(
       return id;
     }
 
+    function assertIsLeader(): void {
+      const userId = authStore.user()?.id;
+      const selected = store.selected();
+      if (!userId || !selected || selected.leader_id !== userId) {
+        throw new Error('Solo el líder del grupo puede realizar esta acción');
+      }
+    }
+
     return {
       async loadMyGroups(): Promise<void> {
         const userId = authStore.user()?.id;
@@ -123,6 +131,7 @@ export const GroupStore = signalStore(
       async update(id: string, dto: Partial<Pick<GroupDto, 'name' | 'join_mode'>>): Promise<void> {
         patchState(store, { isLoading: true, error: null });
         try {
+          assertIsLeader();
           const updated = await groupService.update(id, dto);
           patchState(store, {
             selected: updated,
@@ -139,6 +148,7 @@ export const GroupStore = signalStore(
       async remove(id: string): Promise<void> {
         patchState(store, { isLoading: true, error: null });
         try {
+          assertIsLeader();
           await groupService.remove(id);
           patchState(store, {
             groups: store.groups().filter((g) => g.id !== id),
@@ -166,7 +176,6 @@ export const GroupStore = signalStore(
           }
           return result.status;
         } catch (e: unknown) {
-          console.error('Error while joining group:', e);
           patchState(store, { isLoading: false });
           toast.error(e instanceof Error ? e.message : 'Error al unirse al grupo');
           return null;
@@ -175,6 +184,7 @@ export const GroupStore = signalStore(
 
       async approveMember(memberId: string, groupId: string): Promise<void> {
         try {
+          assertIsLeader();
           await groupService.approveMember(memberId);
           const members = await groupService.getMembers(groupId);
           patchState(store, { members });
@@ -186,6 +196,7 @@ export const GroupStore = signalStore(
 
       async rejectMember(memberId: string, groupId: string): Promise<void> {
         try {
+          assertIsLeader();
           await groupService.rejectMember(memberId);
           const members = await groupService.getMembers(groupId);
           patchState(store, { members });
@@ -198,6 +209,7 @@ export const GroupStore = signalStore(
       async removeMember(memberId: string, groupId: string): Promise<void> {
         if (!confirm('¿Remover este miembro del grupo?')) return;
         try {
+          assertIsLeader();
           await groupService.removeMember(memberId);
           const members = await groupService.getMembers(groupId);
           patchState(store, { members });

@@ -38,11 +38,9 @@ export class MatchService {
     try {
       const { error: scoreErr } = await this.repo.scoreMatch(id);
       if (scoreErr) {
-        console.error('score-match error:', scoreErr);
         this.toast.error('Resultado guardado, pero falló el cálculo de puntos');
       }
-    } catch (e) {
-      console.error('score-match exception:', e);
+    } catch {
       this.toast.error('Resultado guardado, pero falló el cálculo de puntos');
     }
   }

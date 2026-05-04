@@ -153,8 +153,7 @@ export class GroupRepository {
         .update({ status: 'removed' })
         .eq('group_id', groupId)
         .eq('user_id', userId);
-    } catch (error) {
-      console.error('Error leaving group:', error);
+    } catch {
       return Promise.reject(new Error('No se pudo salir del grupo'));
     }
   }

@@ -13,7 +13,13 @@ import { supabase } from '../supabase.client';
 export const tournamentSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
-  logo_url: z.string().url('URL inválida').optional().or(z.literal('')).or(z.undefined()),
+  logo_url: z
+    .string()
+    .url('URL inválida')
+    .refine((url) => /^https?:\/\//i.test(url), 'Solo se permiten URLs http o https')
+    .optional()
+    .or(z.literal(''))
+    .or(z.undefined()),
   start_date: z.string().min(1, 'La fecha de inicio es requerida'),
   end_date: z.string().min(1, 'La fecha de cierre es requerida'),
   status: z.enum(['draft', 'active', 'closed']),
