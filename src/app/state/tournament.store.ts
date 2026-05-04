@@ -43,14 +43,29 @@ export const TournamentStore = signalStore(
 
     return {
       async loadAll(): Promise<void> {
-        patchState(store, { isLoading: true, error: null });
-        const { data, error } = await repo.findAll();
-        if (error) {
-          patchState(store, { isLoading: false });
-          toast.error('No se pudieron cargar los torneos');
+        if (store.tournaments().length > 0) {
+          Promise.resolve(repo.findAll())
+            .then(({ data }) => {
+              if (data) patchState(store, { tournaments: data });
+            })
+            .catch(() => {
+              /* background refresh — ignore errors */
+            });
           return;
         }
-        patchState(store, { tournaments: data ?? [], isLoading: false });
+        patchState(store, { isLoading: true, error: null });
+        try {
+          const { data, error } = await repo.findAll();
+          if (error) {
+            toast.error('No se pudieron cargar los torneos');
+          } else {
+            patchState(store, { tournaments: data ?? [] });
+          }
+        } catch {
+          toast.error('No se pudieron cargar los torneos');
+        } finally {
+          patchState(store, { isLoading: false });
+        }
       },
 
       async loadOne(id: string): Promise<void> {

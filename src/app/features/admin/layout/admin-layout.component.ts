@@ -132,14 +132,14 @@ import { AuthStore } from '../../../state/auth.store';
       <!-- Overlay — mobile only, visible when sidebar is open -->
       @if (sidebarOpen()) {
         <div
-          class="md:hidden fixed inset-0 bg-black/50 z-30"
+          class="md:hidden fixed inset-0 bg-black/50 z-[60]"
           (click)="sidebarOpen.set(false)"
         ></div>
       }
 
       <!-- Sidebar drawer — mobile only -->
       <aside
-        class="md:hidden fixed top-0 left-0 h-full w-64 bg-gray-900 border-r border-gray-800 flex flex-col z-40 transition-transform duration-300 ease-in-out"
+        class="md:hidden fixed top-0 left-0 h-full w-64 bg-gray-900 border-r border-gray-800 flex flex-col z-[70] transition-transform duration-300 ease-in-out"
         [class.translate-x-0]="sidebarOpen()"
         [class.-translate-x-full]="!sidebarOpen()"
       >

@@ -9,20 +9,32 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
     </a>
-    <h1 class="text-2xl font-bold text-white">Crear grupo</h1>
+    <div>
+      <h1 class="text-2xl font-bold text-white">Crear grupo</h1>
+      <p class="text-sm text-gray-400 mt-0.5">Invitá amigos con un código y competí juntos</p>
+    </div>
   </div>
 
   <form (ngSubmit)="onSubmit()" novalidate>
     <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
       <!-- Nombre -->
       <div>
-        <label class="block text-sm font-medium text-gray-300 mb-1.5">
-          Nombre del grupo <span class="text-red-400">*</span>
-        </label>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-sm font-medium text-gray-300">
+            Nombre del grupo <span class="text-red-400">*</span>
+          </label>
+          <span
+            class="text-xs tabular-nums transition-colors"
+            [class]="name.length > 50 ? 'text-red-400' : 'text-gray-500'"
+          >
+            {{ name.length }}/60
+          </span>
+        </div>
         <input
           type="text"
           name="name"
           [(ngModel)]="name"
+          maxlength="60"
           placeholder="Los Cracks del Prode"
           class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           [class.border-red-600]="fieldErrors()['name']"
@@ -39,22 +51,70 @@
           Torneo <span class="text-red-400">*</span>
         </label>
         @if (tournamentStore.isLoading()) {
-          <p class="text-gray-500 text-sm">Cargando torneos...</p>
+          <div class="flex items-center gap-2 text-gray-500 text-sm py-2">
+            <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            Cargando torneos...
+          </div>
         } @else if (tournamentStore.activeTournaments().length === 0) {
-          <p class="text-gray-500 text-sm">No hay torneos activos disponibles.</p>
+          <p class="text-gray-500 text-sm py-2">No hay torneos activos disponibles.</p>
         } @else {
-          <select
-            name="tournamentId"
-            [(ngModel)]="tournamentId"
-            class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-            [class.border-red-600]="fieldErrors()['tournament']"
-            [class.border-gray-700]="!fieldErrors()['tournament']"
-          >
-            <option value="">Seleccioná un torneo</option>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             @for (t of tournamentStore.activeTournaments(); track t.id) {
-              <option [value]="t.id">{{ t.name }}</option>
+              <button
+                type="button"
+                (click)="tournamentId = t.id"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg border text-sm text-left w-full transition-colors"
+                [class]="
+                  tournamentId === t.id
+                    ? 'border-blue-500 bg-blue-950 text-white'
+                    : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
+                "
+              >
+                <svg
+                  class="w-4 h-4 shrink-0"
+                  [class]="tournamentId === t.id ? 'text-blue-400' : 'text-gray-500'"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                  />
+                </svg>
+                <span class="font-medium flex-1">{{ t.name }}</span>
+                @if (tournamentId === t.id) {
+                  <svg
+                    class="w-4 h-4 shrink-0 text-blue-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                }
+              </button>
             }
-          </select>
+          </div>
           @if (fieldErrors()['tournament']) {
             <p class="mt-1 text-xs text-red-400">{{ fieldErrors()['tournament'] }}</p>
           }
@@ -65,6 +125,7 @@
       <div>
         <label class="block text-sm font-medium text-gray-300 mb-1.5">Modo de ingreso</label>
         <div class="grid grid-cols-2 gap-3">
+          <!-- Abierto -->
           <label class="cursor-pointer">
             <input
               type="radio"
@@ -81,10 +142,25 @@
                   : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
               "
             >
+              <svg
+                class="w-5 h-5 mb-1.5"
+                [class]="joinMode === 'open' ? 'text-blue-400' : 'text-gray-500'"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
+                />
+              </svg>
               <p class="font-medium mb-0.5">Abierto</p>
               <p class="text-xs opacity-70">Cualquiera con el código se une directamente</p>
             </div>
           </label>
+          <!-- Cerrado -->
           <label class="cursor-pointer">
             <input
               type="radio"
@@ -94,13 +170,27 @@
               class="sr-only"
             />
             <div
-              class="px-4 py-3 rounded-lg border text-sm transition-colors"
+              class="h-full px-4 py-3 rounded-lg border text-sm transition-colors"
               [class]="
                 joinMode === 'closed'
                   ? 'border-blue-500 bg-blue-950 text-white'
                   : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
               "
             >
+              <svg
+                class="w-5 h-5 mb-1.5"
+                [class]="joinMode === 'closed' ? 'text-blue-400' : 'text-gray-500'"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
               <p class="font-medium mb-0.5">Cerrado</p>
               <p class="text-xs opacity-70">Requiere aprobación del líder para ingresar</p>
             </div>
@@ -108,6 +198,23 @@
         </div>
       </div>
     </div>
+
+    <!-- Error del servidor -->
+    @if (store.error()) {
+      <div
+        class="mt-4 flex items-center gap-2 px-4 py-3 bg-red-950 border border-red-800 rounded-lg text-sm text-red-400"
+      >
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        {{ store.error() }}
+      </div>
+    }
 
     <!-- Actions -->
     <div class="flex items-center gap-3 mt-5">

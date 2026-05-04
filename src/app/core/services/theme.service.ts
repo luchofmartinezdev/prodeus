@@ -2,34 +2,40 @@ import { Injectable, signal } from '@angular/core';
 
 // Light mode overrides injected as a <style> tag at runtime.
 // These unlayered rules beat Tailwind's @layer utilities regardless of build state.
+//
+// Palette: blue-gray tinted page (#eff2f9) + white cards (#fff) + blue-tinted inputs (#f1f5fb)
+// Creates a 3-level depth hierarchy (page → card → input) without relying on flat grays.
 const LIGHT_CSS = `
   /* ── Backgrounds ── */
-  html:not(.dark) .bg-gray-950  { background-color: #f8fafc !important; }
-  html:not(.dark) .bg-gray-900  { background-color: #f1f5f9 !important; }
-  html:not(.dark) .bg-gray-800  { background-color: #e2e8f0 !important; }
-  html:not(.dark) .bg-gray-700  { background-color: #cbd5e1 !important; }
-  html:not(.dark) .hover\\:bg-gray-800:hover { background-color: #e2e8f0 !important; }
-  html:not(.dark) .hover\\:bg-gray-700:hover { background-color: #cbd5e1 !important; }
+  html:not(.dark) .bg-gray-950 { background-color: #eff2f9 !important; }
+  html:not(.dark) .bg-gray-900 {
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 3px 0 rgba(15,23,42,0.07), 0 1px 2px -1px rgba(15,23,42,0.04) !important;
+  }
+  html:not(.dark) .bg-gray-800 { background-color: #f1f5fb !important; }
+  html:not(.dark) .bg-gray-700 { background-color: #e4e9f4 !important; }
+  html:not(.dark) .hover\\:bg-gray-800:hover { background-color: #e8edf7 !important; }
+  html:not(.dark) .hover\\:bg-gray-700:hover { background-color: #dce3f0 !important; }
 
   /* ── Text ── */
-  html:not(.dark) .text-white    { color: #0f172a !important; }
-  html:not(.dark) .text-gray-300 { color: #334155 !important; }
+  html:not(.dark) .text-white    { color: #0d1117 !important; }
+  html:not(.dark) .text-gray-300 { color: #1e293b !important; }
   html:not(.dark) .text-gray-400 { color: #475569 !important; }
   html:not(.dark) .text-gray-500 { color: #64748b !important; }
   html:not(.dark) .text-gray-600 { color: #94a3b8 !important; }
   html:not(.dark) .text-gray-700 { color: #94a3b8 !important; }
-  html:not(.dark) .hover\\:text-white:hover    { color: #0f172a !important; }
-  html:not(.dark) .hover\\:text-gray-300:hover { color: #334155 !important; }
+  html:not(.dark) .hover\\:text-white:hover    { color: #0d1117 !important; }
+  html:not(.dark) .hover\\:text-gray-300:hover { color: #1e293b !important; }
 
   /* ── Borders ── */
-  html:not(.dark) .border-gray-800 { border-color: #e2e8f0 !important; }
-  html:not(.dark) .border-gray-700 { border-color: #cbd5e1 !important; }
-  html:not(.dark) .border-gray-600 { border-color: #cbd5e1 !important; }
-  html:not(.dark) .divide-gray-800 > * + * { border-color: #e2e8f0 !important; }
+  html:not(.dark) .border-gray-800 { border-color: #dde3f0 !important; }
+  html:not(.dark) .border-gray-700 { border-color: #c7d0e8 !important; }
+  html:not(.dark) .border-gray-600 { border-color: #9ca3af !important; }
+  html:not(.dark) .divide-gray-800 > * + * { border-color: #dde3f0 !important; }
 
   /* ── Blue tints (primary brand) ── */
   html:not(.dark) .bg-blue-950   { background-color: #eff6ff !important; }
-  html:not(.dark) .bg-blue-900   { background-color: #dbeafe !important; }
+  html:not(.dark) .bg-blue-900   { background-color: #dbeafe !important; box-shadow: none !important; }
   html:not(.dark) .text-blue-400 { color: #2563eb !important; }
   html:not(.dark) .text-blue-300 { color: #1d4ed8 !important; }
   html:not(.dark) .border-blue-700 { border-color: #bfdbfe !important; }
@@ -37,14 +43,14 @@ const LIGHT_CSS = `
 
   /* ── Orange tints (secondary accent) ── */
   html:not(.dark) .bg-orange-950  { background-color: #fff7ed !important; }
-  html:not(.dark) .bg-orange-900  { background-color: #ffedd5 !important; }
+  html:not(.dark) .bg-orange-900  { background-color: #ffedd5 !important; box-shadow: none !important; }
   html:not(.dark) .text-orange-400 { color: #ea580c !important; }
   html:not(.dark) .border-orange-700 { border-color: #fed7aa !important; }
   html:not(.dark) .border-orange-800 { border-color: #fed7aa !important; }
 
   /* ── Red ── */
   html:not(.dark) .bg-red-950     { background-color: #fff1f2 !important; }
-  html:not(.dark) .bg-red-900     { background-color: #ffe4e6 !important; }
+  html:not(.dark) .bg-red-900     { background-color: #ffe4e6 !important; box-shadow: none !important; }
   html:not(.dark) .border-red-800 { border-color: #fecdd3 !important; }
   html:not(.dark) .border-red-700 { border-color: #fecdd3 !important; }
   html:not(.dark) .text-red-300   { color: #b91c1c !important; }
@@ -52,34 +58,34 @@ const LIGHT_CSS = `
   html:not(.dark) .hover\\:text-red-400:hover { color: #dc2626 !important; }
 
   /* ── Green ── */
-  html:not(.dark) .bg-green-900    { background-color: #f0fdf4 !important; }
+  html:not(.dark) .bg-green-900    { background-color: #f0fdf4 !important; box-shadow: none !important; }
   html:not(.dark) .text-green-300  { color: #15803d !important; }
   html:not(.dark) .border-green-800 { border-color: #bbf7d0 !important; }
 
   /* ── Yellow / Amber ── */
-  html:not(.dark) .bg-yellow-900    { background-color: #fefce8 !important; }
+  html:not(.dark) .bg-yellow-900    { background-color: #fefce8 !important; box-shadow: none !important; }
   html:not(.dark) .text-yellow-300  { color: #a16207 !important; }
   html:not(.dark) .text-yellow-400  { color: #ca8a04 !important; }
   html:not(.dark) .border-yellow-900 { border-color: #fef08a !important; }
   html:not(.dark) .text-amber-600   { color: #92400e !important; }
 
   /* ── Blue active state in nav ── */
-  html:not(.dark) .bg-blue-600    { background-color: #2563eb !important; }
+  html:not(.dark) .bg-blue-600    { background-color: #2563eb !important; box-shadow: none !important; }
   html:not(.dark) .hover\\:bg-blue-500:hover { background-color: #1d4ed8 !important; }
 
   /* ── Blue 900/40 (semi-transparent highlight) ── */
-  html:not(.dark) .bg-blue-900\\/40 { background-color: rgba(59,130,246,0.12) !important; }
+  html:not(.dark) .bg-blue-900\\/40 { background-color: rgba(59,130,246,0.10) !important; }
 
   /* ── Gray 800/60 (semi-transparent cards) ── */
-  html:not(.dark) .bg-gray-800\\/60 { background-color: rgba(226,232,240,0.8) !important; }
+  html:not(.dark) .bg-gray-800\\/60 { background-color: rgba(241,245,251,0.92) !important; }
 
   /* ── Inputs ── */
   html:not(.dark) input,
   html:not(.dark) select,
   html:not(.dark) textarea {
     color-scheme: light;
-    background-color: #f1f5f9;
-    color: #0f172a;
+    background-color: #f1f5fb;
+    color: #0d1117;
   }
 
   /* ── Placeholder ── */

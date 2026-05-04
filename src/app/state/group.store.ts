@@ -123,8 +123,9 @@ export const GroupStore = signalStore(
           toast.success('Grupo creado exitosamente');
           router.navigate(['/app/groups', group.id]);
         } catch (e: unknown) {
-          patchState(store, { isLoading: false });
-          toast.error(e instanceof Error ? e.message : 'Error al crear grupo');
+          const msg = e instanceof Error ? e.message : 'Error al crear grupo';
+          patchState(store, { isLoading: false, error: msg });
+          toast.error(msg);
         }
       },
 
