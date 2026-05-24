@@ -36,13 +36,9 @@ const fakeUser = { id: 'user-1' } as User;
 const mockAuthStore = {
   user: signal<User | null>(fakeUser),
   profile: signal(null),
-  isLoading: signal(false),
   isAuthenticated: signal(true),
   isSuperadmin: signal(false),
-  loadSession: vi.fn(),
   signOut: vi.fn(),
-  signInWithEmail: vi.fn(),
-  signUp: vi.fn(),
 };
 
 const fakeGroup = (overrides: Partial<GroupWithTournament> = {}): GroupWithTournament =>

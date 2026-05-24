@@ -26,14 +26,8 @@ export class GroupListComponent {
 
   constructor() {
     effect(() => {
-      const isAuth = this.authStore.isAuthenticated();
-      const isLoadingAuth = this.authStore.isLoading();
-
-      if (!isLoadingAuth && isAuth) {
-        // 2. Envolvemos la ejecución en untracked
-        untracked(() => {
-          this.store.loadMyGroups();
-        });
+      if (this.authStore.isAuthenticated()) {
+        untracked(() => this.store.loadMyGroups());
       }
     });
   }

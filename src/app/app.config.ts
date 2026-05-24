@@ -1,4 +1,8 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import {
   PreloadAllModules,
   provideRouter,
@@ -7,6 +11,7 @@ import {
   withRouterConfig,
 } from '@angular/router';
 import { routes } from './app.routes';
+import { AuthStore } from './state/auth.store';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,5 +22,11 @@ export const appConfig: ApplicationConfig = {
       withRouterConfig({ paramsInheritanceStrategy: 'always' }),
       withPreloading(PreloadAllModules),
     ),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (authStore: InstanceType<typeof AuthStore>) => () => authStore.initialize(),
+      deps: [AuthStore],
+      multi: true,
+    },
   ],
 };

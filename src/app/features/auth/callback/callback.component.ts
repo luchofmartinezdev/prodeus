@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter, firstValueFrom, map } from 'rxjs';
 import { AuthStore } from '../../../state/auth.store';
-import { AuthRepository } from '../../../data/repositories/auth.repository';
 
 @Component({
   selector: 'app-callback',
@@ -35,13 +36,10 @@ import { AuthRepository } from '../../../data/repositories/auth.repository';
 export class CallbackComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authStore = inject(AuthStore);
-  private readonly authRepo = inject(AuthRepository);
+  private readonly isAuthenticated$ = toObservable(this.authStore.isAuthenticated);
 
   async ngOnInit(): Promise<void> {
-    // Wait for the AuthStore to finish processing the session.
-    // onAuthStateChange in the store handles the SIGNED_IN event and loads the profile,
-    // so we poll until isLoading settles and user is resolved.
-    await this.waitForSession();
+    await this.waitForAuthentication();
 
     if (this.authStore.isAuthenticated()) {
       this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/app']);
@@ -50,39 +48,17 @@ export class CallbackComponent implements OnInit {
     }
   }
 
-  private waitForSession(): Promise<void> {
-    return new Promise((resolve) => {
-      // Fallback timeout so we never hang indefinitely.
-      const timeout = setTimeout(resolve, 5000);
-
-      const { data } = this.authRepo.onAuthStateChange(async (_event, session) => {
-        // Only proceed when we have an actual authenticated session.
-        // session can be null on the initial state-change emission — ignoring that
-        // is critical to avoid resolving before SIGNED_IN fires.
-        if (session?.user) {
-          clearTimeout(timeout);
-          data.subscription.unsubscribe();
-          // The store's own onAuthStateChange handler calls getProfile() async.
-          // Poll until isAuthenticated() is true rather than using a fixed delay,
-          // so we don't navigate before the store has finished updating.
-          await this.untilStoreAuthenticated();
-          resolve();
-        }
-      });
-    });
-  }
-
-  private untilStoreAuthenticated(): Promise<void> {
+  private waitForAuthentication(): Promise<void> {
     if (this.authStore.isAuthenticated()) return Promise.resolve();
-    return new Promise((resolve) => {
-      const giveUp = setTimeout(resolve, 3000);
-      const poll = setInterval(() => {
-        if (this.authStore.isAuthenticated()) {
-          clearTimeout(giveUp);
-          clearInterval(poll);
-          resolve();
-        }
-      }, 30);
-    });
+
+    return Promise.race([
+      firstValueFrom(
+        this.isAuthenticated$.pipe(
+          filter(Boolean),
+          map(() => undefined as void),
+        ),
+      ),
+      new Promise<void>((resolve) => setTimeout(resolve, 5000)),
+    ]);
   }
 }

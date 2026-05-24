@@ -11,10 +11,7 @@ const mockAuthRepo = {
   }),
   getProfile: vi.fn().mockResolvedValue({ data: null }),
   signOut: vi.fn().mockResolvedValue({}),
-  signInWithPassword: vi.fn(),
-  signUp: vi.fn(),
   signInWithGoogle: vi.fn(),
-  signInWithMagicLink: vi.fn(),
 };
 
 const mockRouter = { navigate: vi.fn() };
@@ -46,11 +43,9 @@ describe('AuthStore', () => {
 
   // ─── Initial state ────────────────────────────────────────────
 
-  it('starts with user null and isLoading true', () => {
+  it('starts with user null and isSigningIn false', () => {
     expect(store.user()).toBeNull();
-    // isLoading starts true and resolves after getSession
-    // We just check it exists
-    expect(typeof store.isLoading()).toBe('boolean');
+    expect(store.isSigningIn()).toBe(false);
   });
 
   // ─── Computed ─────────────────────────────────────────────────
@@ -88,30 +83,6 @@ describe('AuthStore', () => {
 
   it('signOut() calls authRepo.signOut() (fire-and-forget)', () => {
     store.signOut();
-    // Called asynchronously — just ensure it was invoked
     expect(mockAuthRepo.signOut).toHaveBeenCalled();
-  });
-
-  // ─── signInWithEmail ──────────────────────────────────────────
-
-  it('signInWithEmail() returns false when credentials are wrong', async () => {
-    mockAuthRepo.signInWithPassword.mockResolvedValue({
-      data: { user: null, session: null },
-      error: { message: 'Invalid credentials' },
-    });
-    const result = await store.signInWithEmail({ email: 'a@b.com', password: 'wrong' });
-    expect(result).toBe(false);
-  });
-
-  it('signInWithEmail() sets user and profile on success', async () => {
-    const fakeUser = { id: 'user-1', email: 'a@b.com' };
-    const fakeProfile = { id: 'user-1', role: 'user', username: 'tester', avatar_url: null };
-    mockAuthRepo.signInWithPassword.mockResolvedValue({
-      data: { user: fakeUser, session: {} },
-      error: null,
-    });
-    mockAuthRepo.getProfile.mockResolvedValue({ data: fakeProfile });
-    const result = await store.signInWithEmail({ email: 'a@b.com', password: 'correct' });
-    expect(result).toBe(true);
   });
 });

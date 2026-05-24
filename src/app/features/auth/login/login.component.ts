@@ -13,7 +13,7 @@ export class LoginComponent {
 
   constructor() {
     effect(() => {
-      if (!this.authStore.isLoading() && this.authStore.isAuthenticated()) {
+      if (this.authStore.isAuthenticated()) {
         this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/app']);
       }
     });

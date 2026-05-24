@@ -10,7 +10,6 @@ import {
 } from '@ngrx/signals';
 import type { User } from '@supabase/supabase-js';
 import type { Profile } from '../data/database.types';
-import type { LoginDto, RegisterDto } from '../data/repositories/auth.repository';
 import { AuthRepository } from '../data/repositories/auth.repository';
 
 // ─── State ───────────────────────────────────────────────────
@@ -18,21 +17,26 @@ import { AuthRepository } from '../data/repositories/auth.repository';
 interface AuthState {
   user: User | null;
   profile: Profile | null;
-  isLoading: boolean;
+  isSigningIn: boolean;
   error: string | null;
 }
 
 const initialState: AuthState = {
   user: null,
   profile: null,
-  isLoading: true,
+  isSigningIn: false,
   error: null,
 };
 
 // ─── Helpers ─────────────────────────────────────────────────
 
-async function syncGoogleNames(user: User, authRepo: AuthRepository): Promise<void> {
+async function syncGoogleNames(
+  user: User,
+  profile: Profile | null,
+  authRepo: AuthRepository,
+): Promise<void> {
   if (user.app_metadata?.['provider'] !== 'google') return;
+  if (profile?.first_name || profile?.last_name) return;
   const meta = user.user_metadata ?? {};
   let firstName = (meta['given_name'] as string) || null;
   let lastName = (meta['family_name'] as string) || null;
@@ -45,12 +49,11 @@ async function syncGoogleNames(user: User, authRepo: AuthRepository): Promise<vo
   await authRepo.updateProfile(user.id, { first_name: firstName, last_name: lastName });
 }
 
-// ─── Store ───────────────────────────────────────────────────
+// ─── Subscription reference (module-scoped, not exported) ────
 
-// Promise that resolves once the initial session check completes.
-// Guards can `await sessionReady` instead of polling isLoading.
-let _resolveSession: (() => void) | null = null;
-export const sessionReady = new Promise<void>((r) => (_resolveSession = r));
+let _authSubscription: { unsubscribe(): void } | null = null;
+
+// ─── Store ───────────────────────────────────────────────────
 
 export const AuthStore = signalStore(
   { providedIn: 'root' },
@@ -89,7 +92,8 @@ export const AuthStore = signalStore(
     const router = inject(Router);
 
     return {
-      async loadSession(): Promise<void> {
+      async initialize(): Promise<void> {
+        // 1. Load initial session — always resolves, never throws
         try {
           const {
             data: { session },
@@ -97,91 +101,41 @@ export const AuthStore = signalStore(
 
           if (session?.user) {
             const { data: profile } = await authRepo.getProfile(session.user.id);
-            patchState(store, { user: session.user, profile, isLoading: false });
-            await syncGoogleNames(session.user, authRepo);
+            patchState(store, { user: session.user, profile });
+            syncGoogleNames(session.user, profile, authRepo);
+          }
+        } catch {
+          // Swallow errors so APP_INITIALIZER always resolves
+        }
+
+        // 2. Subscribe to subsequent auth state changes
+        const { data } = authRepo.onAuthStateChange(async (event, session) => {
+          if (session?.user) {
+            const { data: profile } = await authRepo.getProfile(session.user.id);
+            // SIGNED_IN always wins (new login — store.user() is null at this point for OAuth).
+            // For other events (TOKEN_REFRESHED, USER_UPDATED) only update if the user
+            // hasn't signed out while getProfile was in-flight.
+            if (event === 'SIGNED_IN' || store.user()) {
+              patchState(store, { user: session.user, profile });
+            }
+            if (event === 'SIGNED_IN') {
+              syncGoogleNames(session.user, profile, authRepo);
+            }
           } else {
-            patchState(store, { isLoading: false });
+            patchState(store, { user: null, profile: null });
           }
-        } catch {
-          patchState(store, { isLoading: false });
-        } finally {
-          _resolveSession?.();
-        }
-      },
+        });
 
-      updateAuthState(user: User | null, profile: Profile | null): void {
-        patchState(store, { user, profile });
-      },
-
-      async signInWithEmail(dto: LoginDto): Promise<boolean> {
-        patchState(store, { isLoading: true, error: null });
-        try {
-          const { data, error } = await authRepo.signInWithPassword(dto);
-          if (error) {
-            patchState(store, { isLoading: false, error: 'Email o contraseña incorrectos' });
-            return false;
-          }
-          if (data.user) {
-            const { data: profile } = await authRepo.getProfile(data.user.id);
-            patchState(store, { user: data.user, profile, isLoading: false });
-            router.navigate([profile?.role === 'superadmin' ? '/admin' : '/app']);
-          }
-          return true;
-        } catch {
-          patchState(store, { isLoading: false, error: 'Error al iniciar sesión' });
-          return false;
-        }
-      },
-
-      async signUp(dto: RegisterDto): Promise<boolean> {
-        patchState(store, { isLoading: true, error: null });
-        try {
-          const { data, error } = await authRepo.signUp(dto);
-          if (error) {
-            patchState(store, {
-              isLoading: false,
-              error: error.message.includes('already registered')
-                ? 'Este email ya está registrado'
-                : 'Error al registrarse',
-            });
-            return false;
-          }
-          // Si no requiere confirmación de email, el usuario ya está logueado
-          if (data.session) {
-            const { data: profile } = await authRepo.getProfile(data.user!.id);
-            patchState(store, { user: data.user, profile, isLoading: false });
-            router.navigate(['/app']);
-          } else {
-            // Requiere confirmación de email
-            patchState(store, { isLoading: false });
-          }
-          return true;
-        } catch {
-          patchState(store, { isLoading: false, error: 'Error al registrarse' });
-          return false;
-        }
+        _authSubscription = data.subscription;
       },
 
       async signInWithGoogle(): Promise<void> {
-        patchState(store, { error: null });
+        patchState(store, { isSigningIn: true, error: null });
         const { error } = await authRepo.signInWithGoogle();
-        if (error) patchState(store, { error: 'Error al conectar con Google' });
-      },
-
-      async signInWithMagicLink(email: string): Promise<boolean> {
-        patchState(store, { isLoading: true, error: null });
-        try {
-          const { error } = await authRepo.signInWithMagicLink(email);
-          if (error) {
-            patchState(store, { isLoading: false, error: 'No se pudo enviar el magic link' });
-            return false;
-          }
-          patchState(store, { isLoading: false });
-          return true;
-        } catch {
-          patchState(store, { isLoading: false, error: 'Error al enviar el magic link' });
-          return false;
+        if (error) {
+          patchState(store, { isSigningIn: false, error: 'Error al conectar con Google' });
         }
+        // No error: browser redirects to OAuth — isSigningIn stays true until page unloads
       },
 
       signOut(): void {
@@ -215,36 +169,12 @@ export const AuthStore = signalStore(
     };
   }),
 
-  withHooks((store) => {
-    const authRepo = inject(AuthRepository);
-    let subscription: { unsubscribe(): void } | null = null;
-
-    return {
-      onInit() {
-        store.loadSession();
-
-        const { data } = authRepo.onAuthStateChange(async (event, session) => {
-          if (session?.user) {
-            const { data: profile } = await authRepo.getProfile(session.user.id);
-            // SIGNED_IN always wins (new login — store.user() is null at this point for OAuth).
-            // For other events (TOKEN_REFRESHED, USER_UPDATED) only update if the user
-            // hasn't signed out while getProfile was in-flight.
-            if (event === 'SIGNED_IN' || store.user()) {
-              store.updateAuthState(session.user, profile);
-            }
-            if (event === 'SIGNED_IN') {
-              await syncGoogleNames(session.user, authRepo);
-            }
-          } else {
-            store.updateAuthState(null, null);
-          }
-        });
-
-        subscription = data.subscription;
-      },
-      onDestroy() {
-        subscription?.unsubscribe();
-      },
-    };
-  }),
+  withHooks(() => ({
+    onInit() {
+      // Intentionally empty — APP_INITIALIZER calls store.initialize()
+    },
+    onDestroy() {
+      _authSubscription?.unsubscribe();
+    },
+  })),
 );

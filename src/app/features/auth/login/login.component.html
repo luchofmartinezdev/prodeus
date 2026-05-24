@@ -17,10 +17,10 @@
       <button
         type="button"
         (click)="onGoogleLogin()"
-        [disabled]="authStore.isLoading()"
+        [disabled]="authStore.isSigningIn()"
         class="w-full py-3 px-4 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold text-base transition-all duration-300 flex items-center justify-center gap-3 hover:bg-gray-800 dark:hover:bg-gray-100 border border-gray-700 dark:border-gray-200 disabled:opacity-50 mb-4"
       >
-        @if (authStore.isLoading()) {
+        @if (authStore.isSigningIn()) {
           <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
             <circle
               class="opacity-25"
