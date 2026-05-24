@@ -49,7 +49,12 @@ export class RankingComponent implements OnInit, OnDestroy {
 
   formatDate(iso: string): string {
     if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+    return new Date(iso).toLocaleDateString('es-AR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   }
 
   pointsBadgeClass(points: number | null): string {

@@ -1,4 +1,3 @@
-import { SlicePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, Input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -13,7 +12,7 @@ type DetailTab = 'teams' | 'matches';
 
 @Component({
   selector: 'app-tournament-detail',
-  imports: [RouterLink, FormsModule, SlicePipe, GeneratePhaseButtonComponent],
+  imports: [RouterLink, FormsModule, GeneratePhaseButtonComponent],
   templateUrl: './tournament-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -123,9 +122,20 @@ export class TournamentDetailComponent implements OnInit {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
+  formatDate(iso: string): string {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('es-AR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  }
+
   formatDatetime(iso: string): string {
     if (!iso) return '';
     return new Date(iso).toLocaleString('es-AR', {
+      weekday: 'long',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',

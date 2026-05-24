@@ -27,7 +27,7 @@
             </span>
           </div>
           <p class="text-gray-400 text-sm mt-0.5">
-            {{ t.start_date | slice: 0 : 10 }} → {{ t.end_date | slice: 0 : 10 }}
+            {{ formatDate(t.start_date) }} → {{ formatDate(t.end_date) }}
           </p>
         </div>
       </div>

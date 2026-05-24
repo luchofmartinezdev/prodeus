@@ -58,8 +58,13 @@ export class DashboardComponent implements OnInit {
   }
 
   formatDate(iso: string): string {
-    const d = new Date(iso);
-    return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' });
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('es-AR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   }
 
   formatTime(iso: string): string {

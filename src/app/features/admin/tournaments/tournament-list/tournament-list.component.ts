@@ -1,4 +1,3 @@
-import { SlicePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { Tournament } from '../../../../data/database.types';
@@ -6,7 +5,7 @@ import { TournamentStore } from '../../../../state/tournament.store';
 
 @Component({
   selector: 'app-tournament-list',
-  imports: [RouterLink, SlicePipe],
+  imports: [RouterLink],
   templateUrl: './tournament-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -33,6 +32,16 @@ export class TournamentListComponent implements OnInit {
     const next: Tournament['status'] =
       current === 'draft' ? 'active' : current === 'active' ? 'closed' : 'draft';
     await this.store.changeStatus(id, next);
+  }
+
+  formatDate(iso: string): string {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('es-AR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   }
 
   async onDelete(id: string, name: string): Promise<void> {

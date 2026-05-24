@@ -105,8 +105,8 @@
 
               <!-- Fechas -->
               <td class="px-5 py-4 text-gray-400 whitespace-nowrap">
-                {{ tournament.start_date | slice: 0 : 10 }} →
-                {{ tournament.end_date | slice: 0 : 10 }}
+                {{ formatDate(tournament.start_date) }} →
+                {{ formatDate(tournament.end_date) }}
               </td>
 
               <!-- Estado -->
