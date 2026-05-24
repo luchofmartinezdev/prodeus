@@ -28,12 +28,13 @@ export type GroupDto = z.infer<typeof groupSchema>;
 
 @Injectable({ providedIn: 'root' })
 export class GroupRepository {
-  findByUser(userId: string) {
-    return supabase
+  findByUser(userId: string, signal?: AbortSignal) {
+    const query = supabase
       .from('group_members')
       .select('groups(*, tournament:tournaments(id,name,status))')
       .eq('user_id', userId)
       .eq('status', 'active');
+    return signal ? query.abortSignal(signal) : query;
   }
 
   findOne(id: string) {

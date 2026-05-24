@@ -63,9 +63,7 @@ export const GroupStore = signalStore(
       async loadMyGroups(): Promise<void> {
         const userId = authStore.user()?.id;
         if (!userId) return;
-        // Skip refetch if we already have groups loaded (avoid blank screen)
         if (store.groups().length > 0) {
-          // Refresh in background without showing loading spinner
           groupService
             .getMyGroups(userId)
             .then((groups) => patchState(store, { groups }))
@@ -74,18 +72,24 @@ export const GroupStore = signalStore(
             });
           return;
         }
+        if (store.isLoading()) return;
         patchState(store, { isLoading: true, error: null });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10_000);
         try {
-          const groups = await groupService.getMyGroups(userId);
-          if (groups) {
-            patchState(store, { groups, isLoading: false });
-          } else {
-            patchState(store, { isLoading: false });
-            toast.error('Error al cargar grupos');
-          }
+          const groups = await groupService.getMyGroups(userId, controller.signal);
+          clearTimeout(timeoutId);
+          patchState(store, { groups, isLoading: false });
         } catch (e: unknown) {
-          patchState(store, { isLoading: false });
-          toast.error(e instanceof Error ? e.message : 'Error al cargar grupos');
+          clearTimeout(timeoutId);
+          let msg = 'Error al cargar grupos';
+          if (e instanceof DOMException && e.name === 'AbortError') {
+            msg = 'La carga tardó demasiado. Revisá tu conexión e intentá de nuevo.';
+          } else if (e instanceof Error) {
+            msg = e.message;
+          }
+          patchState(store, { isLoading: false, error: msg });
+          toast.error(msg);
         }
       },
 

@@ -10,8 +10,8 @@ import {
 export class GroupService {
   private readonly repo = inject(GroupRepository);
 
-  async getMyGroups(userId: string): Promise<GroupWithTournament[]> {
-    const { data, error } = await this.repo.findByUser(userId);
+  async getMyGroups(userId: string, signal?: AbortSignal): Promise<GroupWithTournament[]> {
+    const { data, error } = await this.repo.findByUser(userId, signal);
     // RLS may return an error when the user has no rows yet — treat as empty
     if (error && (!data || (data as unknown[]).length === 0)) return [];
     if (error) throw new Error('No se pudieron cargar tus grupos');
