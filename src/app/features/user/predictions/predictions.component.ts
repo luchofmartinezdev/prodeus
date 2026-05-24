@@ -60,6 +60,22 @@ function bracketPhaseLabel(bracketId: string): string {
   imports: [RouterLink, FormsModule],
   templateUrl: './predictions.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    `
+      @keyframes savedFadeOut {
+        0%,
+        60% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      .saved-feedback {
+        animation: savedFadeOut 2s ease-in forwards;
+      }
+    `,
+  ],
 })
 export class PredictionsComponent implements OnInit {
   @Input() id!: string; // group id
