@@ -24,8 +24,8 @@ export class AdminRulesComponent implements OnInit {
 
   ruleValues: Record<string, number> = {};
 
-  async ngOnInit(): Promise<void> {
-    await this.load();
+  ngOnInit(): void {
+    this.load();
   }
 
   async load(): Promise<void> {
@@ -41,12 +41,12 @@ export class AdminRulesComponent implements OnInit {
     } catch (e: unknown) {
       clearTimeout(timeoutId);
       this.hasError.set(true);
-      const message =
-        e instanceof DOMException && e.name === 'AbortError'
-          ? 'La carga tardó demasiado. Revisá tu conexión e intentá de nuevo.'
-          : e instanceof Error
-            ? e.message
-            : 'Error al cargar reglas';
+      let message = 'Error al cargar reglas';
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        message = 'La carga tardó demasiado. Revisá tu conexión e intentá de nuevo.';
+      } else if (e instanceof Error) {
+        message = e.message;
+      }
       this.toast.error(message);
     } finally {
       this.isLoading.set(false);
