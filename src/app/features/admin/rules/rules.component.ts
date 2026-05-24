@@ -18,6 +18,7 @@ export class AdminRulesComponent implements OnInit {
 
   readonly rules = signal<ScoringRule[]>([]);
   readonly isLoading = signal(true);
+  readonly hasError = signal(false);
   readonly isEditing = signal(false);
   readonly isSaving = signal(false);
 
@@ -27,14 +28,26 @@ export class AdminRulesComponent implements OnInit {
     await this.load();
   }
 
-  private async load(): Promise<void> {
+  async load(): Promise<void> {
     this.isLoading.set(true);
+    this.hasError.set(false);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10_000);
     try {
-      const rules = await this.rulesService.getAll();
+      const rules = await this.rulesService.getAll(controller.signal);
+      clearTimeout(timeoutId);
       this.rules.set(rules);
       this.ruleValues = Object.fromEntries(rules.map((r) => [r.id, r.points_value]));
     } catch (e: unknown) {
-      this.toast.error(e instanceof Error ? e.message : 'Error al cargar reglas');
+      clearTimeout(timeoutId);
+      this.hasError.set(true);
+      const message =
+        e instanceof DOMException && e.name === 'AbortError'
+          ? 'La carga tardó demasiado. Revisá tu conexión e intentá de nuevo.'
+          : e instanceof Error
+            ? e.message
+            : 'Error al cargar reglas';
+      this.toast.error(message);
     } finally {
       this.isLoading.set(false);
     }

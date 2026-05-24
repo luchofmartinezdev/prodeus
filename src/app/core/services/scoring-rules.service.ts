@@ -6,8 +6,8 @@ import { ScoringRulesRepository } from '../../data/repositories/scoring-rules.re
 export class ScoringRulesService {
   private readonly repo = inject(ScoringRulesRepository);
 
-  async getAll(): Promise<ScoringRule[]> {
-    const { data, error } = await this.repo.findAll();
+  async getAll(signal?: AbortSignal): Promise<ScoringRule[]> {
+    const { data, error } = await this.repo.findAll(signal);
     if (error) throw new Error('No se pudieron cargar las reglas de puntuación');
     return data ?? [];
   }

@@ -41,8 +41,22 @@
     </div>
   }
 
+  <!-- Error state -->
+  @if (!isLoading() && hasError()) {
+    <div class="text-center py-16">
+      <p class="text-gray-400 text-sm mb-4">No se pudieron cargar las reglas.</p>
+      <button
+        type="button"
+        (click)="load()"
+        class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors"
+      >
+        Reintentar
+      </button>
+    </div>
+  }
+
   <!-- Rules -->
-  @if (!isLoading()) {
+  @if (!isLoading() && !hasError()) {
     @if (rules().length === 0) {
       <div class="text-center py-16 text-gray-500 text-sm">
         No hay reglas configuradas. Verificá que existan registros en la tabla
