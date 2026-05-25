@@ -15,13 +15,14 @@ export class GroupFormComponent implements OnInit {
   protected readonly tournamentStore = inject(TournamentStore);
 
   readonly fieldErrors = signal<Record<string, string>>({});
+  readonly isLoadingTournaments = signal(true);
 
   name = '';
   tournamentId = '';
   joinMode: 'open' | 'closed' = 'open';
 
   ngOnInit(): void {
-    this.tournamentStore.loadAll();
+    this.tournamentStore.loadAll().finally(() => this.isLoadingTournaments.set(false));
   }
 
   async onSubmit(): Promise<void> {

@@ -42,7 +42,7 @@
   </div>
 
   <!-- Skeleton loader -->
-  @if (groupStore.isLoading()) {
+  @if (isLoadingGroups()) {
     <section class="mb-8">
       <div class="h-6 bg-gray-800 rounded animate-pulse w-28 mb-4"></div>
       <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -57,7 +57,7 @@
     </section>
   }
 
-  @if (!groupStore.isLoading()) {
+  @if (!isLoadingGroups()) {
     <!-- Empty state -->
     @if (groupStore.groups().length === 0) {
       <div class="bg-gray-900 border border-dashed border-gray-700 rounded-2xl p-12 text-center">
@@ -241,7 +241,7 @@
     }
   }
 
-  @if (groupStore.error() && !groupStore.isLoading()) {
+  @if (groupStore.error() && !isLoadingGroups()) {
     <div
       class="mt-4 p-4 rounded-xl bg-red-950 border border-red-900 text-red-400 text-sm flex items-center justify-between gap-3"
     >

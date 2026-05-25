@@ -48,7 +48,7 @@
     </div>
   }
 
-  @if (store.isLoading()) {
+  @if (isLoadingDetail()) {
     <div class="flex justify-center py-20">
       <svg class="animate-spin h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -61,7 +61,7 @@
     </div>
   }
 
-  @if (!store.isLoading() && store.selected()) {
+  @if (!isLoadingDetail() && store.selected()) {
     <!-- Tabs -->
     <div class="flex gap-1 border-b border-gray-800 mb-6">
       @for (tab of tabs; track tab.key) {

@@ -5,7 +5,9 @@ import {
   Input,
   OnDestroy,
   OnInit,
+  SimpleChanges,
   signal,
+  OnChanges,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../state/auth.store';
@@ -19,7 +21,7 @@ import { getFlagEmoji } from '../../../shared/utils/flags';
   templateUrl: './ranking.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RankingComponent implements OnInit, OnDestroy {
+export class RankingComponent implements OnInit, OnDestroy, OnChanges {
   @Input() id!: string; // group id
 
   protected readonly rankingStore = inject(RankingStore);
@@ -27,20 +29,32 @@ export class RankingComponent implements OnInit, OnDestroy {
   protected readonly authStore = inject(AuthStore);
 
   readonly activeTab = signal<'ranking' | 'historial'>('ranking');
+  readonly isLoadingRanking = signal(true);
 
   ngOnInit(): void {
-    this.groupStore.loadOne(this.id);
-    this.rankingStore.loadRanking(this.id);
-    this.rankingStore.subscribeToGroup(this.id);
+    this.loadRankingData(this.id);
+  }
 
-    const userId = this.authStore.user()?.id;
-    if (userId) {
-      this.rankingStore.loadHistorial(userId, this.id);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['id'] && !changes['id'].firstChange) {
+      this.loadRankingData(this.id);
     }
   }
 
   ngOnDestroy(): void {
     this.rankingStore.unsubscribe();
+  }
+
+  private loadRankingData(id: string): void {
+    this.isLoadingRanking.set(true);
+    this.groupStore.loadOne(id);
+    this.rankingStore.loadRanking(id).finally(() => this.isLoadingRanking.set(false));
+    this.rankingStore.subscribeToGroup(id);
+
+    const userId = this.authStore.user()?.id;
+    if (userId) {
+      this.rankingStore.loadHistorial(userId, id);
+    }
   }
 
   switchTab(tab: 'ranking' | 'historial'): void {

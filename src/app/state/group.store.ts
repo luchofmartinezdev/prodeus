@@ -45,6 +45,9 @@ export const GroupStore = signalStore(
     const router = inject(Router);
     const toast = inject(ToastService);
 
+    // Deduplicates concurrent full-load calls (e.g. dashboard + group-list both mounting)
+    let loadInFlight: Promise<void> | null = null;
+
     function currentUserId(): string {
       const id = authStore.user()?.id;
       if (!id) throw new Error('Usuario no autenticado');
@@ -68,29 +71,37 @@ export const GroupStore = signalStore(
             .getMyGroups(userId)
             .then((groups) => patchState(store, { groups }))
             .catch((_e: unknown) => {
-              /* background refresh — ignore errors */
+              // background refresh — ignore errors silently
             });
           return;
         }
-        if (store.isLoading()) return;
+        // If a full-load is already in flight, share the same promise
+        if (loadInFlight) return loadInFlight;
+
         patchState(store, { isLoading: true, error: null });
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10_000);
-        try {
-          const groups = await groupService.getMyGroups(userId, controller.signal);
-          clearTimeout(timeoutId);
-          patchState(store, { groups, isLoading: false });
-        } catch (e: unknown) {
-          clearTimeout(timeoutId);
-          let msg = 'Error al cargar grupos';
-          if (e instanceof DOMException && e.name === 'AbortError') {
-            msg = 'La carga tardó demasiado. Revisá tu conexión e intentá de nuevo.';
-          } else if (e instanceof Error) {
-            msg = e.message;
+        loadInFlight = (async () => {
+          try {
+            const groups = await groupService.getMyGroups(userId, controller.signal);
+            clearTimeout(timeoutId);
+            patchState(store, { groups, isLoading: false });
+          } catch (e: unknown) {
+            clearTimeout(timeoutId);
+            let msg = 'Error al cargar grupos';
+            if (e instanceof DOMException && e.name === 'AbortError') {
+              msg = 'La carga tardó demasiado. Revisá tu conexión e intentá de nuevo.';
+            } else if (e instanceof Error) {
+              msg = e.message;
+            }
+            patchState(store, { isLoading: false, error: msg });
+            toast.error(msg);
           }
-          patchState(store, { isLoading: false, error: msg });
-          toast.error(msg);
-        }
+        })();
+        loadInFlight.finally(() => {
+          loadInFlight = null;
+        });
+        return loadInFlight;
       },
 
       async loadOne(id: string): Promise<void> {

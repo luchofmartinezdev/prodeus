@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject, Input, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+  OnInit,
+  SimpleChanges,
+  signal,
+  OnChanges,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import type { Match, Team, Tournament } from '../../../../data/database.types';
@@ -16,7 +25,7 @@ type DetailTab = 'teams' | 'matches';
   templateUrl: './tournament-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TournamentDetailComponent implements OnInit {
+export class TournamentDetailComponent implements OnInit, OnChanges {
   @Input() id!: string;
 
   protected readonly store = inject(TournamentStore);
@@ -31,6 +40,7 @@ export class TournamentDetailComponent implements OnInit {
 
   // ─── UI State ───────────────────────────────────────────────
   readonly activeTab = signal<DetailTab>('teams');
+  readonly isLoadingDetail = signal(true);
   readonly isLoadingTab = signal(false);
   readonly tabError = signal<string | null>(null);
 
@@ -58,7 +68,18 @@ export class TournamentDetailComponent implements OnInit {
   resultAway = 0;
 
   ngOnInit(): void {
-    this.store.loadOne(this.id);
+    this.loadDetail(this.id);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['id'] && !changes['id'].firstChange) {
+      this.loadDetail(this.id);
+    }
+  }
+
+  private loadDetail(id: string): void {
+    this.isLoadingDetail.set(true);
+    this.store.loadOne(id).finally(() => this.isLoadingDetail.set(false));
     this.loadTab('teams');
   }
 

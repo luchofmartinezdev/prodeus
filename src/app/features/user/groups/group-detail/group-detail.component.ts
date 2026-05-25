@@ -3,9 +3,10 @@ import {
   Component,
   inject,
   Input,
-  OnDestroy,
   OnInit,
+  SimpleChanges,
   signal,
+  OnChanges,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -24,7 +25,9 @@ import type { MatchWithTeams } from '../../../../data/repositories/match.reposit
   templateUrl: './group-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GroupDetailComponent implements OnInit, OnDestroy {
+export class GroupDetailComponent implements OnInit, OnChanges {
+  // ngOnChanges needed because withComponentInputBinding() reuses the instance when navigating
+  // between different group IDs — ngOnInit does NOT re-run in that case
   @Input() id!: string;
 
   protected readonly store = inject(GroupStore);
@@ -42,19 +45,32 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
   readonly predictedCount = signal(0);
   readonly nextMatch = signal<MatchWithTeams | null>(null);
   readonly overviewLoading = signal(true);
+  readonly isLoadingDetail = signal(true);
+  readonly isLoadingRanking = signal(true);
 
   editName = '';
   editJoinMode: 'open' | 'closed' = 'open';
 
   ngOnInit(): void {
-    this.store.loadOne(this.id).then(() => this.loadOverview());
-    this.store.loadMembers(this.id);
-    this.rankingStore.loadRanking(this.id);
-    this.rankingStore.subscribeToGroup(this.id);
+    this.loadGroup(this.id);
   }
 
-  ngOnDestroy(): void {
-    this.rankingStore.unsubscribe();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['id'] && !changes['id'].firstChange) {
+      this.loadGroup(this.id);
+    }
+  }
+
+  private loadGroup(id: string): void {
+    this.isLoadingDetail.set(true);
+    this.isLoadingRanking.set(true);
+    this.overviewLoading.set(true);
+    this.store
+      .loadOne(id)
+      .then(() => this.loadOverview())
+      .finally(() => this.isLoadingDetail.set(false));
+    this.store.loadMembers(id);
+    this.rankingStore.loadRanking(id).finally(() => this.isLoadingRanking.set(false));
   }
 
   private async loadOverview(): Promise<void> {

@@ -1,6 +1,6 @@
 <div class="p-4 sm:p-6 w-full max-w-4xl">
   <!-- Loading -->
-  @if (store.isLoading() && !store.selected()) {
+  @if (isLoadingDetail()) {
     <div class="flex justify-center py-20">
       <svg class="animate-spin h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -385,7 +385,7 @@
          TAB: RANKING
     ══════════════════════════════════════════ -->
     @if (activeTab() === 'ranking') {
-      @if (rankingStore.isLoading()) {
+      @if (isLoadingRanking()) {
         <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
           <table class="w-full">
             <thead>

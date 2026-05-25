@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { Tournament } from '../../../../data/database.types';
 import { TournamentStore } from '../../../../state/tournament.store';
@@ -11,9 +11,10 @@ import { TournamentStore } from '../../../../state/tournament.store';
 })
 export class TournamentListComponent implements OnInit {
   protected readonly store = inject(TournamentStore);
+  readonly isLoadingTournaments = signal(true);
 
   ngOnInit(): void {
-    this.store.loadAll();
+    this.store.loadAll().finally(() => this.isLoadingTournaments.set(false));
   }
 
   statusLabel(status: Tournament['status']): string {

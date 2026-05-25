@@ -5,7 +5,9 @@ import {
   inject,
   Input,
   OnInit,
+  SimpleChanges,
   signal,
+  OnChanges,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -77,7 +79,7 @@ function bracketPhaseLabel(bracketId: string): string {
     `,
   ],
 })
-export class PredictionsComponent implements OnInit {
+export class PredictionsComponent implements OnInit, OnChanges {
   @Input() id!: string; // group id
 
   private readonly predictionService = inject(PredictionService);
@@ -168,10 +170,18 @@ export class PredictionsComponent implements OnInit {
     this.load();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['id'] && !changes['id'].firstChange) {
+      this.load();
+    }
+  }
+
   private async load(): Promise<void> {
+    const userId = this.authStore.user()?.id;
+    if (!userId) return;
+    Object.keys(this.formValues).forEach((k) => delete this.formValues[k]);
     this.isLoading.set(true);
     try {
-      const userId = this.authStore.user()!.id;
       const g = await this.groupService.getOne(this.id);
       const [ms, ps] = await Promise.all([
         this.matchService.getByTournament(g.tournament_id),
@@ -214,7 +224,8 @@ export class PredictionsComponent implements OnInit {
   }
 
   async save(row: MatchRow): Promise<void> {
-    const userId = this.authStore.user()!.id;
+    const userId = this.authStore.user()?.id;
+    if (!userId) return;
     const vals = this.formValues[row.id];
 
     const s = new Set(this.saving());

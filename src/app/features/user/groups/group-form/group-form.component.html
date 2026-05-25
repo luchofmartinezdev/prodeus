@@ -50,7 +50,7 @@
         <label class="block text-sm font-medium text-gray-300 mb-1.5">
           Torneo <span class="text-red-400">*</span>
         </label>
-        @if (tournamentStore.isLoading()) {
+        @if (isLoadingTournaments()) {
           <div class="flex items-center gap-2 text-gray-500 text-sm py-2">
             <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
               <circle

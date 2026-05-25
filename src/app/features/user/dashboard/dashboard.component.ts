@@ -20,9 +20,13 @@ export class DashboardComponent implements OnInit {
 
   readonly upcomingMatches = signal<MatchWithTeams[]>([]);
   readonly isLoadingMatches = signal(false);
+  readonly isLoadingGroups = signal(true);
 
   ngOnInit(): void {
-    this.groupStore.loadMyGroups().then(() => this.loadUpcomingMatches());
+    this.groupStore
+      .loadMyGroups()
+      .then(() => this.loadUpcomingMatches())
+      .finally(() => this.isLoadingGroups.set(false));
   }
 
   private async loadUpcomingMatches(): Promise<void> {

@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  signal,
-  untracked,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { GroupStore } from '../../../../state/group.store';
@@ -17,19 +10,16 @@ import { AuthStore } from '../../../../state/auth.store';
   templateUrl: './group-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GroupListComponent {
+export class GroupListComponent implements OnInit {
   protected readonly store = inject(GroupStore);
   private readonly authStore = inject(AuthStore);
 
   readonly showJoinForm = signal(false);
+  readonly isLoadingGroups = signal(true);
   joinCodeValue = '';
 
-  constructor() {
-    effect(() => {
-      if (this.authStore.isAuthenticated()) {
-        untracked(() => this.store.loadMyGroups());
-      }
-    });
+  ngOnInit(): void {
+    this.store.loadMyGroups().finally(() => this.isLoadingGroups.set(false));
   }
 
   async onJoin(): Promise<void> {

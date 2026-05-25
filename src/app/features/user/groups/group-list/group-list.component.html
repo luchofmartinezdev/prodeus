@@ -67,7 +67,7 @@
   }
 
   <!-- Skeleton loader -->
-  @if (store.isLoading()) {
+  @if (isLoadingGroups()) {
     <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       @for (i of [1, 2, 3]; track i) {
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
@@ -80,7 +80,7 @@
   }
 
   <!-- Groups grid -->
-  @if (!store.isLoading()) {
+  @if (!isLoadingGroups()) {
     @if (store.groups().length === 0) {
       <div class="text-center py-20">
         <svg
@@ -142,7 +142,7 @@
     }
   }
 
-  @if (store.error() && !store.isLoading()) {
+  @if (store.error() && !isLoadingGroups()) {
     <div
       class="mt-4 p-4 rounded-xl bg-red-950 border border-red-900 text-red-400 text-sm flex items-center justify-between gap-3"
     >
