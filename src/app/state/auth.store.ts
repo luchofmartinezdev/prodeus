@@ -111,15 +111,17 @@ export const AuthStore = signalStore(
         // 2. Subscribe to subsequent auth state changes
         const { data } = authRepo.onAuthStateChange(async (event, session) => {
           if (session?.user) {
-            const { data: profile } = await authRepo.getProfile(session.user.id);
-            // SIGNED_IN always wins (new login — store.user() is null at this point for OAuth).
-            // For other events (TOKEN_REFRESHED, USER_UPDATED) only update if the user
-            // hasn't signed out while getProfile was in-flight.
-            if (event === 'SIGNED_IN' || store.user()) {
-              patchState(store, { user: session.user, profile });
-            }
             if (event === 'SIGNED_IN') {
+              // Fresh login (OAuth, etc.) — lock is free, safe to fetch profile.
+              const { data: profile } = await authRepo.getProfile(session.user.id);
+              patchState(store, { user: session.user, profile });
               syncGoogleNames(session.user, profile, authRepo);
+            } else if (store.user()) {
+              // TOKEN_REFRESHED / USER_UPDATED / INITIAL_SESSION:
+              // Avoid calling getProfile() here — the auth lock may be held during token
+              // refresh callbacks, causing getSession() inside getProfile() to deadlock.
+              // Profile is already loaded from initialize(); just refresh the user token.
+              patchState(store, { user: session.user });
             }
           } else {
             patchState(store, { user: null, profile: null });
