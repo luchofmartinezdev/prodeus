@@ -32,14 +32,20 @@ export class AdminRulesComponent implements OnInit {
     this.isLoading.set(true);
     this.hasError.set(false);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10_000);
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => {
+        controller.abort();
+        reject(new DOMException('Load timed out', 'AbortError'));
+      }, 10_000),
+    );
     try {
-      const rules = await this.rulesService.getAll(controller.signal);
-      clearTimeout(timeoutId);
+      const rules = await Promise.race([
+        this.rulesService.getAll(controller.signal),
+        timeoutPromise,
+      ]);
       this.rules.set(rules);
       this.ruleValues = Object.fromEntries(rules.map((r) => [r.id, r.points_value]));
     } catch (e: unknown) {
-      clearTimeout(timeoutId);
       this.hasError.set(true);
       let message = 'Error al cargar reglas';
       if (e instanceof DOMException && e.name === 'AbortError') {
