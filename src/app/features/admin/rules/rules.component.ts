@@ -31,18 +31,11 @@ export class AdminRulesComponent implements OnInit {
   async load(): Promise<void> {
     this.isLoading.set(true);
     this.hasError.set(false);
-    const controller = new AbortController();
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => {
-        controller.abort();
-        reject(new DOMException('Load timed out', 'AbortError'));
-      }, 10_000),
+      setTimeout(() => reject(new DOMException('Load timed out', 'AbortError')), 10_000),
     );
     try {
-      const rules = await Promise.race([
-        this.rulesService.getAll(controller.signal),
-        timeoutPromise,
-      ]);
+      const rules = await Promise.race([this.rulesService.getAll(), timeoutPromise]);
       this.rules.set(rules);
       this.ruleValues = Object.fromEntries(rules.map((r) => [r.id, r.points_value]));
     } catch (e: unknown) {
