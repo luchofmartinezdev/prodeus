@@ -48,8 +48,8 @@ export const TournamentStore = signalStore(
             .then(({ data }) => {
               if (data) patchState(store, { tournaments: data });
             })
-            .catch(() => {
-              /* background refresh — ignore errors */
+            .catch((err: unknown) => {
+              console.warn('[TournamentStore] background refresh failed', err);
             });
           return;
         }

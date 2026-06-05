@@ -159,12 +159,12 @@ export class PredictionsComponent implements OnInit, OnChanges {
     return result;
   });
 
-  get currentRows(): MatchRow[] {
+  readonly currentRows = computed(() => {
     if (this.activeMainTab() === 'fecha') {
       return this.fechas().find((f) => f.label === this.activeFechaTab())?.rows ?? [];
     }
     return this.fases().find((f) => f.label === this.activeFaseTab())?.rows ?? [];
-  }
+  });
 
   ngOnInit(): void {
     this.load();
@@ -178,7 +178,10 @@ export class PredictionsComponent implements OnInit, OnChanges {
 
   private async load(): Promise<void> {
     const userId = this.authStore.user()?.id;
-    if (!userId) return;
+    if (!userId) {
+      this.isLoading.set(false);
+      return;
+    }
     Object.keys(this.formValues).forEach((k) => delete this.formValues[k]);
     this.isLoading.set(true);
     try {
@@ -298,11 +301,7 @@ export class PredictionsComponent implements OnInit, OnChanges {
     });
   }
 
-  get openCount(): number {
-    return this.rows().filter((r) => r.isOpen).length;
-  }
+  readonly openCount = computed(() => this.rows().filter((r) => r.isOpen).length);
 
-  get predictedCount(): number {
-    return this.rows().filter((r) => r.prediction !== null).length;
-  }
+  readonly predictedCount = computed(() => this.rows().filter((r) => r.prediction !== null).length);
 }

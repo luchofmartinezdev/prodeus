@@ -70,8 +70,8 @@ export const GroupStore = signalStore(
           groupService
             .getMyGroups(userId)
             .then((groups) => patchState(store, { groups }))
-            .catch((_e: unknown) => {
-              // background refresh — ignore errors silently
+            .catch((err: unknown) => {
+              console.warn('[GroupStore] background refresh failed', err);
             });
           return;
         }

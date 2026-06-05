@@ -83,12 +83,12 @@ describe('PredictionsComponent', () => {
       fakeMatchRow({ id: 'match-2', prediction: null }),
       fakeMatchRow({ id: 'match-3', prediction: fakePrediction }),
     ]);
-    expect(component.predictedCount).toBe(2);
+    expect(component.predictedCount()).toBe(2);
   });
 
   it('predictedCount returns 0 when no predictions', () => {
     component.rows.set([fakeMatchRow(), fakeMatchRow({ id: 'match-2' })]);
-    expect(component.predictedCount).toBe(0);
+    expect(component.predictedCount()).toBe(0);
   });
 
   // ─── openCount ────────────────────────────────────────────────
@@ -99,7 +99,7 @@ describe('PredictionsComponent', () => {
       fakeMatchRow({ id: 'match-2', isOpen: false }),
       fakeMatchRow({ id: 'match-3', isOpen: true }),
     ]);
-    expect(component.openCount).toBe(2);
+    expect(component.openCount()).toBe(2);
   });
 
   // ─── isSaving / isSaved ───────────────────────────────────────

@@ -46,14 +46,14 @@
     @if (rows().length > 0) {
       <div class="flex items-center gap-4 mb-5 text-sm">
         <span class="text-gray-400">
-          <span class="text-white font-semibold">{{ predictedCount }}</span> /
+          <span class="text-white font-semibold">{{ predictedCount() }}</span> /
           {{ rows().length }} predichas
         </span>
-        @if (openCount > 0) {
+        @if (openCount() > 0) {
           <span
             class="px-2 py-0.5 rounded-full bg-blue-950 border border-blue-800 text-blue-400 text-xs font-medium"
           >
-            {{ openCount }} abiertas
+            {{ openCount() }} abiertas
           </span>
         }
       </div>
@@ -135,7 +135,7 @@
 
       <!-- Match list -->
       <div class="space-y-3">
-        @for (row of currentRows; track row.id) {
+        @for (row of currentRows(); track row.id) {
           <div
             class="bg-gray-900 border rounded-xl overflow-hidden transition-colors"
             [class]="
@@ -373,7 +373,7 @@
           </div>
         }
 
-        @if (currentRows.length === 0) {
+        @if (currentRows().length === 0) {
           <div class="text-center py-10 text-gray-600 text-sm">Sin partidos en esta sección.</div>
         }
       </div>

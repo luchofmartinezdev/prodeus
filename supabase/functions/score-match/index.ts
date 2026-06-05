@@ -84,10 +84,11 @@ async function handleRequest(req: Request): Promise<Response> {
     });
   }
 
-  // 2. Load scoring rules (global — not per tournament)
+  // 2. Load scoring rules for this tournament
   const { data: rules, error: rulesErr } = await supabase
     .from('scoring_rules')
-    .select('rule_key, points_value');
+    .select('rule_key, points_value')
+    .eq('tournament_id', match.tournament_id);
 
   if (rulesErr) {
     return new Response(JSON.stringify({ error: 'Could not load scoring rules' }), {
@@ -125,7 +126,7 @@ async function handleRequest(req: Request): Promise<Response> {
     });
   }
 
-  // 4. Calculate and update points_earned for each prediction
+  // 4. Calculate points for each prediction and batch-upsert in one roundtrip
   const updates = predictions.map((p) => ({
     id: p.id,
     user_id: p.user_id,
@@ -136,53 +137,62 @@ async function handleRequest(req: Request): Promise<Response> {
       ],
   }));
 
-  for (const { id, points_earned } of updates) {
-    const { error: updateErr } = await supabase
-      .from('predictions')
-      .update({ points_earned })
-      .eq('id', id);
+  const { error: batchPredErr } = await supabase.from('predictions').upsert(
+    updates.map(({ id, points_earned }) => ({ id, points_earned })),
+    { onConflict: 'id' },
+  );
 
-    if (updateErr) {
-      console.error('Update prediction error:', id, updateErr);
-      return new Response(
-        JSON.stringify({ error: 'Could not update predictions', detail: updateErr.message }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
-    }
+  if (batchPredErr) {
+    console.error('Batch update predictions error:', batchPredErr);
+    return new Response(
+      JSON.stringify({ error: 'Could not update predictions', detail: batchPredErr.message }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
   }
 
-  // 5. Recalculate total_points per user+group and upsert into scores
+  // 5. Recalculate total_points per user+group with a single batch fetch + batch upsert
   const affectedPairs = new Map<string, { user_id: string; group_id: string }>();
   for (const p of predictions) {
-    const key = `${p.user_id}:${p.group_id}`;
-    affectedPairs.set(key, { user_id: p.user_id, group_id: p.group_id });
+    affectedPairs.set(`${p.user_id}:${p.group_id}`, { user_id: p.user_id, group_id: p.group_id });
   }
 
-  for (const { user_id, group_id } of affectedPairs.values()) {
-    const { data: sumData, error: sumErr } = await supabase
-      .from('predictions')
-      .select('points_earned')
-      .eq('user_id', user_id)
-      .eq('group_id', group_id)
-      .not('points_earned', 'is', null);
+  const affectedUserIds = [...new Set(predictions.map((p) => p.user_id))];
+  const affectedGroupIds = [...new Set(predictions.map((p) => p.group_id))];
 
-    if (sumErr) continue;
+  const { data: allPoints, error: allPointsErr } = await supabase
+    .from('predictions')
+    .select('user_id, group_id, points_earned')
+    .in('user_id', affectedUserIds)
+    .in('group_id', affectedGroupIds)
+    .not('points_earned', 'is', null);
 
-    const total = (sumData ?? []).reduce((acc, row) => acc + (row.points_earned ?? 0), 0);
+  if (allPointsErr) {
+    console.error('Could not load points for score recalculation:', allPointsErr);
+    return new Response(JSON.stringify({ scored: updates.length, scores_updated: false }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 
-    await supabase.from('scores').upsert(
-      {
-        user_id,
-        group_id,
-        tournament_id: match.tournament_id,
-        total_points: total,
-        last_calculated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id,group_id' },
-    );
+  const totalsMap = new Map<string, number>();
+  for (const row of allPoints ?? []) {
+    const key = `${row.user_id}:${row.group_id}`;
+    totalsMap.set(key, (totalsMap.get(key) ?? 0) + (row.points_earned ?? 0));
+  }
+
+  const scoreUpserts = [...affectedPairs.values()].map(({ user_id, group_id }) => ({
+    user_id,
+    group_id,
+    tournament_id: match.tournament_id,
+    total_points: totalsMap.get(`${user_id}:${group_id}`) ?? 0,
+    last_calculated_at: new Date().toISOString(),
+  }));
+
+  const { error: scoresErr } = await supabase
+    .from('scores')
+    .upsert(scoreUpserts, { onConflict: 'user_id,group_id' });
+
+  if (scoresErr) {
+    console.error('Could not upsert scores:', scoresErr);
   }
 
   return new Response(JSON.stringify({ scored: updates.length }), {

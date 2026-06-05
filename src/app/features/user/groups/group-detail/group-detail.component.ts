@@ -76,7 +76,10 @@ export class GroupDetailComponent implements OnInit, OnChanges {
   private async loadOverview(): Promise<void> {
     const userId = this.authStore.user()?.id;
     const g = this.store.selected();
-    if (!userId || !g) return;
+    if (!userId || !g) {
+      this.overviewLoading.set(false);
+      return;
+    }
     try {
       const [matches, predictions] = await Promise.all([
         this.matchService.getByTournament(g.tournament_id),
