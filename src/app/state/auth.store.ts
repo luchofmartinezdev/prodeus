@@ -49,9 +49,10 @@ async function syncGoogleNames(
   await authRepo.updateProfile(user.id, { first_name: firstName, last_name: lastName });
 }
 
-// ─── Subscription reference (module-scoped, not exported) ────
+// ─── Subscription references (module-scoped, not exported) ────
 
 let _authSubscription: { unsubscribe(): void } | null = null;
+let _visibilityListener: (() => void) | null = null;
 
 // ─── Store ───────────────────────────────────────────────────
 
@@ -129,6 +130,27 @@ export const AuthStore = signalStore(
         });
 
         _authSubscription = data.subscription;
+
+        // 3. On tab focus: proactively refresh the session to recover from throttled
+        //    timers that delayed Supabase's auto-refresh while the tab was backgrounded.
+        _visibilityListener = async () => {
+          if (document.visibilityState !== 'visible') return;
+          try {
+            const {
+              data: { session },
+            } = await authRepo.getSession();
+            if (session?.user) {
+              // Refresh user token only — avoid getProfile() for same lock-contention
+              // reason as the TOKEN_REFRESHED branch above.
+              patchState(store, { user: session.user });
+            } else {
+              patchState(store, { user: null, profile: null });
+            }
+          } catch {
+            // Leave existing state intact; Supabase may still be mid-refresh.
+          }
+        };
+        document.addEventListener('visibilitychange', _visibilityListener);
       },
 
       async signInWithGoogle(): Promise<void> {
@@ -177,6 +199,10 @@ export const AuthStore = signalStore(
     },
     onDestroy() {
       _authSubscription?.unsubscribe();
+      if (_visibilityListener) {
+        document.removeEventListener('visibilitychange', _visibilityListener);
+        _visibilityListener = null;
+      }
     },
   })),
 );
