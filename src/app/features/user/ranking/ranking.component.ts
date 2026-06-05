@@ -31,8 +31,18 @@ export class RankingComponent implements OnInit, OnDestroy, OnChanges {
   readonly activeTab = signal<'ranking' | 'historial'>('ranking');
   readonly isLoadingRanking = signal(true);
 
+  // Arrow function preserves `this` for removeEventListener
+  private readonly onVisibilityChange = () => {
+    if (document.visibilityState !== 'visible') return;
+    // Realtime may have missed updates while the tab was backgrounded — reload manually.
+    this.rankingStore.loadRanking(this.id).catch(() => undefined);
+    const userId = this.currentUserId;
+    if (userId) this.rankingStore.loadHistorial(userId, this.id).catch(() => undefined);
+  };
+
   ngOnInit(): void {
     this.loadRankingData(this.id);
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -43,6 +53,7 @@ export class RankingComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnDestroy(): void {
     this.rankingStore.unsubscribe();
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
   }
 
   private loadRankingData(id: string): void {
