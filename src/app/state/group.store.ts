@@ -14,17 +14,21 @@ import { AuthStore } from './auth.store';
 
 interface GroupState {
   groups: GroupWithTournament[];
+  publicGroups: GroupWithTournament[];
   selected: GroupWithTournament | null;
   members: MemberWithProfile[];
   isLoading: boolean;
+  isLoadingPublic: boolean;
   error: string | null;
 }
 
 const initialState: GroupState = {
   groups: [],
+  publicGroups: [],
   selected: null,
   members: [],
   isLoading: false,
+  isLoadingPublic: false,
   error: null,
 };
 
@@ -35,7 +39,6 @@ export const GroupStore = signalStore(
   withState(initialState),
 
   withComputed(({ members }) => ({
-    pendingMembers: computed(() => members().filter((m) => m.status === 'pending')),
     activeMembers: computed(() => members().filter((m) => m.status === 'active')),
   })),
 
@@ -136,7 +139,7 @@ export const GroupStore = signalStore(
           const group = await groupService.create(dto, currentUserId());
           patchState(store, { groups: [group, ...store.groups()], isLoading: false });
           toast.success('Grupo creado exitosamente');
-          router.navigate(['/app/groups', group.id]);
+          router.navigate(['/home/groups', group.id]);
         } catch (e: unknown) {
           const msg = e instanceof Error ? e.message : 'Error al crear grupo';
           patchState(store, { isLoading: false, error: msg });
@@ -144,7 +147,7 @@ export const GroupStore = signalStore(
         }
       },
 
-      async update(id: string, dto: Partial<Pick<GroupDto, 'name' | 'join_mode'>>): Promise<void> {
+      async update(id: string, dto: Partial<Pick<GroupDto, 'name' | 'visibility'>>): Promise<void> {
         patchState(store, { isLoading: true, error: null });
         try {
           assertIsLeader();
@@ -171,62 +174,60 @@ export const GroupStore = signalStore(
             selected: null,
             isLoading: false,
           });
-          router.navigate(['/app/groups']);
+          router.navigate(['/home/groups']);
         } catch (e: unknown) {
           patchState(store, { isLoading: false });
           toast.error(e instanceof Error ? e.message : 'Error al eliminar grupo');
         }
       },
 
-      async joinByCode(code: string): Promise<'pending' | 'active' | null> {
+      async joinByCode(code: string): Promise<boolean> {
         patchState(store, { isLoading: true, error: null });
         try {
-          const result = await groupService.joinByCode(code, currentUserId());
-          if (result.status === 'active') {
-            // Add the joined group directly — no extra query needed
-            patchState(store, { groups: [result.group, ...store.groups()], isLoading: false });
-            toast.success('Te uniste al grupo exitosamente');
-          } else {
-            patchState(store, { isLoading: false });
-            toast.info('Solicitud enviada. El líder del grupo debe aprobarte');
-          }
-          return result.status;
+          const group = await groupService.joinByCode(code, currentUserId());
+          patchState(store, { groups: [group, ...store.groups()], isLoading: false });
+          toast.success('Te uniste al grupo exitosamente');
+          return true;
         } catch (e: unknown) {
           patchState(store, { isLoading: false });
           toast.error(e instanceof Error ? e.message : 'Error al unirse al grupo');
-          return null;
+          return false;
         }
       },
 
-      async approveMember(memberId: string, groupId: string): Promise<void> {
+      async loadPublicGroups(): Promise<void> {
+        patchState(store, { isLoadingPublic: true });
         try {
-          assertIsLeader();
-          await groupService.approveMember(memberId);
-          const members = await groupService.getMembers(groupId);
-          patchState(store, { members });
-          toast.success('Miembro aprobado');
-        } catch (e: unknown) {
-          toast.error(e instanceof Error ? e.message : 'Error al aprobar miembro');
+          const publicGroups = await groupService.getPublicGroups();
+          patchState(store, { publicGroups, isLoadingPublic: false });
+        } catch {
+          patchState(store, { isLoadingPublic: false });
         }
       },
 
-      async rejectMember(memberId: string, groupId: string): Promise<void> {
+      async joinPublicGroup(groupId: string): Promise<boolean> {
+        patchState(store, { isLoading: true, error: null });
         try {
-          assertIsLeader();
-          await groupService.rejectMember(memberId);
-          const members = await groupService.getMembers(groupId);
-          patchState(store, { members });
-          toast.info('Solicitud rechazada');
+          const group = await groupService.joinById(groupId, currentUserId());
+          patchState(store, {
+            groups: [group, ...store.groups()],
+            publicGroups: store.publicGroups().filter((g) => g.id !== groupId),
+            isLoading: false,
+          });
+          toast.success('Te uniste al grupo exitosamente');
+          return true;
         } catch (e: unknown) {
-          toast.error(e instanceof Error ? e.message : 'Error al rechazar miembro');
+          patchState(store, { isLoading: false });
+          toast.error(e instanceof Error ? e.message : 'Error al unirse al grupo');
+          return false;
         }
       },
 
+      // La confirmación la maneja el componente que llama (modal), no el store.
       async removeMember(memberId: string, groupId: string): Promise<void> {
-        if (!confirm('¿Remover este miembro del grupo?')) return;
         try {
           assertIsLeader();
-          await groupService.removeMember(memberId);
+          await groupService.removeMember(memberId, groupId);
           const members = await groupService.getMembers(groupId);
           patchState(store, { members });
           toast.info('Miembro removido del grupo');
@@ -239,7 +240,7 @@ export const GroupStore = signalStore(
         try {
           await groupService.leave(groupId, userId);
           toast.success('Has salido del grupo');
-          router.navigate(['/app/groups']);
+          router.navigate(['/home/groups']);
         } catch (e: unknown) {
           toast.error(e instanceof Error ? e.message : 'Error al salir del grupo');
         }

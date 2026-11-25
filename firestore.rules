@@ -1,0 +1,216 @@
+rules_version = '2';
+
+// ============================================================
+// PRODEUS — Firestore Security Rules
+// Traducción de las políticas RLS de Supabase (supabase/migrations/002,005,008,009,011)
+// Ver docs/firebase/02-security-rules.md para el mapeo detallado.
+// ============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSuperadmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin';
+    }
+
+    // Un solo get() sobre el doc de membresía: si no existe, el get()
+    // falla y la regla se evalúa como denegada — equivalente a is_group_member().
+    function isGroupMember(groupId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function isGroupLeader(groupId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/groups/$(groupId)).data.leaderId == request.auth.uid;
+    }
+
+    function tournamentIsActive(tournamentId) {
+      return get(/databases/$(database)/documents/tournaments/$(tournamentId)).data.status == 'active';
+    }
+
+    // ── users (ex profiles) ──────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      // Creación solo vía Cloud Function (Auth trigger, Admin SDK) — no desde el cliente.
+      allow create: if false;
+      // Un usuario edita su propio doc pero no puede tocar su propio `role`
+      // (endurecimiento respecto a la RLS original: profiles_update_own no
+      // protegía esa columna). El superadmin sí puede cambiar roles.
+      allow update: if isSuperadmin() ||
+        (isSignedIn() && request.auth.uid == uid &&
+         request.resource.data.role == resource.data.role);
+      allow delete: if false;
+    }
+
+    // ── tournaments ───────────────────────────────────────────────
+    match /tournaments/{tournamentId} {
+      allow read: if isSignedIn() &&
+        (resource.data.status == 'active' || isSuperadmin());
+      allow write: if isSuperadmin();
+    }
+
+    // ── teams (entidad global — un club existe una sola vez,
+    //    independiente de en qué torneo(s) participe) ────────────
+    match /teams/{teamId} {
+      allow read: if isSignedIn();
+      allow create: if isSuperadmin();
+      allow update, delete: if isSuperadmin();
+    }
+
+    // ── tournamentTeams (join torneo↔equipo — el "roster" de un
+    //    torneo para una temporada dada; borrar este doc no borra
+    //    el equipo ni los partidos/predicciones ya jugados) ──────
+    // Doc ID = `${tournamentId}_${teamId}`
+    match /tournamentTeams/{joinId} {
+      allow read: if isSignedIn();
+      allow write: if isSuperadmin();
+    }
+
+    // ── matches ──────────────────────────────────────────────────
+    match /matches/{matchId} {
+      allow read: if isSignedIn() &&
+        (isSuperadmin() ||
+         tournamentIsActive(resource.data.tournamentId));
+      // Alta/edición manual (creación de fixture, carga de resultados) solo superadmin.
+      // El cálculo de puntajes (scoreMatch) corre con Admin SDK y no pasa por estas reglas.
+      allow write: if isSuperadmin();
+    }
+
+    // ── scoringRules ─────────────────────────────────────────────
+    match /scoringRules/{ruleKey} {
+      allow read: if isSignedIn();
+      allow write: if isSuperadmin();
+    }
+
+    // ── groups ───────────────────────────────────────────────────
+    match /groups/{groupId} {
+      // Migración 005: se abrió a cualquier autenticado (necesario para
+      // buscar grupos cerrados por código de invitación sin recursión de RLS).
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn() &&
+        request.resource.data.leaderId == request.auth.uid;
+
+      // El líder no puede transferir el liderazgo vía update (mismo límite que en Postgres).
+      allow update: if isSuperadmin() ||
+        (isSignedIn() &&
+         resource.data.leaderId == request.auth.uid &&
+         request.resource.data.leaderId == request.auth.uid);
+
+      allow delete: if isSuperadmin() ||
+        (isSignedIn() && resource.data.leaderId == request.auth.uid);
+
+      // ── groups/{groupId}/members (ex group_members) ──────────────
+      match /members/{userId} {
+        allow read: if isSignedIn() &&
+          (userId == request.auth.uid ||
+           isGroupMember(groupId) ||
+           isSuperadmin());
+
+        // Autoinscripción: siempre queda 'active' directo (no hay aprobación
+        // del líder — decisión de producto: público/privado solo controla si
+        // el grupo aparece listado en /home, no si hace falta aprobación).
+        // El campo `userId` (redundante con el path) es necesario para poder
+        // hacer collectionGroup queries filtradas por usuario — se valida acá
+        // que coincida con el segmento del path para que no se pueda falsear.
+        allow create: if isSignedIn() && userId == request.auth.uid &&
+          request.resource.data.userId == request.auth.uid &&
+          request.resource.data.status == 'active';
+
+        // Líder expulsa, o el propio miembro se auto-remueve (migración 009).
+        allow update: if isSuperadmin() ||
+          isGroupLeader(groupId) ||
+          (isSignedIn() && userId == request.auth.uid);
+
+        allow delete: if isSuperadmin() ||
+          isGroupLeader(groupId) ||
+          (isSignedIn() && userId == request.auth.uid);
+      }
+    }
+
+    // ── groups/*/members vía collectionGroup ────────────────────────
+    // Los `match` anidados de arriba (dentro de `match /groups/{groupId}`)
+    // solo autorizan el acceso directo a la subcolección de UN grupo
+    // conocido (p.ej. `collection(db,'groups',groupId,'members')`, usado por
+    // findMembers()). Una query `collectionGroup(db,'members')` — usada por
+    // GroupRepository.findByUser() para resolver "¿en qué grupos soy
+    // miembro activo?" sin conocer el groupId de antemano — necesita su
+    // propio bloque `match` con el wildcard `{path=**}`, si no Firestore la
+    // rechaza con permission-denied aunque el nested match ya cubra el path
+    // exacto (confirmado empíricamente: ninguna combinación de condiciones
+    // en el match anidado la habilitaba).
+    match /{path=**}/members/{memberId} {
+      allow read: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || isSuperadmin());
+    }
+
+    // ── predictions ──────────────────────────────────────────────
+    // Doc ID = `${userId}_${matchId}_${groupId}`
+    match /predictions/{predictionId} {
+      allow read: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid ||
+         isSuperadmin() ||
+         (get(/databases/$(database)/documents/matches/$(resource.data.matchId)).data.status == 'finished' &&
+          isGroupMember(resource.data.groupId)));
+
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        predictionId == request.auth.uid + '_' + request.resource.data.matchId + '_' + request.resource.data.groupId &&
+        isGroupMember(request.resource.data.groupId) &&
+        get(/databases/$(database)/documents/matches/$(request.resource.data.matchId)).data.status == 'scheduled' &&
+        request.time < get(/databases/$(database)/documents/matches/$(request.resource.data.matchId)).data.predictionDeadline &&
+        request.resource.data.submittedAt == request.time;
+
+      // El usuario solo edita su propia predicción antes del deadline;
+      // pointsEarned solo lo escribe la Cloud Function scoreMatch (Admin SDK, bypasea reglas).
+      // lastEditedAt debe ser serverTimestamp() en el propio request — reemplaza
+      // al trigger `handle_prediction_edited` sin necesitar una Cloud Function
+      // (evita el riesgo de loop de un trigger onUpdate escribiendo sobre sí mismo).
+      allow update: if isSignedIn() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        get(/databases/$(database)/documents/matches/$(resource.data.matchId)).data.status == 'scheduled' &&
+        request.time < get(/databases/$(database)/documents/matches/$(resource.data.matchId)).data.predictionDeadline &&
+        request.resource.data.lastEditedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    // ── scores (ex scores + prodes fusionadas, ver docs/firebase/01) ─
+    // Doc ID = `${userId}_${groupId}`
+    match /scores/{scoreId} {
+      allow read: if isSignedIn() &&
+        (isSuperadmin() || isGroupMember(resource.data.groupId));
+      // Solo la Cloud Function scoreMatch (Admin SDK) escribe acá.
+      allow write: if false;
+    }
+
+    // ── groupStandings ───────────────────────────────────────────
+    match /groupStandings/{standingId} {
+      allow read: if isSignedIn();
+      // Lo escribe calculateGroupStandings (Admin SDK); se deja isSuperadmin()
+      // como paridad con la policy original, aunque en la práctica no se usa desde el cliente.
+      allow write: if isSuperadmin();
+    }
+
+    // ── thirdPlaceLookup ─────────────────────────────────────────
+    // Dato de referencia estático (tabla FIFA), lectura pública igual que en Postgres.
+    match /thirdPlaceLookup/{lookupId} {
+      allow read: if true;
+      allow write: if false; // se importa una sola vez vía script con Admin SDK
+    }
+
+    // ── default deny ─────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

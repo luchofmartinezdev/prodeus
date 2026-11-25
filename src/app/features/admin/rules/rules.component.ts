@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import type { ScoringRule } from '../../../data/database.types';
+import type { ScoringRule } from '../../../data/repositories/scoring-rules.repository';
 import { ScoringRulesService } from '../../../core/services/scoring-rules.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { AuthStore } from '../../../state/auth.store';
@@ -77,10 +77,9 @@ export class AdminRulesComponent implements OnInit {
     return (
       (
         {
-          exact_score: 'Resultado exacto',
-          correct_winner: 'Ganador correcto',
-          correct_goals_only: 'Solo goles (un equipo)',
-          no_match: 'Sin acierto',
+          correct_outcome: 'Local, Empate o Visitante',
+          home_goals: 'Goles del local',
+          away_goals: 'Goles del visitante',
         } as Record<string, string>
       )[key] ?? key
     );
@@ -90,10 +89,9 @@ export class AdminRulesComponent implements OnInit {
     return (
       (
         {
-          exact_score: 'El usuario predijo exactamente el marcador final',
-          correct_winner: 'Acertó quién gana o empate, sin el marcador exacto',
-          correct_goals_only: 'Acertó los goles de al menos un equipo, sin acertar ganador',
-          no_match: 'No se cumple ninguna condición anterior',
+          correct_outcome: 'Acertó quién gana el partido, o si empatan',
+          home_goals: 'Acertó la cantidad exacta de goles del equipo local',
+          away_goals: 'Acertó la cantidad exacta de goles del equipo visitante',
         } as Record<string, string>
       )[key] ?? ''
     );

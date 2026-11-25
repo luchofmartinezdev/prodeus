@@ -1,48 +1,67 @@
 import { Injectable } from '@angular/core';
-import { supabase } from '../supabase.client';
+import {
+  collection,
+  collectionGroup,
+  getCountFromServer,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore';
+import { db } from '../firebase.client';
+import { mapFirestoreError, type RepoError } from '../firestore-helpers';
+
+export interface CountResult {
+  count: number;
+  error: RepoError | null;
+}
+
+async function count(q: Parameters<typeof getCountFromServer>[0]): Promise<CountResult> {
+  try {
+    const snap = await getCountFromServer(q);
+    return { count: snap.data().count, error: null };
+  } catch (e) {
+    return { count: 0, error: mapFirestoreError(e) };
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class StatsRepository {
-  findActiveTournamentIds() {
-    return supabase.from('tournaments').select('id').eq('status', 'active');
-  }
-
-  countGroupsByTournamentIds(ids: string[]) {
-    if (ids.length === 0) {
-      return supabase.from('groups').select('id', { count: 'exact', head: true }).eq('id', 'none');
+  async findActiveTournamentIds(): Promise<{ data: { id: string }[]; error: RepoError | null }> {
+    try {
+      const snap = await getDocs(
+        query(collection(db, 'tournaments'), where('status', '==', 'active')),
+      );
+      return { data: snap.docs.map((d) => ({ id: d.id })), error: null };
+    } catch (e) {
+      return { data: [], error: mapFirestoreError(e) };
     }
-    return supabase
-      .from('groups')
-      .select('id', { count: 'exact', head: true })
-      .in('tournament_id', ids);
   }
 
-  countTotalGroups() {
-    return supabase.from('groups').select('id', { count: 'exact', head: true });
+  countGroupsByTournamentIds(ids: string[]): Promise<CountResult> {
+    if (ids.length === 0) return Promise.resolve({ count: 0, error: null });
+    // Firestore 'in' admite hasta 30 valores — suficiente para la cantidad de
+    // torneos activos esperada.
+    return count(query(collection(db, 'groups'), where('tournamentId', 'in', ids.slice(0, 30))));
   }
 
-  countPredictions() {
-    return supabase.from('predictions').select('id', { count: 'exact', head: true });
+  countTotalGroups(): Promise<CountResult> {
+    return count(collection(db, 'groups'));
   }
 
-  countActiveMembers() {
-    return supabase
-      .from('group_members')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'active');
+  countPredictions(): Promise<CountResult> {
+    return count(collection(db, 'predictions'));
   }
 
-  countRegisteredUsers() {
-    return supabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .neq('role', 'superadmin');
+  /** Collection group query: cuenta miembros activos across todos los grupos. */
+  countActiveMembers(): Promise<CountResult> {
+    return count(query(collectionGroup(db, 'members'), where('status', '==', 'active')));
   }
 
-  countTournamentsByStatus(status: 'draft' | 'active' | 'closed') {
-    return supabase
-      .from('tournaments')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', status);
+  countRegisteredUsers(): Promise<CountResult> {
+    return count(query(collection(db, 'users'), where('role', '!=', 'superadmin')));
+  }
+
+  countTournamentsByStatus(status: 'draft' | 'active' | 'closed'): Promise<CountResult> {
+    return count(query(collection(db, 'tournaments'), where('status', '==', status)));
   }
 }

@@ -6,18 +6,18 @@ import { GroupService } from '../core/services/group.service';
 import { AuthStore } from './auth.store';
 import { ToastService } from '../core/services/toast.service';
 import type { GroupWithTournament, MemberWithProfile } from '../data/repositories/group.repository';
-import type { User } from '@supabase/supabase-js';
+import type { AuthUser as User } from './auth.store';
 
 const mockGroupService = {
   getMyGroups: vi.fn(),
+  getPublicGroups: vi.fn(),
   getOne: vi.fn(),
   getMembers: vi.fn(),
   create: vi.fn(),
   update: vi.fn(),
   remove: vi.fn(),
   joinByCode: vi.fn(),
-  approveMember: vi.fn(),
-  rejectMember: vi.fn(),
+  joinById: vi.fn(),
   removeMember: vi.fn(),
 };
 
@@ -45,16 +45,16 @@ const fakeGroup = (overrides: Partial<GroupWithTournament> = {}): GroupWithTourn
   ({
     id: 'group-1',
     name: 'Los cracks',
-    join_mode: 'open',
+    visibility: 'public',
     leader_id: 'user-1',
-    invite_code: 'ABC12345',
+    invite_code: 'A3F9K2',
     tournament_id: 'tour-1',
     tournament: { id: 'tour-1', name: 'Liga 2025', status: 'active' },
     created_at: new Date().toISOString(),
     ...overrides,
   }) as unknown as GroupWithTournament;
 
-const fakeMember = (status: 'active' | 'pending'): MemberWithProfile =>
+const fakeMember = (status: 'active' | 'removed'): MemberWithProfile =>
   ({
     id: 'member-1',
     group_id: 'group-1',
@@ -90,24 +90,18 @@ describe('GroupStore', () => {
 
   it('starts with empty groups and isLoading false', () => {
     expect(store.groups()).toEqual([]);
+    expect(store.publicGroups()).toEqual([]);
     expect(store.isLoading()).toBe(false);
     expect(store.members()).toEqual([]);
   });
 
   // ─── Computed ─────────────────────────────────────────────────
 
-  it('pendingMembers filters members with status pending', async () => {
-    mockGroupService.getMembers.mockResolvedValue([fakeMember('active'), fakeMember('pending')]);
-    await store.loadMembers('group-1');
-    expect(store.pendingMembers()).toHaveLength(1);
-    expect(store.pendingMembers()[0].status).toBe('pending');
-  });
-
   it('activeMembers filters members with status active', async () => {
     mockGroupService.getMembers.mockResolvedValue([
       fakeMember('active'),
       fakeMember('active'),
-      fakeMember('pending'),
+      fakeMember('removed'),
     ]);
     await store.loadMembers('group-1');
     expect(store.activeMembers()).toHaveLength(2);
@@ -138,6 +132,30 @@ describe('GroupStore', () => {
     expect(store.isLoading()).toBe(false);
   });
 
+  // ─── loadPublicGroups / joinPublicGroup ───────────────────────
+
+  it('loadPublicGroups() sets publicGroups on success', async () => {
+    const groups = [fakeGroup({ id: 'public-1' })];
+    mockGroupService.getPublicGroups.mockResolvedValue(groups);
+    await store.loadPublicGroups();
+    expect(store.publicGroups()).toEqual(groups);
+    expect(store.isLoadingPublic()).toBe(false);
+  });
+
+  it('joinPublicGroup() moves the group from publicGroups to groups', async () => {
+    const group = fakeGroup({ id: 'public-1' });
+    mockGroupService.getPublicGroups.mockResolvedValue([group]);
+    await store.loadPublicGroups();
+
+    mockGroupService.joinById.mockResolvedValue(group);
+    const ok = await store.joinPublicGroup('public-1');
+
+    expect(ok).toBe(true);
+    expect(store.groups()).toContain(group);
+    expect(store.publicGroups()).not.toContain(group);
+    expect(mockToast.success).toHaveBeenCalledWith('Te uniste al grupo exitosamente');
+  });
+
   // ─── create ───────────────────────────────────────────────────
 
   it('create() adds group to beginning of list on success', async () => {
@@ -147,7 +165,7 @@ describe('GroupStore', () => {
 
     const newGroup = fakeGroup({ id: 'new-group' });
     mockGroupService.create.mockResolvedValue(newGroup);
-    await store.create({ name: 'G', tournament_id: 't', join_mode: 'open' });
+    await store.create({ name: 'G', tournament_id: 't', visibility: 'public' });
 
     expect(store.groups()[0].id).toBe('new-group');
     expect(store.groups()).toHaveLength(2);
@@ -156,43 +174,33 @@ describe('GroupStore', () => {
   it('create() shows toast.success and navigates to group', async () => {
     const newGroup = fakeGroup({ id: 'new-group' });
     mockGroupService.create.mockResolvedValue(newGroup);
-    await store.create({ name: 'G', tournament_id: 't', join_mode: 'open' });
+    await store.create({ name: 'G', tournament_id: 't', visibility: 'public' });
     expect(mockToast.success).toHaveBeenCalledWith('Grupo creado exitosamente');
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/groups', 'new-group']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/home/groups', 'new-group']);
   });
 
   it('create() shows toast.error and clears loading on failure', async () => {
     mockGroupService.create.mockRejectedValue(new Error('No se pudo crear el grupo'));
-    await store.create({ name: 'G', tournament_id: 't', join_mode: 'open' });
+    await store.create({ name: 'G', tournament_id: 't', visibility: 'public' });
     expect(mockToast.error).toHaveBeenCalledWith('No se pudo crear el grupo');
     expect(store.isLoading()).toBe(false);
   });
 
   // ─── joinByCode ──────────────────────────────────────────────
 
-  it('joinByCode() adds group to list and shows success when status is active', async () => {
+  it('joinByCode() adds group to list and shows success', async () => {
     const group = fakeGroup();
-    mockGroupService.joinByCode.mockResolvedValue({ group, status: 'active' });
-    const status = await store.joinByCode('ABC12345');
-    expect(status).toBe('active');
+    mockGroupService.joinByCode.mockResolvedValue(group);
+    const ok = await store.joinByCode('A3F9K2');
+    expect(ok).toBe(true);
     expect(store.groups()).toContain(group);
     expect(mockToast.success).toHaveBeenCalledWith('Te uniste al grupo exitosamente');
   });
 
-  it('joinByCode() does not add group to list when status is pending', async () => {
-    const group = fakeGroup();
-    mockGroupService.joinByCode.mockResolvedValue({ group, status: 'pending' });
-    await store.joinByCode('ABC12345');
-    expect(store.groups()).toHaveLength(0);
-    expect(mockToast.info).toHaveBeenCalledWith(
-      'Solicitud enviada. El líder del grupo debe aprobarte',
-    );
-  });
-
-  it('joinByCode() returns null and shows error on failure', async () => {
+  it('joinByCode() returns false and shows error on failure', async () => {
     mockGroupService.joinByCode.mockRejectedValue(new Error('Código inválido'));
-    const status = await store.joinByCode('BAD');
-    expect(status).toBeNull();
+    const ok = await store.joinByCode('BAD');
+    expect(ok).toBe(false);
     expect(mockToast.error).toHaveBeenCalledWith('Código inválido');
     expect(store.isLoading()).toBe(false);
   });
@@ -224,6 +232,6 @@ describe('GroupStore', () => {
 
     expect(store.groups()).toHaveLength(1);
     expect(store.groups()[0].id).toBe('b');
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/groups']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/home/groups']);
   });
 });

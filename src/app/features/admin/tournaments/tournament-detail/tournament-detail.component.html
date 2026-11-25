@@ -16,6 +16,13 @@
             />
           </svg>
         </a>
+        @if (t.logo_url) {
+          <img
+            [src]="t.logo_url"
+            [alt]="t.name"
+            class="w-10 h-10 object-contain rounded shrink-0"
+          />
+        }
         <div>
           <div class="flex items-center gap-3">
             <h1 class="text-2xl font-bold text-white">{{ t.name }}</h1>
@@ -113,10 +120,10 @@
       <div>
         <div class="flex items-center justify-between mb-4">
           <p class="text-gray-400 text-sm">{{ teams().length }} equipo(s)</p>
-          @if (!showTeamForm()) {
+          @if (!showAddTeam()) {
             <button
               type="button"
-              (click)="openTeamForm()"
+              (click)="openAddTeam()"
               class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,12 +139,121 @@
           }
         </div>
 
-        <!-- Form -->
+        <!-- Buscar equipo existente / crear nuevo -->
+        @if (showAddTeam()) {
+          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-4">
+            @if (!showNewTeamForm()) {
+              <h3 class="text-white font-semibold text-sm mb-3">Agregar equipo</h3>
+              <input
+                type="text"
+                [ngModel]="teamSearch()"
+                (ngModelChange)="teamSearch.set($event)"
+                placeholder="Buscar equipo por nombre..."
+                class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+              />
+              @if (isLoadingAllTeams()) {
+                <p class="text-gray-500 text-sm py-2">Cargando equipos...</p>
+              } @else {
+                <div class="max-h-64 overflow-y-auto space-y-1 mb-3">
+                  @for (t of filteredExistingTeams; track t.id) {
+                    <button
+                      type="button"
+                      (click)="selectExistingTeam(t)"
+                      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-left text-sm text-gray-200 hover:bg-gray-800 transition-colors"
+                    >
+                      @if (t.logo_url) {
+                        <img
+                          [src]="t.logo_url"
+                          [alt]="t.name"
+                          class="w-5 h-5 object-contain shrink-0"
+                        />
+                      }
+                      {{ t.name }}
+                    </button>
+                  } @empty {
+                    <p class="text-gray-500 text-sm px-3 py-2">Sin resultados</p>
+                  }
+                </div>
+              }
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  (click)="openNewTeamForm()"
+                  class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium rounded-lg transition-colors"
+                >
+                  + Crear equipo nuevo
+                </button>
+                <button
+                  type="button"
+                  (click)="closeAddTeam()"
+                  class="px-4 py-2 text-gray-400 hover:text-white text-sm transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            } @else {
+              <h3 class="text-white font-semibold text-sm mb-4">Nuevo equipo</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-xs font-medium text-gray-400 mb-1">Nombre *</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="teamName"
+                    placeholder="Argentina"
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    [class.border-red-600]="teamErrors()['name']"
+                    [class.border-gray-700]="!teamErrors()['name']"
+                  />
+                  @if (teamErrors()['name']) {
+                    <p class="mt-0.5 text-xs text-red-400">{{ teamErrors()['name'] }}</p>
+                  }
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-400 mb-1"
+                    >Abreviatura (máx 5)</label
+                  >
+                  <input
+                    type="text"
+                    [(ngModel)]="teamShortName"
+                    placeholder="ARG"
+                    maxlength="5"
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div class="col-span-1 sm:col-span-2">
+                  <label class="block text-xs font-medium text-gray-400 mb-1">URL del escudo</label>
+                  <input
+                    type="url"
+                    [(ngModel)]="teamLogoUrl"
+                    placeholder="https://..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  (click)="submitNewTeamForm()"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  Crear y agregar
+                </button>
+                <button
+                  type="button"
+                  (click)="closeAddTeam()"
+                  class="px-4 py-2 text-gray-400 hover:text-white text-sm transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Editar equipo (global) -->
         @if (showTeamForm()) {
           <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-4">
-            <h3 class="text-white font-semibold text-sm mb-4">
-              {{ editingTeam() ? 'Editar equipo' : 'Nuevo equipo' }}
-            </h3>
+            <h3 class="text-white font-semibold text-sm mb-4">Editar equipo</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label class="block text-xs font-medium text-gray-400 mb-1">Nombre *</label>
@@ -181,7 +297,7 @@
                 (click)="submitTeamForm()"
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
               >
-                {{ editingTeam() ? 'Guardar' : 'Agregar' }}
+                Guardar
               </button>
               <button
                 type="button"
@@ -220,7 +336,7 @@
                           <img
                             [src]="team.logo_url"
                             [alt]="team.name"
-                            class="w-6 h-4 object-cover rounded-sm"
+                            class="w-5 h-5 object-contain shrink-0"
                           />
                         }
                         {{ team.name }}
@@ -232,6 +348,7 @@
                         <button
                           type="button"
                           (click)="openTeamForm(team)"
+                          title="Editar equipo"
                           class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
                         >
                           <svg
@@ -251,6 +368,7 @@
                         <button
                           type="button"
                           (click)="deleteTeam(team)"
+                          title="Quitar del torneo"
                           class="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-lg transition-colors"
                         >
                           <svg
@@ -364,7 +482,7 @@
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-400 mb-1"
-                  >Deadline predicción * <span class="text-gray-600">(5 min antes)</span></label
+                  >Deadline predicción * <span class="text-gray-600">(1 min antes)</span></label
                 >
                 <input
                   type="datetime-local"
@@ -427,7 +545,7 @@
                           <img
                             [src]="match.home_team!.logo_url"
                             [alt]="match.home_team!.name"
-                            class="w-6 h-4 object-cover rounded-sm shrink-0"
+                            class="w-5 h-5 object-contain shrink-0"
                           />
                         }
                         <span class="truncate">{{ match.home_team?.name ?? '?' }}</span>
@@ -446,7 +564,7 @@
                           <img
                             [src]="match.away_team!.logo_url"
                             [alt]="match.away_team!.name"
-                            class="w-6 h-4 object-cover rounded-sm shrink-0"
+                            class="w-5 h-5 object-contain shrink-0"
                           />
                         }
                         <span class="truncate">{{ match.away_team?.name ?? '?' }}</span>
@@ -563,5 +681,15 @@
         }
       </div>
     }
+  }
+
+  @if (deleteTarget()) {
+    <app-confirm-modal
+      title="Eliminar"
+      [message]="deleteModalMessage"
+      [confirmLabel]="deleteModalConfirmLabel"
+      (confirmed)="confirmDeleteTarget()"
+      (cancelled)="closeDeleteModal()"
+    />
   }
 </div>

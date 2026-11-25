@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { AdminRulesComponent } from './rules.component';
 import { ScoringRulesService } from '../../../core/services/scoring-rules.service';
 import { ToastService } from '../../../core/services/toast.service';
-import type { ScoringRule } from '../../../data/database.types';
+import type { ScoringRule } from '../../../data/repositories/scoring-rules.repository';
 
 const mockRulesService = {
   getAll: vi.fn(),
@@ -48,20 +48,16 @@ describe('AdminRulesComponent', () => {
 
   // ─── ruleLabel ────────────────────────────────────────────────
 
-  it('ruleLabel() returns correct label for exact_score', () => {
-    expect(component.ruleLabel('exact_score')).toBe('Resultado exacto');
+  it('ruleLabel() returns correct label for correct_outcome', () => {
+    expect(component.ruleLabel('correct_outcome')).toBe('Local, Empate o Visitante');
   });
 
-  it('ruleLabel() returns correct label for correct_winner', () => {
-    expect(component.ruleLabel('correct_winner')).toBe('Ganador correcto');
+  it('ruleLabel() returns correct label for home_goals', () => {
+    expect(component.ruleLabel('home_goals')).toBe('Goles del local');
   });
 
-  it('ruleLabel() returns correct label for correct_goals_only', () => {
-    expect(component.ruleLabel('correct_goals_only')).toBe('Solo goles (un equipo)');
-  });
-
-  it('ruleLabel() returns correct label for no_match', () => {
-    expect(component.ruleLabel('no_match')).toBe('Sin acierto');
+  it('ruleLabel() returns correct label for away_goals', () => {
+    expect(component.ruleLabel('away_goals')).toBe('Goles del visitante');
   });
 
   it('ruleLabel() returns the key itself for unknown keys', () => {
@@ -70,20 +66,16 @@ describe('AdminRulesComponent', () => {
 
   // ─── ruleDescription ─────────────────────────────────────────
 
-  it('ruleDescription() returns description for exact_score', () => {
-    expect(component.ruleDescription('exact_score')).toContain('exactamente');
+  it('ruleDescription() returns description for correct_outcome', () => {
+    expect(component.ruleDescription('correct_outcome')).toContain('gana');
   });
 
-  it('ruleDescription() returns description for correct_winner', () => {
-    expect(component.ruleDescription('correct_winner')).toContain('gana');
+  it('ruleDescription() returns description for home_goals', () => {
+    expect(component.ruleDescription('home_goals')).toContain('local');
   });
 
-  it('ruleDescription() returns description for correct_goals_only', () => {
-    expect(component.ruleDescription('correct_goals_only')).toContain('goles');
-  });
-
-  it('ruleDescription() returns description for no_match', () => {
-    expect(component.ruleDescription('no_match')).toContain('ninguna');
+  it('ruleDescription() returns description for away_goals', () => {
+    expect(component.ruleDescription('away_goals')).toContain('visitante');
   });
 
   it('ruleDescription() returns empty string for unknown key', () => {
@@ -93,9 +85,9 @@ describe('AdminRulesComponent', () => {
   // ─── cancel ───────────────────────────────────────────────────
 
   it('cancel() resets ruleValues to original points and turns off editing', () => {
-    const rules = [fakeRule('exact_score', 5, 'id-1'), fakeRule('correct_winner', 3, 'id-2')];
+    const rules = [fakeRule('correct_outcome', 3, 'id-1'), fakeRule('home_goals', 1, 'id-2')];
     component.rules.set(rules);
-    component.ruleValues = { 'id-1': 5, 'id-2': 3 };
+    component.ruleValues = { 'id-1': 3, 'id-2': 1 };
     component.isEditing.set(true);
 
     // Simulate user edited the value
@@ -103,8 +95,8 @@ describe('AdminRulesComponent', () => {
 
     component.cancel();
 
-    expect(component.ruleValues['id-1']).toBe(5);
-    expect(component.ruleValues['id-2']).toBe(3);
+    expect(component.ruleValues['id-1']).toBe(3);
+    expect(component.ruleValues['id-2']).toBe(1);
     expect(component.isEditing()).toBe(false);
   });
 
@@ -112,27 +104,27 @@ describe('AdminRulesComponent', () => {
 
   it('ngOnInit() loads rules and deduplicates by rule_key', async () => {
     const rules = [
-      fakeRule('exact_score', 5, 'id-1'),
-      fakeRule('exact_score', 5, 'id-2'), // duplicate key
-      fakeRule('correct_winner', 3, 'id-3'),
+      fakeRule('correct_outcome', 3, 'id-1'),
+      fakeRule('correct_outcome', 3, 'id-2'), // duplicate key
+      fakeRule('home_goals', 1, 'id-3'),
     ];
     mockRulesService.getAll.mockResolvedValue(rules);
     await component.ngOnInit();
-    // Should deduplicate — only one exact_score
+    // Should deduplicate — only one correct_outcome
     expect(component.rules()).toHaveLength(2);
     expect(component.isLoading()).toBe(false);
   });
 
   it('ngOnInit() sorts rules by points descending', async () => {
     const rules = [
-      fakeRule('correct_winner', 3, 'id-1'),
-      fakeRule('exact_score', 5, 'id-2'),
-      fakeRule('no_match', 0, 'id-3'),
+      fakeRule('home_goals', 1, 'id-1'),
+      fakeRule('correct_outcome', 3, 'id-2'),
+      fakeRule('away_goals', 1, 'id-3'),
     ];
     mockRulesService.getAll.mockResolvedValue(rules);
     await component.ngOnInit();
     const points = component.rules().map((r) => r.points_value);
-    expect(points).toEqual([5, 3, 0]);
+    expect(points).toEqual([3, 1, 1]);
   });
 
   it('ngOnInit() shows error toast on failure', async () => {
@@ -145,7 +137,7 @@ describe('AdminRulesComponent', () => {
   // ─── save ─────────────────────────────────────────────────────
 
   it('save() calls update for each rule and shows success toast', async () => {
-    const rules = [fakeRule('exact_score', 5, 'id-1')];
+    const rules = [fakeRule('correct_outcome', 3, 'id-1')];
     component.rules.set(rules);
     component.ruleValues = { 'id-1': 7 };
     mockRulesService.update.mockResolvedValue({ ...rules[0], points_value: 7 });

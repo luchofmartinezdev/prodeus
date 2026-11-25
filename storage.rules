@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// ============================================================
+// PRODEUS — Storage Security Rules
+// Todo el contenido (logos de torneos, escudos de equipos) se sube
+// vía Admin SDK (scripts de importación / Cloud Functions) — nunca
+// desde el cliente. Lectura pública porque las imágenes se muestran
+// en <img src> sin auth headers.
+// ============================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

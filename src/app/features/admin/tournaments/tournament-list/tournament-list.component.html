@@ -90,17 +90,28 @@
             >
               <!-- Nombre -->
               <td class="px-5 py-4">
-                <a
-                  [routerLink]="['/admin/tournaments', tournament.id]"
-                  class="text-white font-medium hover:text-blue-400 transition-colors"
-                >
-                  {{ tournament.name }}
-                </a>
-                @if (tournament.description) {
-                  <p class="text-gray-500 text-xs mt-0.5 truncate max-w-xs">
-                    {{ tournament.description }}
-                  </p>
-                }
+                <div class="flex items-center gap-2.5">
+                  @if (tournament.logo_url) {
+                    <img
+                      [src]="tournament.logo_url"
+                      [alt]="tournament.name"
+                      class="w-6 h-6 object-contain rounded shrink-0"
+                    />
+                  }
+                  <div>
+                    <a
+                      [routerLink]="['/admin/tournaments', tournament.id]"
+                      class="text-white font-medium hover:text-blue-400 transition-colors"
+                    >
+                      {{ tournament.name }}
+                    </a>
+                    @if (tournament.description) {
+                      <p class="text-gray-500 text-xs mt-0.5 truncate max-w-xs">
+                        {{ tournament.description }}
+                      </p>
+                    }
+                  </div>
+                </div>
               </td>
 
               <!-- Fechas -->
@@ -181,7 +192,7 @@
                   <button
                     type="button"
                     title="Eliminar"
-                    (click)="onDelete(tournament.id, tournament.name)"
+                    (click)="openDeleteModal(tournament.id, tournament.name)"
                     class="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-lg transition-colors"
                   >
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,5 +211,17 @@
         </tbody>
       </table>
     </div>
+  }
+
+  @if (tournamentToDelete(); as tournament) {
+    <app-confirm-modal
+      title="Eliminar torneo"
+      [message]="
+        '¿Eliminar el torneo \'' + tournament.name + '\'? Esta acción no se puede deshacer.'
+      "
+      confirmLabel="Eliminar torneo"
+      (confirmed)="confirmDelete()"
+      (cancelled)="closeDeleteModal()"
+    />
   }
 </div>

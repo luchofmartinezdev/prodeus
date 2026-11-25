@@ -70,11 +70,11 @@
             <div
               class="w-14 h-14 flex-shrink-0 rounded-xl flex flex-col items-center justify-center"
               [class]="
-                rule.rule_key === 'exact_score'
+                rule.rule_key === 'correct_outcome'
                   ? 'bg-blue-950 border border-blue-800'
-                  : rule.rule_key === 'correct_winner'
+                  : rule.rule_key === 'home_goals'
                     ? 'bg-orange-950 border border-orange-800'
-                    : rule.rule_key === 'correct_goals_only'
+                    : rule.rule_key === 'away_goals'
                       ? 'bg-yellow-950 border border-yellow-800'
                       : 'bg-gray-800 border border-gray-700'
               "
@@ -90,11 +90,11 @@
                 <span
                   class="text-xl font-black"
                   [class]="
-                    rule.rule_key === 'exact_score'
+                    rule.rule_key === 'correct_outcome'
                       ? 'text-blue-400'
-                      : rule.rule_key === 'correct_winner'
+                      : rule.rule_key === 'home_goals'
                         ? 'text-orange-400'
-                        : rule.rule_key === 'correct_goals_only'
+                        : rule.rule_key === 'away_goals'
                           ? 'text-yellow-400'
                           : 'text-gray-500'
                   "

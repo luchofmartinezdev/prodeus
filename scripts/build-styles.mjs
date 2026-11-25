@@ -33,25 +33,18 @@ const watch = process.argv.includes('--watch');
 build().catch(console.error);
 
 if (watch) {
-  const { glob } = await import('glob');
-  const chokidar = await import('chokidar').then(m => m.default).catch(() => null);
-
-  if (!chokidar) {
-    // Fallback: polling sin chokidar
-    console.log('[tw] watching src/app/**/*.{html,ts} (polling)...');
-    let debounce;
-    fs.watch(path.join(root, 'src', 'app'), { recursive: true }, () => {
-      clearTimeout(debounce);
-      debounce = setTimeout(() => build().catch(console.error), 300);
-    });
-    fs.watch(input, () => build().catch(console.error));
-  } else {
-    console.log('[tw] watching src/app/**/*.{html,ts}...');
-    chokidar
-      .watch(['src/app/**/*.html', 'src/app/**/*.ts', 'src/styles.input.css'], {
-        cwd: root,
-        ignoreInitial: true,
-      })
-      .on('all', () => build().catch(console.error));
-  }
+  // Node's fs.watch con recursive:true (soportado en Windows y macOS) en vez
+  // de chokidar: chokidar v4+ eliminó el soporte de patrones glob como
+  // 'src/app/**/*.html' — pasado tal cual no matchea nada y el watcher queda
+  // silenciosamente inerte (no hay error, simplemente nunca dispara).
+  console.log('[tw] watching src/app/**/*.{html,ts}...');
+  let debounce;
+  const scheduleBuild = () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => build().catch(console.error), 200);
+  };
+  fs.watch(path.join(root, 'src', 'app'), { recursive: true }, (_event, filename) => {
+    if (filename && /\.(html|ts)$/.test(filename)) scheduleBuild();
+  });
+  fs.watch(input, scheduleBuild);
 }

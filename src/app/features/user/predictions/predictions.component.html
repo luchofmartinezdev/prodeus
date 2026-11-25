@@ -2,7 +2,7 @@
   <!-- Header -->
   <div class="flex items-center gap-3 mb-6">
     <a
-      [routerLink]="['/app/groups', id]"
+      [routerLink]="['/home/groups', id]"
       class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -218,7 +218,7 @@
                       <img
                         [src]="row.home_team!.logo_url"
                         [alt]="row.home_team!.name"
-                        class="w-6 h-4 object-cover rounded-sm shrink-0"
+                        class="w-5 h-5 object-contain shrink-0"
                       />
                     } @else if (getFlag(row.home_team?.name)) {
                       <span>{{ getFlag(row.home_team?.name) }}</span>
@@ -286,7 +286,7 @@
                       <img
                         [src]="row.away_team!.logo_url"
                         [alt]="row.away_team!.name"
-                        class="w-6 h-4 object-cover rounded-sm shrink-0"
+                        class="w-5 h-5 object-contain shrink-0"
                       />
                     } @else if (getFlag(row.away_team?.name)) {
                       <span>{{ getFlag(row.away_team?.name) }}</span>

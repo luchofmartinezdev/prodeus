@@ -1,6 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import type { ScoringRule } from '../../data/database.types';
-import { ScoringRulesRepository } from '../../data/repositories/scoring-rules.repository';
+import {
+  ScoringRulesRepository,
+  type ScoringRule,
+} from '../../data/repositories/scoring-rules.repository';
 
 @Injectable({ providedIn: 'root' })
 export class ScoringRulesService {
@@ -15,6 +17,6 @@ export class ScoringRulesService {
   async update(id: string, pointsValue: number, description?: string): Promise<ScoringRule> {
     const { data, error } = await this.repo.update(id, pointsValue, description);
     if (error) throw new Error('No se pudo actualizar la regla');
-    return data;
+    return data!;
   }
 }

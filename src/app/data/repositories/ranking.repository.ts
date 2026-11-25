@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { supabase } from '../supabase.client';
+import { collection, doc, getDoc, getDocs, orderBy, query, where } from 'firebase/firestore';
+import { db } from '../firebase.client';
+import { tsToIso } from '../firestore-helpers';
 
 export interface RankingRow {
   userId: string;
@@ -27,87 +29,85 @@ export interface HistorialRow {
 
 @Injectable({ providedIn: 'root' })
 export class RankingRepository {
-  /** Scores for all members of a group, sorted by total_points DESC */
+  /** Scores for all members of a group, sorted by totalPoints DESC */
   async getGroupRanking(groupId: string): Promise<RankingRow[]> {
-    const { data, error } = await supabase
-      .from('scores')
-      .select(
-        `
-        user_id,
-        total_points,
-        profile:profiles!scores_user_id_fkey(username, avatar_url)
-      `,
-      )
-      .eq('group_id', groupId)
-      .order('total_points', { ascending: false });
+    let snap;
+    try {
+      const q = query(
+        collection(db, 'scores'),
+        where('groupId', '==', groupId),
+        orderBy('totalPoints', 'desc'),
+      );
+      snap = await getDocs(q);
+    } catch {
+      throw new Error('No se pudo cargar el ranking');
+    }
 
-    if (error) throw new Error('No se pudo cargar el ranking');
-
-    return (data ?? []).map((row, i) => ({
-      userId: row.user_id,
-      username:
-        (row.profile as { username: string; avatar_url: string | null } | null)?.username ?? '—',
-      avatarUrl:
-        (row.profile as { username: string; avatar_url: string | null } | null)?.avatar_url ?? null,
-      totalPoints: row.total_points,
-      position: i + 1,
-    }));
+    const rows = await Promise.all(
+      snap.docs.map(async (d, i) => {
+        const s = d.data();
+        const profileSnap = await getDoc(doc(db, 'users', s['userId']));
+        const p = profileSnap.data();
+        return {
+          userId: s['userId'],
+          username: (p?.['username'] as string) ?? '—',
+          avatarUrl: (p?.['avatarUrl'] as string | null) ?? null,
+          totalPoints: s['totalPoints'],
+          position: i + 1,
+        };
+      }),
+    );
+    return rows;
   }
 
   /** Prediction history for one user in one group, newest match first */
   async getUserHistory(userId: string, groupId: string): Promise<HistorialRow[]> {
-    const { data, error } = await supabase
-      .from('predictions')
-      .select(
-        `
-        id,
-        predicted_home,
-        predicted_away,
-        points_earned,
-        match:matches!predictions_match_id_fkey(
-          match_date,
-          round,
-          status,
-          home_score,
-          away_score,
-          home_team:teams!matches_home_team_id_fkey(name, short_name, logo_url),
-          away_team:teams!matches_away_team_id_fkey(name, short_name, logo_url)
-        )
-      `,
-      )
-      .eq('user_id', userId)
-      .eq('group_id', groupId)
-      .order('submitted_at', { ascending: false });
-
-    if (error) throw new Error('No se pudo cargar el historial');
-
-    interface MatchRow {
-      match_date: string;
-      round: string | null;
-      status: 'scheduled' | 'in_progress' | 'finished';
-      home_score: number | null;
-      away_score: number | null;
-      home_team: { name: string; short_name: string | null; logo_url: string | null } | null;
-      away_team: { name: string; short_name: string | null; logo_url: string | null } | null;
+    let snap;
+    try {
+      const q = query(
+        collection(db, 'predictions'),
+        where('userId', '==', userId),
+        where('groupId', '==', groupId),
+      );
+      snap = await getDocs(q);
+    } catch {
+      throw new Error('No se pudo cargar el historial');
     }
 
-    return (data ?? []).map((row) => {
-      const m = row.match as unknown as MatchRow | null;
-      return {
-        predictionId: row.id,
-        matchDate: m?.match_date ?? '',
-        round: m?.round ?? null,
-        homeTeam: m?.home_team?.name ?? '?',
-        awayTeam: m?.away_team?.name ?? '?',
-        homeTeamLogo: m?.home_team?.logo_url ?? null,
-        awayTeamLogo: m?.away_team?.logo_url ?? null,
-        actualHome: m?.home_score ?? null,
-        actualAway: m?.away_score ?? null,
-        predictedHome: row.predicted_home,
-        predictedAway: row.predicted_away,
-        pointsEarned: row.points_earned ?? null,
-        matchStatus: m?.status ?? 'scheduled',
-      };
-    });
+    interface TeamSnapshot {
+      name: string;
+      shortName: string | null;
+      logoUrl: string | null;
+    }
+
+    const rows = await Promise.all(
+      snap.docs.map(async (predDoc) => {
+        const row = predDoc.data();
+        const matchSnap = await getDoc(doc(db, 'matches', row['matchId']));
+        const m = matchSnap.data();
+        const homeTeam = (m?.['homeTeam'] as TeamSnapshot | null) ?? null;
+        const awayTeam = (m?.['awayTeam'] as TeamSnapshot | null) ?? null;
+        return {
+          predictionId: predDoc.id,
+          matchDate: m ? tsToIso(m['matchDate']) : '',
+          round: (m?.['round'] as string | null) ?? null,
+          homeTeam: homeTeam?.name ?? '?',
+          awayTeam: awayTeam?.name ?? '?',
+          homeTeamLogo: homeTeam?.logoUrl ?? null,
+          awayTeamLogo: awayTeam?.logoUrl ?? null,
+          actualHome: (m?.['homeScore'] as number | null) ?? null,
+          actualAway: (m?.['awayScore'] as number | null) ?? null,
+          predictedHome: row['predictedHome'],
+          predictedAway: row['predictedAway'],
+          pointsEarned: (row['pointsEarned'] as number | null) ?? null,
+          matchStatus: (m?.['status'] as HistorialRow['matchStatus']) ?? 'scheduled',
+          submittedAt: m ? tsToIso(row['submittedAt']) : '',
+        };
+      }),
+    );
+
+    return rows
+      .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+      .map(({ submittedAt: _submittedAt, ...rest }) => rest);
   }
 }

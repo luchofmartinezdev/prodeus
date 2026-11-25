@@ -18,6 +18,7 @@ import { PredictionService } from '../../../../core/services/prediction.service'
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { getFlagEmoji } from '../../../../shared/utils/flags';
 import type { MatchWithTeams } from '../../../../data/repositories/match.repository';
+import type { MemberWithProfile } from '../../../../data/repositories/group.repository';
 
 @Component({
   selector: 'app-group-detail',
@@ -40,6 +41,9 @@ export class GroupDetailComponent implements OnInit, OnChanges {
   readonly editing = signal(false);
   readonly copied = signal(false);
   readonly showLeaveModal = signal(false);
+  readonly showDeleteModal = signal(false);
+  readonly showSaveEditModal = signal(false);
+  readonly memberToRemove = signal<MemberWithProfile | null>(null);
 
   readonly totalMatches = signal(0);
   readonly predictedCount = signal(0);
@@ -49,7 +53,7 @@ export class GroupDetailComponent implements OnInit, OnChanges {
   readonly isLoadingRanking = signal(true);
 
   editName = '';
-  editJoinMode: 'open' | 'closed' = 'open';
+  editVisibility: 'public' | 'private' = 'public';
 
   ngOnInit(): void {
     this.loadGroup(this.id);
@@ -125,7 +129,7 @@ export class GroupDetailComponent implements OnInit, OnChanges {
     const g = this.store.selected();
     if (!g) return;
     this.editName = g.name;
-    this.editJoinMode = g.join_mode;
+    this.editVisibility = g.visibility;
     this.editing.set(true);
   }
 
@@ -133,11 +137,20 @@ export class GroupDetailComponent implements OnInit, OnChanges {
     this.editing.set(false);
   }
 
-  async saveEdit(): Promise<void> {
+  saveEdit(): void {
     if (!this.editName.trim()) return;
+    this.showSaveEditModal.set(true);
+  }
+
+  closeSaveEditModal(): void {
+    this.showSaveEditModal.set(false);
+  }
+
+  async confirmSaveEdit(): Promise<void> {
+    this.closeSaveEditModal();
     await this.store.update(this.id, {
       name: this.editName.trim(),
-      join_mode: this.editJoinMode,
+      visibility: this.editVisibility,
     });
     this.editing.set(false);
   }
@@ -161,19 +174,25 @@ export class GroupDetailComponent implements OnInit, OnChanges {
     }
   }
 
-  async onDelete(): Promise<void> {
-    const g = this.store.selected();
-    if (!g) return;
-    if (!confirm(`¿Eliminar el grupo "${g.name}"? Esta acción no se puede deshacer.`)) return;
+  openDeleteModal(): void {
+    this.showDeleteModal.set(true);
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal.set(false);
+  }
+
+  async confirmDelete(): Promise<void> {
+    this.closeDeleteModal();
     await this.store.remove(this.id);
   }
 
-  joinModeLabel(mode: 'open' | 'closed'): string {
-    return mode === 'open' ? 'Abierto' : 'Cerrado';
+  visibilityLabel(visibility: 'public' | 'private'): string {
+    return visibility === 'public' ? 'Público' : 'Privado';
   }
 
-  joinModeClass(mode: 'open' | 'closed'): string {
-    return mode === 'open'
+  visibilityClass(visibility: 'public' | 'private'): string {
+    return visibility === 'public'
       ? 'bg-green-950 text-green-400 border border-green-800'
       : 'bg-yellow-950 text-yellow-400 border border-yellow-800';
   }
@@ -195,6 +214,21 @@ export class GroupDetailComponent implements OnInit, OnChanges {
     if (!currentUser) return;
     await this.store.leave(this.id, currentUser.id);
     this.closeLeaveModal();
+  }
+
+  openRemoveMemberModal(member: MemberWithProfile): void {
+    this.memberToRemove.set(member);
+  }
+
+  closeRemoveMemberModal(): void {
+    this.memberToRemove.set(null);
+  }
+
+  async confirmRemoveMember(): Promise<void> {
+    const member = this.memberToRemove();
+    if (!member) return;
+    this.closeRemoveMemberModal();
+    await this.store.removeMember(member.id, this.id);
   }
 
   getFlag(name: string | null | undefined): string {

@@ -13,7 +13,6 @@ const mockRepo = {
   update: vi.fn(),
   changeStatus: vi.fn(),
   remove: vi.fn(),
-  createDefaultRules: vi.fn(),
 };
 
 const mockRouter = { navigate: vi.fn() };
@@ -122,7 +121,6 @@ describe('TournamentStore', () => {
   it('create() returns the new tournament id', async () => {
     const tour = fakeTournament({ id: 'new-id' });
     mockRepo.create.mockResolvedValue({ data: tour, error: null });
-    mockRepo.createDefaultRules.mockResolvedValue({});
     const id = await store.create({
       name: 'Liga',
       start_date: '2025-01-01',
@@ -138,18 +136,9 @@ describe('TournamentStore', () => {
 
     const newTour = fakeTournament({ id: 'new-id' });
     mockRepo.create.mockResolvedValue({ data: newTour, error: null });
-    mockRepo.createDefaultRules.mockResolvedValue({});
     await store.create({ name: 'Liga', start_date: '2025-01-01', end_date: '2025-12-31' });
 
     expect(store.tournaments()[0].id).toBe('new-id');
-  });
-
-  it('create() calls createDefaultRules', async () => {
-    const tour = fakeTournament({ id: 'new-id' });
-    mockRepo.create.mockResolvedValue({ data: tour, error: null });
-    mockRepo.createDefaultRules.mockResolvedValue({});
-    await store.create({ name: 'Liga', start_date: '2025-01-01', end_date: '2025-12-31' });
-    expect(mockRepo.createDefaultRules).toHaveBeenCalledWith('new-id');
   });
 
   it('create() returns null on error', async () => {

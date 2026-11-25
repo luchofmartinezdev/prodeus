@@ -8,14 +8,31 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import type { User } from '@supabase/supabase-js';
+import type { User as FirebaseUser } from 'firebase/auth';
+import { auth } from '../data/firebase.client';
 import type { Profile } from '../data/database.types';
 import { AuthRepository } from '../data/repositories/auth.repository';
+
+// ─── Tipos ───────────────────────────────────────────────────
+
+// Subconjunto de firebase.User usado en toda la app — mantiene `.id` (en vez
+// de `.uid`) para no tocar los ~10 call sites que ya leían `user()?.id` con
+// Supabase.
+export interface AuthUser {
+  id: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
+
+function toAuthUser(u: FirebaseUser): AuthUser {
+  return { id: u.uid, email: u.email, displayName: u.displayName, photoURL: u.photoURL };
+}
 
 // ─── State ───────────────────────────────────────────────────
 
 interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   profile: Profile | null;
   isSigningIn: boolean;
   error: string | null;
@@ -28,30 +45,9 @@ const initialState: AuthState = {
   error: null,
 };
 
-// ─── Helpers ─────────────────────────────────────────────────
-
-async function syncGoogleNames(
-  user: User,
-  profile: Profile | null,
-  authRepo: AuthRepository,
-): Promise<void> {
-  if (user.app_metadata?.['provider'] !== 'google') return;
-  if (profile?.first_name || profile?.last_name) return;
-  const meta = user.user_metadata ?? {};
-  let firstName = (meta['given_name'] as string) || null;
-  let lastName = (meta['family_name'] as string) || null;
-  if (!firstName && !lastName) {
-    const full = (meta['full_name'] as string) || (meta['name'] as string) || '';
-    const parts = full.trim().split(/\s+/);
-    firstName = parts[0] || null;
-    lastName = parts.length > 1 ? parts.slice(1).join(' ') : null;
-  }
-  await authRepo.updateProfile(user.id, { first_name: firstName, last_name: lastName });
-}
-
 // ─── Subscription references (module-scoped, not exported) ────
 
-let _authSubscription: { unsubscribe(): void } | null = null;
+let _authUnsubscribe: (() => void) | null = null;
 let _visibilityListener: (() => void) | null = null;
 
 // ─── Store ───────────────────────────────────────────────────
@@ -63,91 +59,60 @@ export const AuthStore = signalStore(
   withComputed(({ user, profile }) => ({
     isAuthenticated: computed(() => user() !== null),
     isSuperadmin: computed(() => profile()?.role === 'superadmin'),
-    displayName: computed(() => {
-      const u = user();
-      if (!u) return null;
-      if (u.app_metadata?.['provider'] === 'google') {
-        return (
-          (u.user_metadata?.['full_name'] as string) ??
-          (u.user_metadata?.['name'] as string) ??
-          null
-        );
-      }
-      return profile()?.username ?? null;
-    }),
-    avatarUrl: computed(() => {
-      const u = user();
-      if (u?.app_metadata?.['provider'] === 'google') {
-        return (
-          (u.user_metadata?.['avatar_url'] as string) ??
-          (u.user_metadata?.['picture'] as string) ??
-          null
-        );
-      }
-      return null;
-    }),
+    displayName: computed(() => user()?.displayName ?? profile()?.username ?? null),
+    avatarUrl: computed(() => user()?.photoURL ?? profile()?.avatar_url ?? null),
   })),
 
   withMethods((store) => {
     const authRepo = inject(AuthRepository);
     const router = inject(Router);
 
+    async function loadForUser(firebaseUser: FirebaseUser): Promise<void> {
+      const authUser = toAuthUser(firebaseUser);
+      const { data: profile } = await authRepo.getProfile(authUser.id);
+      patchState(store, { user: authUser, profile });
+    }
+
     return {
       async initialize(): Promise<void> {
-        // 1. Load initial session — always resolves, never throws
-        try {
-          const {
-            data: { session },
-          } = await authRepo.getSession();
-
-          if (session?.user) {
-            const { data: profile } = await authRepo.getProfile(session.user.id);
-            patchState(store, { user: session.user, profile });
-            syncGoogleNames(session.user, profile, authRepo);
-          }
-        } catch {
-          // Swallow errors so APP_INITIALIZER always resolves
-        }
-
-        // 2. Subscribe to subsequent auth state changes
-        const { data } = authRepo.onAuthStateChange(async (event, session) => {
-          if (session?.user) {
-            if (event === 'SIGNED_IN') {
-              // Fresh login (OAuth, etc.) — lock is free, safe to fetch profile.
-              const { data: profile } = await authRepo.getProfile(session.user.id);
-              patchState(store, { user: session.user, profile });
-              syncGoogleNames(session.user, profile, authRepo);
-            } else if (store.user()) {
-              // TOKEN_REFRESHED / USER_UPDATED / INITIAL_SESSION:
-              // Avoid calling getProfile() here — the auth lock may be held during token
-              // refresh callbacks, causing getSession() inside getProfile() to deadlock.
-              // Profile is already loaded from initialize(); just refresh the user token.
-              patchState(store, { user: session.user });
+        // Firebase Auth restaura la sesión persistida de forma asíncrona — en
+        // una recarga de página `auth.currentUser` todavía es `null` en este
+        // punto aunque exista una sesión válida en IndexedDB. Hay que esperar
+        // a que dispare el primer `onAuthStateChanged` antes de dejar que
+        // APP_INITIALIZER desbloquee el bootstrap; si no, los guards
+        // (isAuthenticated()) corren con el store todavía vacío y redirigen a
+        // /auth/login pese a que el usuario sí está logueado.
+        await new Promise<void>((resolveFirst) => {
+          let isFirstEmission = true;
+          const { unsubscribe } = authRepo.onAuthStateChange(async (firebaseUser) => {
+            try {
+              if (firebaseUser) {
+                await loadForUser(firebaseUser);
+              } else {
+                patchState(store, { user: null, profile: null });
+              }
+            } catch {
+              // Swallow so APP_INITIALIZER always resolves
+            } finally {
+              if (isFirstEmission) {
+                isFirstEmission = false;
+                resolveFirst();
+              }
             }
-          } else {
-            patchState(store, { user: null, profile: null });
-          }
+          });
+          _authUnsubscribe = unsubscribe;
         });
 
-        _authSubscription = data.subscription;
-
-        // 3. On tab focus: proactively refresh the session to recover from throttled
-        //    timers that delayed Supabase's auto-refresh while the tab was backgrounded.
-        _visibilityListener = async () => {
+        // Al volver a la pestaña, releer auth.currentUser (Firebase SDK ya
+        //    refresca el token en background; esto solo resincroniza el signal
+        //    si el timer estuvo throttled mientras la pestaña estaba oculta).
+        _visibilityListener = () => {
           if (document.visibilityState !== 'visible') return;
-          try {
-            const {
-              data: { session },
-            } = await authRepo.getSession();
-            if (session?.user) {
-              // Refresh user token only — avoid getProfile() for same lock-contention
-              // reason as the TOKEN_REFRESHED branch above.
-              patchState(store, { user: session.user });
-            } else {
-              patchState(store, { user: null, profile: null });
-            }
-          } catch {
-            // Leave existing state intact; Supabase may still be mid-refresh.
+          const current = auth.currentUser;
+          if (current && current.uid !== store.user()?.id) {
+            loadForUser(current);
+          } else if (!current && store.user()) {
+            patchState(store, { user: null, profile: null });
           }
         };
         document.addEventListener('visibilitychange', _visibilityListener);
@@ -155,19 +120,23 @@ export const AuthStore = signalStore(
 
       async signInWithGoogle(): Promise<void> {
         patchState(store, { isSigningIn: true, error: null });
-        const { error } = await authRepo.signInWithGoogle();
-        if (error) {
-          patchState(store, { isSigningIn: false, error: 'Error al conectar con Google' });
+        try {
+          await authRepo.signInWithGoogle();
+          // Éxito: onAuthStateChange (suscripto en initialize()) ya actualiza
+          // user/profile — solo resta bajar el flag de carga acá.
+          patchState(store, { isSigningIn: false });
+        } catch (e) {
+          // El usuario puede cerrar el popup (auth/popup-closed-by-user) — no
+          // es un error real, no mostramos toast en ese caso.
+          const code = (e as { code?: string }).code;
+          patchState(store, {
+            isSigningIn: false,
+            error: code === 'auth/popup-closed-by-user' ? null : 'Error al conectar con Google',
+          });
         }
-        // No error: browser redirects to OAuth — isSigningIn stays true until page unloads
       },
 
       signOut(): void {
-        // Clear local storage keys that Supabase uses for session persistence
-        // so the session is gone even if the network call fails
-        Object.keys(localStorage)
-          .filter((k) => k.startsWith('sb-'))
-          .forEach((k) => localStorage.removeItem(k));
         patchState(store, { user: null, profile: null, error: null });
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         authRepo.signOut().catch(() => {});
@@ -198,7 +167,7 @@ export const AuthStore = signalStore(
       // Intentionally empty — APP_INITIALIZER calls store.initialize()
     },
     onDestroy() {
-      _authSubscription?.unsubscribe();
+      _authUnsubscribe?.();
       if (_visibilityListener) {
         document.removeEventListener('visibilitychange', _visibilityListener);
         _visibilityListener = null;

@@ -1,17 +1,19 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import type { Tournament } from '../../../../data/database.types';
 import { TournamentStore } from '../../../../state/tournament.store';
 
 @Component({
   selector: 'app-tournament-list',
-  imports: [RouterLink],
+  imports: [RouterLink, ConfirmModalComponent],
   templateUrl: './tournament-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TournamentListComponent implements OnInit {
   protected readonly store = inject(TournamentStore);
   readonly isLoadingTournaments = signal(true);
+  readonly tournamentToDelete = signal<{ id: string; name: string } | null>(null);
 
   ngOnInit(): void {
     this.store.loadAll().finally(() => this.isLoadingTournaments.set(false));
@@ -45,8 +47,18 @@ export class TournamentListComponent implements OnInit {
     });
   }
 
-  async onDelete(id: string, name: string): Promise<void> {
-    if (!confirm(`¿Eliminar el torneo "${name}"? Esta acción no se puede deshacer.`)) return;
-    await this.store.remove(id);
+  openDeleteModal(id: string, name: string): void {
+    this.tournamentToDelete.set({ id, name });
+  }
+
+  closeDeleteModal(): void {
+    this.tournamentToDelete.set(null);
+  }
+
+  async confirmDelete(): Promise<void> {
+    const target = this.tournamentToDelete();
+    if (!target) return;
+    this.closeDeleteModal();
+    await this.store.remove(target.id);
   }
 }

@@ -14,7 +14,7 @@ export class LoginComponent {
   constructor() {
     effect(() => {
       if (this.authStore.isAuthenticated()) {
-        this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/app']);
+        this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/home']);
       }
     });
   }

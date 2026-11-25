@@ -18,7 +18,8 @@ export class ProfileComponent {
   usernameValue = '';
 
   get isGoogleUser(): boolean {
-    return this.authStore.user()?.app_metadata?.['provider'] === 'google';
+    // Único método de login soportado — ver docs/firebase/01-firestore-schema.md
+    return this.authStore.user() !== null;
   }
 
   get email(): string {
