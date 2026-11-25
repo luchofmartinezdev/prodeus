@@ -11,8 +11,8 @@ import { Component, input, output } from '@angular/core';
       <div
         class="relative bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-sm p-6"
       >
-        <h2 class="text-white font-semibold text-lg mb-2">{{ title() }}</h2>
-        <p class="text-gray-400 text-sm mb-6">{{ message() }}</p>
+        <h2 class="t-display text-white text-3xl mb-2">{{ title() }}</h2>
+        <p class="text-gray-300 text-sm mb-6">{{ message() }}</p>
 
         <div class="flex gap-3 justify-end">
           <button

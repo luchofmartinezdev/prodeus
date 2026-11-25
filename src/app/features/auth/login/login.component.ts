@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../../state/auth.store';
 
 @Component({
   selector: 'app-login',
+  imports: [RouterLink],
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

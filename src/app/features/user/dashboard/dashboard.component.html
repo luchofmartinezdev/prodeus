@@ -1,55 +1,61 @@
 <div class="p-4 sm:p-8 max-w-5xl w-full">
-  <!-- Greeting -->
-  <div class="mb-8 flex items-center gap-4">
+  <!-- Saludo -->
+  <header class="mb-8 flex items-center gap-4">
     @if (authStore.avatarUrl()) {
       <img
         [src]="authStore.avatarUrl()"
-        alt="Avatar"
-        class="w-14 h-14 rounded-full object-cover shrink-0"
+        alt=""
+        class="w-14 h-14 rounded-full object-cover shrink-0 ring-2 ring-orange-400/60"
         referrerpolicy="no-referrer"
       />
     }
     <div class="min-w-0">
-      <h1 class="text-3xl font-bold text-white truncate">Hola, {{ authStore.displayName() }} 👋</h1>
-      <p class="text-gray-400 mt-1">Acá vas a encontrar un resumen de tu actividad en Prodeus.</p>
+      <p class="t-label !text-orange-400">Tu resumen</p>
+      <h1 class="t-display text-white text-4xl sm:text-5xl truncate">
+        Hola, {{ authStore.displayName() }}
+      </h1>
     </div>
-  </div>
+  </header>
 
-  <!-- Stats -->
-  <div class="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-3">
+  <!-- Resumen en números -->
+  <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-10">
     <a
       routerLink="/home/groups"
-      class="bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition-colors group/stat"
+      class="card p-4 sm:p-5 hover:border-gray-600 transition-colors group/stat"
     >
-      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Grupos</p>
-      <p class="text-3xl font-black text-white group-hover/stat:text-blue-400 transition-colors">
+      <p class="t-label mb-2">Grupos</p>
+      <p class="t-display text-5xl sm:text-6xl text-white tabular">
         {{ groupStore.groups().length }}
       </p>
-      <p class="text-gray-700 text-xs mt-1 group-hover/stat:text-gray-500 transition-colors">
+      <p
+        class="hidden sm:block text-gray-400 text-xs mt-2 group-hover/stat:text-white transition-colors"
+      >
         Ver mis grupos →
       </p>
     </a>
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Torneos activos</p>
-      <p class="text-3xl font-black text-white">{{ activeTournamentCount }}</p>
+    <div class="card p-4 sm:p-5">
+      <p class="t-label mb-2">Torneos</p>
+      <p class="t-display text-5xl sm:text-6xl text-white tabular">{{ activeTournamentCount }}</p>
+      <p class="hidden sm:block text-gray-400 text-xs mt-2">En los que participás</p>
     </div>
-    <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 col-span-2 sm:col-span-1">
-      <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">
-        Próximos partidos
+    <div class="card p-4 sm:p-5">
+      <p class="t-label mb-2">Por jugar</p>
+      <p class="t-display text-5xl sm:text-6xl text-orange-400 tabular">
+        {{ upcomingMatches().length }}
       </p>
-      <p class="text-3xl font-black text-white">{{ upcomingMatches().length }}</p>
+      <p class="hidden sm:block text-gray-400 text-xs mt-2">Próximos partidos</p>
     </div>
   </div>
 
-  <!-- Skeleton loader -->
+  <!-- Carga -->
   @if (isLoadingGroups()) {
-    <section class="mb-8">
-      <div class="h-6 bg-gray-800 rounded animate-pulse w-28 mb-4"></div>
+    <section class="mb-8" aria-busy="true" aria-label="Cargando grupos">
+      <div class="h-8 bg-gray-800 rounded animate-pulse w-40 mb-4"></div>
       <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         @for (i of [1, 2, 3, 4]; track i) {
-          <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <div class="h-3 bg-gray-800 rounded animate-pulse w-24 mb-2"></div>
-            <div class="h-4 bg-gray-800 rounded animate-pulse w-36 mb-2"></div>
+          <div class="card p-4">
+            <div class="h-3 bg-gray-800 rounded animate-pulse w-24 mb-3"></div>
+            <div class="h-4 bg-gray-800 rounded animate-pulse w-36 mb-3"></div>
             <div class="h-4 bg-gray-800 rounded-full animate-pulse w-14"></div>
           </div>
         }
@@ -58,42 +64,27 @@
   }
 
   @if (!isLoadingGroups()) {
-    <!-- Empty state -->
+    <!-- Sin grupos -->
     @if (groupStore.groups().length === 0) {
       <div
-        class="bg-gray-900 border border-dashed border-gray-700 rounded-2xl p-12 text-center mb-8"
+        class="pitch-lines border border-dashed border-gray-700 rounded-2xl p-10 sm:p-14 text-center mb-10"
       >
-        <svg
-          class="w-12 h-12 text-gray-700 mx-auto mb-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="1.5"
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-        <p class="text-gray-300 font-semibold text-lg mb-1">
-          Todavía no participás en ningún grupo
+        <p class="t-display text-white text-4xl sm:text-5xl mb-2">Armá tu primer prode</p>
+        <p class="text-gray-300 mb-7 max-w-sm mx-auto">
+          Creá un grupo e invitá a tus amigos, o sumate a uno con un código de invitación.
         </p>
-        <p class="text-gray-500 text-sm mb-6">
-          Creá uno nuevo o unite a uno con un código de invitación.
-        </p>
-        <div class="flex items-center justify-center gap-3">
+        <div class="flex flex-wrap items-center justify-center gap-3">
           <a
             routerLink="/home/groups/new"
-            class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
+            class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-colors"
           >
             Crear grupo
           </a>
           <a
             routerLink="/home/groups"
-            class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-colors"
+            class="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
-            Unirme por código
+            Unirme con código
           </a>
         </div>
       </div>
@@ -101,13 +92,13 @@
 
     <!-- Mis grupos -->
     @if (previewGroups.length > 0) {
-      <section class="mb-8">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-bold text-white">Mis grupos</h2>
+      <section class="mb-10">
+        <div class="flex items-end justify-between mb-4">
+          <h2 class="t-display text-white text-3xl">Mis grupos</h2>
           @if (groupStore.groups().length > 4) {
             <a
               routerLink="/home/groups"
-              class="text-blue-400 hover:text-blue-300 text-sm transition-colors"
+              class="text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors"
             >
               Ver todos ({{ groupStore.groups().length }})
             </a>
@@ -117,91 +108,90 @@
           @for (group of previewGroups; track group.id) {
             <a
               [routerLink]="['/home/groups', group.id]"
-              class="block bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-4 transition-colors group/card"
+              class="card block p-4 hover:border-blue-600 transition-colors group/card"
             >
-              <div class="flex items-center gap-1.5 mb-1">
+              <div class="flex items-center gap-1.5 mb-2">
                 @if (group.tournament.logo_url) {
                   <img
                     [src]="group.tournament.logo_url"
                     [alt]="group.tournament.name"
-                    class="w-3.5 h-3.5 object-contain rounded-sm shrink-0"
+                    class="w-4 h-4 object-contain rounded-sm shrink-0"
                   />
                 }
-                <p class="text-xs text-gray-500 truncate">{{ group.tournament.name }}</p>
+                <p class="t-label truncate">{{ group.tournament.name }}</p>
               </div>
               <p
-                class="text-white font-semibold text-sm group-hover/card:text-blue-300 transition-colors truncate"
+                class="text-white font-bold truncate group-hover/card:text-blue-300 transition-colors"
               >
                 {{ group.name }}
               </p>
               <span
-                class="mt-2 inline-block text-xs px-1.5 py-0.5 rounded"
+                class="chip mt-3"
                 [class]="
                   group.visibility === 'public'
-                    ? 'bg-green-900 text-green-400'
-                    : 'bg-yellow-900 text-yellow-400'
+                    ? 'bg-green-900 text-green-300 border-green-800'
+                    : 'bg-yellow-900 text-yellow-300 border-yellow-800'
                 "
               >
                 {{ group.visibility === 'public' ? 'Público' : 'Privado' }}
               </span>
             </a>
           }
-          <!-- Add group card -->
           <a
             routerLink="/home/groups/new"
-            class="flex flex-col items-center justify-center border border-dashed border-gray-700 hover:border-blue-600 rounded-xl p-4 text-gray-600 hover:text-blue-400 transition-colors min-h-[90px]"
+            class="flex flex-col items-center justify-center border border-dashed border-gray-700 hover:border-blue-500 rounded-2xl p-4 text-gray-400 hover:text-blue-400 transition-colors min-h-[104px]"
           >
-            <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 4v16m8-8H4"
-              />
+            <svg
+              class="w-6 h-6 mb-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            <span class="text-xs font-medium">Crear grupo</span>
+            <span class="text-sm font-semibold">Crear grupo</span>
           </a>
         </div>
       </section>
     }
 
-    <!-- Grupos públicos (descubrir) -->
+    <!-- Grupos públicos -->
     @if (groupStore.isLoadingPublic()) {
-      <section class="mb-8">
-        <div class="h-6 bg-gray-800 rounded animate-pulse w-40 mb-4"></div>
+      <section class="mb-10" aria-busy="true">
+        <div class="h-8 bg-gray-800 rounded animate-pulse w-48 mb-4"></div>
         <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           @for (i of [1, 2, 3, 4]; track i) {
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-              <div class="h-3 bg-gray-800 rounded animate-pulse w-24 mb-2"></div>
-              <div class="h-4 bg-gray-800 rounded animate-pulse w-36 mb-2"></div>
+            <div class="card p-4">
+              <div class="h-3 bg-gray-800 rounded animate-pulse w-24 mb-3"></div>
+              <div class="h-4 bg-gray-800 rounded animate-pulse w-36"></div>
             </div>
           }
         </div>
       </section>
     } @else if (discoverableGroups.length > 0) {
-      <section class="mb-8">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-bold text-white">Grupos públicos</h2>
-        </div>
+      <section class="mb-10">
+        <h2 class="t-display text-white text-3xl mb-4">Grupos públicos</h2>
         <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           @for (group of discoverableGroups; track group.id) {
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
-              <div class="flex items-center gap-1.5 mb-1">
+            <div class="card p-4 flex flex-col">
+              <div class="flex items-center gap-1.5 mb-2">
                 @if (group.tournament.logo_url) {
                   <img
                     [src]="group.tournament.logo_url"
                     [alt]="group.tournament.name"
-                    class="w-3.5 h-3.5 object-contain rounded-sm shrink-0"
+                    class="w-4 h-4 object-contain rounded-sm shrink-0"
                   />
                 }
-                <p class="text-xs text-gray-500 truncate">{{ group.tournament.name }}</p>
+                <p class="t-label truncate">{{ group.tournament.name }}</p>
               </div>
-              <p class="text-white font-semibold text-sm truncate mb-2">{{ group.name }}</p>
+              <p class="text-white font-bold truncate mb-4">{{ group.name }}</p>
               <button
                 type="button"
                 (click)="onJoinPublic(group.id)"
                 [disabled]="groupStore.isLoading()"
-                class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+                class="mt-auto w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-colors"
               >
                 Unirme
               </button>
@@ -214,85 +204,75 @@
     <!-- Próximos partidos -->
     @if (groupStore.groups().length > 0) {
       <section>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-bold text-white">Próximos partidos</h2>
-        </div>
+        <h2 class="t-display text-white text-3xl mb-4">Próximos partidos</h2>
 
         @if (isLoadingMatches()) {
-          <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div class="card overflow-hidden" aria-busy="true">
             @for (i of [1, 2, 3]; track i) {
               <div
-                class="flex items-center justify-between px-5 py-4 border-b border-gray-800 last:border-0"
+                class="flex items-center gap-4 px-4 sm:px-5 py-4 border-b border-gray-800 last:border-0"
               >
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                  <div class="h-4 bg-gray-800 rounded animate-pulse w-28"></div>
-                  <div class="h-3 bg-gray-800 rounded animate-pulse w-6 shrink-0"></div>
-                  <div class="h-4 bg-gray-800 rounded animate-pulse w-28"></div>
-                </div>
-                <div class="text-right ml-4 shrink-0">
-                  <div class="h-3 bg-gray-800 rounded animate-pulse w-20 mb-1.5"></div>
-                  <div class="h-3 bg-gray-800 rounded animate-pulse w-12"></div>
-                </div>
+                <div class="h-12 w-12 bg-gray-800 rounded-lg animate-pulse shrink-0"></div>
+                <div class="h-4 bg-gray-800 rounded animate-pulse w-48"></div>
               </div>
             }
           </div>
         } @else if (upcomingMatches().length === 0) {
-          <div
-            class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-8 text-center text-gray-500 text-sm"
-          >
-            No hay partidos programados próximamente.
+          <div class="card px-5 py-10 text-center text-gray-300 text-sm">
+            No hay partidos programados por ahora. Cuando se carguen, los vas a ver acá.
           </div>
         } @else {
-          <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <ul class="card overflow-hidden">
             @for (match of upcomingMatches(); track match.id) {
-              <div
-                class="flex items-center justify-between px-5 py-4 border-b border-gray-800 last:border-0"
+              <li
+                class="flex items-center gap-4 px-4 sm:px-5 py-4 border-b border-gray-800 last:border-0"
               >
-                <!-- Teams -->
-                <div class="flex items-center gap-3 min-w-0">
-                  <span
-                    class="text-white font-semibold text-sm flex items-center gap-1.5 min-w-0 truncate"
-                  >
-                    @if (match.home_team?.logo_url) {
-                      <img
-                        [src]="match.home_team!.logo_url"
-                        [alt]="match.home_team!.name"
-                        class="w-5 h-5 object-contain shrink-0"
-                      />
-                    } @else if (getFlag(match.home_team?.name)) {
-                      <span>{{ getFlag(match.home_team?.name) }}</span>
-                    }
-                    <span class="truncate">{{ match.home_team?.name ?? '?' }}</span>
-                  </span>
-                  <span class="text-gray-600 text-xs font-medium shrink-0">vs</span>
-                  <span
-                    class="text-white font-semibold text-sm flex items-center gap-1.5 min-w-0 truncate"
-                  >
-                    @if (match.away_team?.logo_url) {
-                      <img
-                        [src]="match.away_team!.logo_url"
-                        [alt]="match.away_team!.name"
-                        class="w-5 h-5 object-contain shrink-0"
-                      />
-                    } @else if (getFlag(match.away_team?.name)) {
-                      <span>{{ getFlag(match.away_team?.name) }}</span>
-                    }
-                    <span class="truncate">{{ match.away_team?.name ?? '?' }}</span>
-                  </span>
+                <!-- Fecha y hora -->
+                <div class="w-16 shrink-0 text-center rounded-lg bg-gray-800 py-1.5 leading-none">
+                  <p class="t-display text-2xl text-orange-400 tabular">
+                    {{ formatTime(match.match_date) }}
+                  </p>
+                  <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mt-1">
+                    {{ formatDay(match.match_date) }}
+                  </p>
+                </div>
+
+                <!-- Equipos -->
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 min-w-0 text-white font-bold">
+                    <span class="flex items-center gap-1.5 min-w-0">
+                      @if (match.home_team?.logo_url) {
+                        <img
+                          [src]="match.home_team!.logo_url"
+                          [alt]="match.home_team!.name"
+                          class="w-5 h-5 object-contain shrink-0"
+                        />
+                      } @else if (getFlag(match.home_team?.name)) {
+                        <span>{{ getFlag(match.home_team?.name) }}</span>
+                      }
+                      <span class="truncate">{{ match.home_team?.name ?? '?' }}</span>
+                    </span>
+                    <span class="text-gray-500 text-xs font-semibold shrink-0">vs</span>
+                    <span class="flex items-center gap-1.5 min-w-0">
+                      @if (match.away_team?.logo_url) {
+                        <img
+                          [src]="match.away_team!.logo_url"
+                          [alt]="match.away_team!.name"
+                          class="w-5 h-5 object-contain shrink-0"
+                        />
+                      } @else if (getFlag(match.away_team?.name)) {
+                        <span>{{ getFlag(match.away_team?.name) }}</span>
+                      }
+                      <span class="truncate">{{ match.away_team?.name ?? '?' }}</span>
+                    </span>
+                  </div>
                   @if (match.round) {
-                    <span class="text-gray-600 text-xs hidden sm:inline">· {{ match.round }}</span>
+                    <p class="text-gray-400 text-xs mt-1 truncate">{{ match.round }}</p>
                   }
                 </div>
-                <!-- Date & time -->
-                <div class="text-right flex-shrink-0 ml-4">
-                  <p class="text-gray-300 text-xs font-medium">
-                    {{ formatDate(match.match_date) }}
-                  </p>
-                  <p class="text-gray-500 text-xs">{{ formatTime(match.match_date) }}</p>
-                </div>
-              </div>
+              </li>
             }
-          </div>
+          </ul>
         }
       </section>
     }
@@ -300,13 +280,14 @@
 
   @if (groupStore.error() && !isLoadingGroups()) {
     <div
-      class="mt-4 p-4 rounded-xl bg-red-950 border border-red-900 text-red-400 text-sm flex items-center justify-between gap-3"
+      role="alert"
+      class="mt-6 p-4 rounded-xl bg-red-950 border border-red-900 text-red-300 text-sm flex items-center justify-between gap-3"
     >
       <span>{{ groupStore.error() }}</span>
       <button
         type="button"
         (click)="groupStore.loadMyGroups()"
-        class="shrink-0 px-3 py-1.5 bg-red-900 hover:bg-red-800 text-red-300 text-xs font-medium rounded-lg transition-colors"
+        class="shrink-0 px-3 py-1.5 bg-red-900 hover:bg-red-800 text-red-300 text-xs font-bold rounded-lg transition-colors"
       >
         Reintentar
       </button>

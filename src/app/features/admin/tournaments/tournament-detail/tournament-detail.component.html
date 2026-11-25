@@ -25,7 +25,7 @@
         }
         <div>
           <div class="flex items-center gap-3">
-            <h1 class="text-2xl font-bold text-white">{{ t.name }}</h1>
+            <h1 class="t-display text-white text-4xl">{{ t.name }}</h1>
             <span
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
               [class]="statusClass(t.status)"
@@ -152,7 +152,7 @@
                 class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
               />
               @if (isLoadingAllTeams()) {
-                <p class="text-gray-500 text-sm py-2">Cargando equipos...</p>
+                <p class="text-gray-400 text-sm py-2">Cargando equipos...</p>
               } @else {
                 <div class="max-h-64 overflow-y-auto space-y-1 mb-3">
                   @for (t of filteredExistingTeams; track t.id) {
@@ -171,7 +171,7 @@
                       {{ t.name }}
                     </button>
                   } @empty {
-                    <p class="text-gray-500 text-sm px-3 py-2">Sin resultados</p>
+                    <p class="text-gray-400 text-sm px-3 py-2">Sin resultados</p>
                   }
                 </div>
               }
@@ -312,7 +312,7 @@
 
         <!-- Teams list -->
         @if (teams().length === 0) {
-          <div class="text-center py-12 text-gray-500 text-sm">No hay equipos cargados todavía</div>
+          <div class="text-center py-12 text-gray-400 text-sm">No hay equipos cargados todavía</div>
         } @else {
           <div
             class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden overflow-x-auto"
@@ -482,7 +482,7 @@
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-400 mb-1"
-                  >Deadline predicción * <span class="text-gray-600">(1 min antes)</span></label
+                  >Deadline predicción * <span class="text-gray-400">(1 min antes)</span></label
                 >
                 <input
                   type="datetime-local"
@@ -526,13 +526,13 @@
 
         <!-- Matches list -->
         @if (matches().length === 0) {
-          <div class="text-center py-12 text-gray-500 text-sm">
+          <div class="text-center py-12 text-gray-400 text-sm">
             No hay partidos cargados todavía
           </div>
         } @else {
           <div class="space-y-2">
             @for (match of matches(); track match.id) {
-              <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+              <div class="card p-4">
                 <!-- Match info -->
                 <div class="flex items-start justify-between gap-3">
                   <div class="flex-1 min-w-0">
@@ -555,7 +555,7 @@
                           >{{ match.home_score }} – {{ match.away_score }}</span
                         >
                       } @else {
-                        <span class="text-gray-500 text-sm font-medium shrink-0">vs</span>
+                        <span class="text-gray-400 text-sm font-medium shrink-0">vs</span>
                       }
                       <span
                         class="text-white font-semibold text-sm flex items-center gap-1.5 min-w-0"
@@ -577,7 +577,7 @@
                       </span>
                     </div>
                     <!-- Meta -->
-                    <p class="text-gray-500 text-xs">
+                    <p class="text-gray-400 text-xs">
                       {{ formatDatetime(match.match_date) }}
                       @if (match.round) {
                         · {{ match.round }}
@@ -637,7 +637,7 @@
                     <p class="text-gray-400 text-xs font-medium mb-2">Cargar resultado</p>
                     <div class="flex items-center gap-2">
                       <!-- Home team label + input -->
-                      <span class="text-gray-500 text-xs truncate flex-1 text-right">
+                      <span class="text-gray-400 text-xs truncate flex-1 text-right">
                         {{ match.home_team?.short_name ?? match.home_team?.name ?? 'Local' }}
                       </span>
                       <input
@@ -646,14 +646,14 @@
                         min="0"
                         class="w-12 px-1 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      <span class="text-gray-500 font-bold">–</span>
+                      <span class="text-gray-400 font-bold">–</span>
                       <input
                         type="number"
                         [(ngModel)]="resultAway"
                         min="0"
                         class="w-12 px-1 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      <span class="text-gray-500 text-xs truncate flex-1">
+                      <span class="text-gray-400 text-xs truncate flex-1">
                         {{ match.away_team?.short_name ?? match.away_team?.name ?? 'Visita' }}
                       </span>
                     </div>

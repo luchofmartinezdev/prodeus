@@ -89,20 +89,6 @@ export class RankingComponent implements OnInit, OnDestroy, OnChanges {
     return 'bg-yellow-900 text-yellow-300';
   }
 
-  positionClass(pos: number): string {
-    if (pos === 1) return 'text-yellow-400 font-black';
-    if (pos === 2) return 'text-gray-300 font-bold';
-    if (pos === 3) return 'text-amber-600 font-bold';
-    return 'text-gray-500';
-  }
-
-  positionIcon(pos: number): string {
-    if (pos === 1) return '🥇';
-    if (pos === 2) return '🥈';
-    if (pos === 3) return '🥉';
-    return `${pos}°`;
-  }
-
   getFlag(name: string): string {
     return getFlagEmoji(name);
   }

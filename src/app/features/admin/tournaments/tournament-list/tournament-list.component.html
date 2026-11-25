@@ -2,7 +2,7 @@
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-white">Torneos</h1>
+      <h1 class="t-display text-white text-4xl">Torneos</h1>
       <p class="text-gray-400 text-sm mt-0.5">Gestioná los torneos de la plataforma</p>
     </div>
     <a
@@ -59,8 +59,7 @@
   <!-- Empty state -->
   @if (!isLoadingTournaments() && store.tournaments().length === 0) {
     <div class="text-center py-20">
-      <div class="text-5xl mb-4">🏆</div>
-      <h3 class="text-white font-semibold mb-1">No hay torneos todavía</h3>
+      <h3 class="t-display text-white text-3xl mb-1">No hay torneos todavía</h3>
       <p class="text-gray-400 text-sm mb-4">Creá el primero para empezar</p>
       <a
         routerLink="/admin/tournaments/new"
@@ -106,7 +105,7 @@
                       {{ tournament.name }}
                     </a>
                     @if (tournament.description) {
-                      <p class="text-gray-500 text-xs mt-0.5 truncate max-w-xs">
+                      <p class="text-gray-400 text-xs mt-0.5 truncate max-w-xs">
                         {{ tournament.description }}
                       </p>
                     }

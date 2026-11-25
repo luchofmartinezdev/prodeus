@@ -244,11 +244,4 @@ export class GroupDetailComponent implements OnInit, OnChanges {
       minute: '2-digit',
     });
   }
-
-  positionIcon(pos: number): string {
-    if (pos === 1) return '🥇';
-    if (pos === 2) return '🥈';
-    if (pos === 3) return '🥉';
-    return `${pos}°`;
-  }
 }

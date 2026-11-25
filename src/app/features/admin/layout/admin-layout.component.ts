@@ -24,8 +24,8 @@ import { AuthStore } from '../../../state/auth.store';
       >
         <!-- Logo -->
         <div class="px-5 py-5 border-b border-gray-800">
-          <span class="text-white font-black text-xl tracking-tight">PRODEUS</span>
-          <span class="ml-2 text-xs text-blue-400 font-semibold uppercase">Admin</span>
+          <span class="t-display text-2xl text-white">Prodeus</span>
+          <span class="chip ml-2 bg-orange-950 text-orange-300 border-orange-900">Admin</span>
         </div>
 
         <!-- Nav -->
@@ -34,7 +34,7 @@ import { AuthStore } from '../../../state/auth.store';
             routerLink="/admin/tournaments"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: false }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -50,7 +50,7 @@ import { AuthStore } from '../../../state/auth.store';
             routerLink="/admin/rules"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -66,7 +66,7 @@ import { AuthStore } from '../../../state/auth.store';
             routerLink="/admin/stats"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -81,7 +81,7 @@ import { AuthStore } from '../../../state/auth.store';
           <a
             routerLink="/admin/profile"
             routerLinkActive="bg-blue-600 text-white"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -146,8 +146,8 @@ import { AuthStore } from '../../../state/auth.store';
         <!-- Logo + close button -->
         <div class="px-5 py-5 border-b border-gray-800 flex items-center justify-between">
           <div>
-            <span class="text-white font-black text-xl tracking-tight">PRODEUS</span>
-            <span class="ml-2 text-xs text-blue-400 font-semibold uppercase">Admin</span>
+            <span class="t-display text-2xl text-white">Prodeus</span>
+            <span class="chip ml-2 bg-orange-950 text-orange-300 border-orange-900">Admin</span>
           </div>
           <button
             type="button"
@@ -171,7 +171,7 @@ import { AuthStore } from '../../../state/auth.store';
             routerLink="/admin/tournaments"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: false }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -187,7 +187,7 @@ import { AuthStore } from '../../../state/auth.store';
             routerLink="/admin/rules"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -203,7 +203,7 @@ import { AuthStore } from '../../../state/auth.store';
             routerLink="/admin/stats"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -218,7 +218,7 @@ import { AuthStore } from '../../../state/auth.store';
           <a
             routerLink="/admin/profile"
             routerLinkActive="bg-blue-600 text-white"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -271,7 +271,7 @@ import { AuthStore } from '../../../state/auth.store';
           routerLink="/admin/tournaments"
           routerLinkActive="text-blue-400"
           [routerLinkActiveOptions]="{ exact: false }"
-          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-500 hover:text-white transition-colors"
+          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-400 hover:text-white transition-colors"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -287,7 +287,7 @@ import { AuthStore } from '../../../state/auth.store';
           routerLink="/admin/rules"
           routerLinkActive="text-blue-400"
           [routerLinkActiveOptions]="{ exact: true }"
-          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-500 hover:text-white transition-colors"
+          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-400 hover:text-white transition-colors"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -302,7 +302,7 @@ import { AuthStore } from '../../../state/auth.store';
         <button
           type="button"
           (click)="sidebarOpen.set(!sidebarOpen())"
-          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-500 hover:text-white transition-colors"
+          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-400 hover:text-white transition-colors"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path

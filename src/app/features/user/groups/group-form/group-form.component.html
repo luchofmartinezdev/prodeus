@@ -1,42 +1,47 @@
 <div class="p-4 sm:p-8 max-w-2xl mx-auto">
   <!-- Header -->
-  <div class="flex items-center gap-3 mb-6">
+  <header class="flex items-center gap-3 mb-6">
     <a
       routerLink="/home/groups"
-      class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+      aria-label="Volver a mis grupos"
+      class="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
     >
-      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
     </a>
     <div>
-      <h1 class="text-2xl font-bold text-white">Crear grupo</h1>
-      <p class="text-sm text-gray-400 mt-0.5">Invitá amigos con un código y competí juntos</p>
+      <p class="t-label !text-orange-400">Nuevo prode</p>
+      <h1 class="t-display text-white text-4xl sm:text-5xl">Crear grupo</h1>
     </div>
-  </div>
+  </header>
+  <p class="text-gray-300 text-sm mb-5">
+    Elegí un nombre y un torneo. Después compartís el código y tus amigos se suman.
+  </p>
 
   <form (ngSubmit)="onSubmit()" novalidate>
-    <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+    <div class="card p-5 sm:p-6 space-y-6">
       <!-- Nombre -->
       <div>
         <div class="flex items-center justify-between mb-1.5">
-          <label class="text-sm font-medium text-gray-300">
+          <label for="group-name" class="text-sm font-bold text-gray-200">
             Nombre del grupo <span class="text-red-400">*</span>
           </label>
           <span
             class="text-xs tabular-nums transition-colors"
-            [class]="name.length > 50 ? 'text-red-400' : 'text-gray-500'"
+            [class]="name.length > 50 ? 'text-red-400' : 'text-gray-400'"
           >
             {{ name.length }}/60
           </span>
         </div>
         <input
           type="text"
+          id="group-name"
           name="name"
           [(ngModel)]="name"
           maxlength="60"
           placeholder="Los Cracks del Prode"
-          class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          class="w-full px-4 py-2.5 rounded-xl bg-gray-800 border text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors"
           [class.border-red-600]="fieldErrors()['name']"
           [class.border-gray-700]="!fieldErrors()['name']"
         />
@@ -47,11 +52,11 @@
 
       <!-- Torneo -->
       <div>
-        <label class="block text-sm font-medium text-gray-300 mb-1.5">
+        <label for="group-tournament" class="block text-sm font-bold text-gray-200 mb-1.5">
           Torneo <span class="text-red-400">*</span>
         </label>
         @if (isLoadingTournaments()) {
-          <div class="flex items-center gap-2 text-gray-500 text-sm py-2">
+          <div class="flex items-center gap-2 text-gray-400 text-sm py-2">
             <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
               <circle
                 class="opacity-25"
@@ -67,10 +72,10 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
               />
             </svg>
-            Cargando torneos...
+            Cargando torneos…
           </div>
         } @else if (tournamentStore.activeTournaments().length === 0) {
-          <p class="text-gray-500 text-sm py-2">No hay torneos activos disponibles.</p>
+          <p class="text-gray-400 text-sm py-2">No hay torneos activos disponibles.</p>
         } @else {
           <div class="relative">
             <div class="relative">
@@ -95,10 +100,11 @@
                 (ngModelChange)="tournamentSearch.set($event)"
                 (focus)="openTournamentDropdown()"
                 (blur)="closeTournamentDropdown()"
+                id="group-tournament"
                 name="tournamentSearch"
                 placeholder="Buscar torneo..."
                 autocomplete="off"
-                class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-gray-800 border text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-800 border text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors"
                 [class.border-red-600]="fieldErrors()['tournament']"
                 [class.border-gray-700]="!fieldErrors()['tournament']"
               />
@@ -109,7 +115,7 @@
                 class="absolute z-10 mt-1.5 w-full max-h-[200px] overflow-y-auto rounded-lg border border-gray-700 bg-gray-800 shadow-xl"
               >
                 @if (filteredTournaments().length === 0) {
-                  <p class="px-4 py-3 text-sm text-gray-500">Sin resultados</p>
+                  <p class="px-4 py-3 text-sm text-gray-400">Sin resultados</p>
                 } @else {
                   @for (t of filteredTournaments(); track t.id) {
                     <button
@@ -157,7 +163,7 @@
 
       <!-- Tipo de grupo -->
       <div>
-        <label class="block text-sm font-medium text-gray-300 mb-1.5">Tipo de grupo</label>
+        <p class="block text-sm font-bold text-gray-200 mb-1.5">Tipo de grupo</p>
         <div class="grid grid-cols-2 gap-3">
           <!-- Público -->
           <label class="cursor-pointer">
@@ -169,16 +175,16 @@
               class="sr-only"
             />
             <div
-              class="h-full px-4 py-3 rounded-lg border text-sm transition-colors"
+              class="h-full px-4 py-4 rounded-xl border-2 text-sm transition-colors"
               [class]="
                 visibility === 'public'
                   ? 'border-blue-500 bg-blue-950 text-white'
-                  : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
+                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
               "
             >
               <svg
                 class="w-5 h-5 mb-1.5"
-                [class]="visibility === 'public' ? 'text-blue-400' : 'text-gray-500'"
+                [class]="visibility === 'public' ? 'text-blue-400' : 'text-gray-400'"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -190,8 +196,8 @@
                   d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
                 />
               </svg>
-              <p class="font-medium mb-0.5">Público</p>
-              <p class="text-xs opacity-70">
+              <p class="font-bold mb-0.5">Público</p>
+              <p class="text-xs text-gray-300">
                 Aparece listado en el inicio para que cualquiera se una
               </p>
             </div>
@@ -206,16 +212,16 @@
               class="sr-only"
             />
             <div
-              class="h-full px-4 py-3 rounded-lg border text-sm transition-colors"
+              class="h-full px-4 py-4 rounded-xl border-2 text-sm transition-colors"
               [class]="
                 visibility === 'private'
                   ? 'border-blue-500 bg-blue-950 text-white'
-                  : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
+                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
               "
             >
               <svg
                 class="w-5 h-5 mb-1.5"
-                [class]="visibility === 'private' ? 'text-blue-400' : 'text-gray-500'"
+                [class]="visibility === 'private' ? 'text-blue-400' : 'text-gray-400'"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -227,8 +233,8 @@
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                 />
               </svg>
-              <p class="font-medium mb-0.5">Privado</p>
-              <p class="text-xs opacity-70">Solo se une quien tenga el código de invitación</p>
+              <p class="font-bold mb-0.5">Privado</p>
+              <p class="text-xs text-gray-300">Solo se une quien tenga el código de invitación</p>
             </div>
           </label>
         </div>
@@ -238,7 +244,8 @@
     <!-- Error del servidor -->
     @if (store.error()) {
       <div
-        class="mt-4 flex items-center gap-2 px-4 py-3 bg-red-950 border border-red-800 rounded-lg text-sm text-red-400"
+        role="alert"
+        class="mt-4 flex items-center gap-2 px-4 py-3 bg-red-950 border border-red-800 rounded-xl text-sm text-red-300"
       >
         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -257,7 +264,7 @@
       <button
         type="submit"
         [disabled]="store.isLoading()"
-        class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-sm rounded-lg transition-colors"
+        class="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-sm rounded-xl transition-colors"
       >
         @if (store.isLoading()) {
           <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -280,7 +287,7 @@
       </button>
       <a
         routerLink="/home/groups"
-        class="px-5 py-2.5 text-gray-400 hover:text-white text-sm font-medium transition-colors"
+        class="px-5 py-3 text-gray-300 hover:text-white text-sm font-semibold transition-colors"
       >
         Cancelar
       </a>

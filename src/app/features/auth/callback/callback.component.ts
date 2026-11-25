@@ -28,7 +28,7 @@ import { AuthStore } from '../../../state/auth.store';
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
           />
         </svg>
-        <p class="text-gray-400 text-sm">Iniciando sesión...</p>
+        <p class="text-gray-400 text-sm">Iniciando sesión…</p>
       </div>
     </div>
   `,
