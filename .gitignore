@@ -57,3 +57,6 @@ Thumbs.db
 .firebase/
 firebase-debug.log
 firestore-debug.log
+# Temporary previews and verification artifacts
+verify-screenshots/
+preview-*.html
