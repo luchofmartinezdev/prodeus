@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, NavigationEnd, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -6,10 +7,44 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
 import { AuthStore } from '../../../state/auth.store';
 
+interface NavItem {
+  link: string;
+  label: string;
+  /** Path de un ícono outline de 24x24 */
+  icon: string;
+}
+
+const NAV_ITEMS: NavItem[] = [
+  {
+    link: '/admin/tournaments',
+    label: 'Torneos',
+    icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10',
+  },
+  {
+    link: '/admin/rules',
+    label: 'Reglas',
+    icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+  },
+  {
+    link: '/admin/stats',
+    label: 'Estadísticas',
+    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+  },
+  {
+    link: '/admin/profile',
+    label: 'Mi perfil',
+    icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+  },
+];
+
+const LOGOUT_ICON =
+  'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1';
+
 @Component({
   selector: 'app-admin-layout',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    NgTemplateOutlet,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
@@ -17,306 +52,129 @@ import { AuthStore } from '../../../state/auth.store';
     ConfirmModalComponent,
   ],
   template: `
-    <div class="flex h-screen bg-gray-950 overflow-hidden">
-      <!-- Sidebar — desktop only -->
-      <aside
-        class="hidden md:flex w-56 flex-shrink-0 bg-gray-900 border-r border-gray-800 flex-col"
-      >
-        <!-- Logo -->
-        <div class="px-5 py-5 border-b border-gray-800">
-          <span class="t-display text-2xl text-white">Prodeus</span>
-          <span class="chip ml-2 bg-orange-950 text-orange-300 border-orange-900">Admin</span>
-        </div>
-
-        <!-- Nav -->
-        <nav class="flex-1 px-3 py-4 space-y-1">
+    <!-- Contenido de la barra lateral: se reutiliza en escritorio y en el cajón móvil -->
+    <ng-template #sidebarBody>
+      <nav class="flex-1 px-3 py-4 space-y-1" aria-label="Administración">
+        @for (item of navItems; track item.link) {
           <a
-            routerLink="/admin/tournaments"
+            [routerLink]="item.link"
             routerLinkActive="bg-blue-600 text-white"
-            [routerLinkActiveOptions]="{ exact: false }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
           >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
-            </svg>
-            Torneos
-          </a>
-          <a
-            routerLink="/admin/rules"
-            routerLinkActive="bg-blue-600 text-white"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-              />
-            </svg>
-            Reglas
-          </a>
-          <a
-            routerLink="/admin/stats"
-            routerLinkActive="bg-blue-600 text-white"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
-            Estadísticas
-          </a>
-          <a
-            routerLink="/admin/profile"
-            routerLinkActive="bg-blue-600 text-white"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-            Mi perfil
-          </a>
-        </nav>
-
-        <!-- Footer: user info + theme + logout -->
-        <div class="px-4 py-4 border-t border-gray-800 space-y-2">
-          <!-- User info + theme toggle on same row -->
-          <div class="flex items-center gap-2">
-            <div
-              class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
+            <svg
+              class="w-[18px] h-[18px]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
             >
-              {{ authStore.profile()?.username?.charAt(0)?.toUpperCase() ?? 'A' }}
-            </div>
-            <span class="text-gray-300 text-sm truncate flex-1">{{
-              authStore.profile()?.username
-            }}</span>
-            <app-theme-toggle />
-          </div>
-
-          <!-- Sign out -->
-          <button
-            type="button"
-            (click)="showSignOutModal.set(true)"
-            class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
+              <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon" />
             </svg>
-            Cerrar sesión
-          </button>
+            {{ item.label }}
+          </a>
+        }
+      </nav>
+
+      <div class="px-4 py-4 border-t border-gray-800 space-y-2">
+        <div class="flex items-center gap-2.5">
+          @if (authStore.avatarUrl()) {
+            <img
+              [src]="authStore.avatarUrl()"
+              alt=""
+              class="w-8 h-8 rounded-full object-cover shrink-0"
+              referrerpolicy="no-referrer"
+            />
+          } @else {
+            <div
+              class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
+            >
+              {{ authStore.displayName()?.charAt(0)?.toUpperCase() ?? 'A' }}
+            </div>
+          }
+          <span class="text-gray-200 text-sm font-medium truncate flex-1">{{
+            authStore.displayName()
+          }}</span>
+          <app-theme-toggle />
         </div>
+        <button
+          type="button"
+          (click)="showSignOutModal.set(true)"
+          class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+        >
+          <svg
+            class="w-[18px] h-[18px]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="logoutIcon" />
+          </svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </ng-template>
+
+    <div class="flex h-screen bg-gray-950 overflow-hidden">
+      <!-- Barra lateral: escritorio -->
+      <aside
+        class="hidden md:flex w-60 flex-shrink-0 bg-gray-900 border-r border-gray-800 flex-col"
+      >
+        <div class="px-5 h-16 flex items-center gap-2.5 border-b border-gray-800">
+          <img src="assets/images/prodeus.png" alt="" class="w-8 h-8 object-contain" />
+          <span class="t-display text-2xl text-white">Prodeus</span>
+          <span class="chip bg-orange-950 text-orange-300 border-orange-900">Admin</span>
+        </div>
+        <ng-container [ngTemplateOutlet]="sidebarBody" />
       </aside>
 
-      <!-- Overlay — mobile only, visible when sidebar is open -->
+      <!-- Contenido -->
+      <main class="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <router-outlet />
+      </main>
+
       @if (sidebarOpen()) {
         <div
-          class="md:hidden fixed inset-0 bg-black/50 z-[60]"
+          class="md:hidden fixed inset-0 bg-black/60 z-[60]"
           (click)="sidebarOpen.set(false)"
+          aria-hidden="true"
         ></div>
       }
 
-      <!-- Sidebar drawer — mobile only -->
+      <!-- Cajón: móvil -->
       <aside
         class="md:hidden fixed top-0 left-0 h-full w-64 bg-gray-900 border-r border-gray-800 flex flex-col z-[70] transition-transform duration-300 ease-in-out"
         [class.translate-x-0]="sidebarOpen()"
         [class.-translate-x-full]="!sidebarOpen()"
       >
-        <!-- Logo + close button -->
-        <div class="px-5 py-5 border-b border-gray-800 flex items-center justify-between">
-          <div>
+        <div class="px-5 h-16 border-b border-gray-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
             <span class="t-display text-2xl text-white">Prodeus</span>
-            <span class="chip ml-2 bg-orange-950 text-orange-300 border-orange-900">Admin</span>
+            <span class="chip bg-orange-950 text-orange-300 border-orange-900">Admin</span>
           </div>
           <button
             type="button"
             (click)="sidebarOpen.set(false)"
-            class="text-gray-400 hover:text-white transition-colors p-1"
+            aria-label="Cerrar menú"
+            class="text-gray-300 hover:text-white transition-colors p-1"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Nav -->
-        <nav class="flex-1 px-3 py-4 space-y-1">
-          <a
-            routerLink="/admin/tournaments"
-            routerLinkActive="bg-blue-600 text-white"
-            [routerLinkActiveOptions]="{ exact: false }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
-            </svg>
-            Torneos
-          </a>
-          <a
-            routerLink="/admin/rules"
-            routerLinkActive="bg-blue-600 text-white"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-              />
-            </svg>
-            Reglas
-          </a>
-          <a
-            routerLink="/admin/stats"
-            routerLinkActive="bg-blue-600 text-white"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
-            Estadísticas
-          </a>
-          <a
-            routerLink="/admin/profile"
-            routerLinkActive="bg-blue-600 text-white"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-            Mi perfil
-          </a>
-        </nav>
-
-        <!-- Footer: user info + theme + logout -->
-        <div class="px-4 py-4 border-t border-gray-800 space-y-2">
-          <div class="flex items-center gap-2">
-            <div
-              class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
             >
-              {{ authStore.profile()?.username?.charAt(0)?.toUpperCase() ?? 'A' }}
-            </div>
-            <span class="text-gray-300 text-sm truncate flex-1">{{
-              authStore.profile()?.username
-            }}</span>
-            <app-theme-toggle />
-          </div>
-          <button
-            type="button"
-            (click)="showSignOutModal.set(true)"
-            class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
-            Cerrar sesión
           </button>
         </div>
+        <ng-container [ngTemplateOutlet]="sidebarBody" />
       </aside>
 
-      <!-- Bottom nav — mobile only -->
-      <nav
-        class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex items-stretch z-50"
-      >
-        <a
-          routerLink="/admin/tournaments"
-          routerLinkActive="text-blue-400"
-          [routerLinkActiveOptions]="{ exact: false }"
-          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-400 hover:text-white transition-colors"
-        >
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-            />
-          </svg>
-          <span class="text-xs font-medium">Torneos</span>
-        </a>
-        <a
-          routerLink="/admin/rules"
-          routerLinkActive="text-blue-400"
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-400 hover:text-white transition-colors"
-        >
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-            />
-          </svg>
-          <span class="text-xs font-medium">Reglas</span>
-        </a>
-        <button
-          type="button"
-          (click)="sidebarOpen.set(!sidebarOpen())"
-          class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-400 hover:text-white transition-colors"
-        >
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-          <span class="text-xs font-medium">Menú</span>
-        </button>
-      </nav>
-
-      <!-- Sign out confirmation modal -->
       @if (showSignOutModal()) {
         <app-confirm-modal
           title="Cerrar sesión"
@@ -327,10 +185,48 @@ import { AuthStore } from '../../../state/auth.store';
         />
       }
 
-      <!-- Content -->
-      <main class="flex-1 overflow-y-auto pb-16 md:pb-0">
-        <router-outlet />
-      </main>
+      <!-- Navegación inferior: móvil -->
+      <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex items-stretch z-50"
+        aria-label="Acceso rápido"
+      >
+        @for (item of navItems.slice(0, 2); track item.link) {
+          <a
+            [routerLink]="item.link"
+            routerLinkActive="!text-orange-400"
+            class="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-gray-400 hover:text-white transition-colors"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon" />
+            </svg>
+            <span class="text-[11px] font-semibold">{{ item.label }}</span>
+          </a>
+        }
+        <button
+          type="button"
+          (click)="sidebarOpen.set(!sidebarOpen())"
+          class="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-gray-400 hover:text-white transition-colors"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <span class="text-[11px] font-semibold">Menú</span>
+        </button>
+      </nav>
     </div>
   `,
 })
@@ -338,6 +234,8 @@ export class AdminLayoutComponent {
   protected readonly authStore = inject(AuthStore);
   protected readonly sidebarOpen = signal(false);
   protected readonly showSignOutModal = signal(false);
+  protected readonly navItems = NAV_ITEMS;
+  protected readonly logoutIcon = LOGOUT_ICON;
   private readonly router = inject(Router);
 
   constructor() {

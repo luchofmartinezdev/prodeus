@@ -140,9 +140,9 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
 
   statusClass(status: Tournament['status']): string {
     return {
-      draft: 'bg-gray-700 text-gray-300',
-      active: 'bg-green-900 text-green-300',
-      closed: 'bg-red-900 text-red-300',
+      draft: 'bg-gray-800 text-gray-300 border-gray-700',
+      active: 'bg-green-900 text-green-300 border-green-800',
+      closed: 'bg-red-900 text-red-300 border-red-800',
     }[status];
   }
 
@@ -152,9 +152,9 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
 
   matchStatusClass(status: Match['status']): string {
     return {
-      scheduled: 'bg-blue-900 text-blue-300',
-      in_progress: 'bg-yellow-900 text-yellow-300',
-      finished: 'bg-gray-700 text-gray-400',
+      scheduled: 'bg-blue-900 text-blue-300 border-blue-800',
+      in_progress: 'bg-yellow-900 text-yellow-300 border-yellow-800',
+      finished: 'bg-gray-800 text-gray-300 border-gray-700',
     }[status];
   }
 
