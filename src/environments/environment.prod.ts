@@ -1,5 +1,7 @@
 export const environment = {
   production: import.meta.env['NG_APP_PRODUCTION'] === 'true',
+  // ID de cliente web de OAuth (es público). Sin él no se muestra One Tap.
+  googleClientId: import.meta.env?.['NG_APP_GOOGLE_CLIENT_ID'] as string | undefined,
   firebase: {
     apiKey: import.meta.env['NG_APP_FIREBASE_API_KEY'] as string,
     authDomain: import.meta.env['NG_APP_FIREBASE_AUTH_DOMAIN'] as string,

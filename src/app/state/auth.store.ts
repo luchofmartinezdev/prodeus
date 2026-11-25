@@ -136,6 +136,16 @@ export const AuthStore = signalStore(
         }
       },
 
+      async signInWithGoogleIdToken(idToken: string): Promise<void> {
+        patchState(store, { isSigningIn: true, error: null });
+        try {
+          await authRepo.signInWithGoogleIdToken(idToken);
+          patchState(store, { isSigningIn: false });
+        } catch {
+          patchState(store, { isSigningIn: false, error: 'Error al conectar con Google' });
+        }
+      },
+
       signOut(): void {
         patchState(store, { user: null, profile: null, error: null });
         // eslint-disable-next-line @typescript-eslint/no-empty-function
