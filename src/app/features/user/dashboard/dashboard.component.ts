@@ -81,6 +81,14 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  /** Día corto para el bloque de fecha: "vie 28". */
+  formatDay(iso: string): string {
+    if (!iso) return '—';
+    return new Date(iso)
+      .toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric' })
+      .replace('.', '');
+  }
+
   formatTime(iso: string): string {
     return new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
   }

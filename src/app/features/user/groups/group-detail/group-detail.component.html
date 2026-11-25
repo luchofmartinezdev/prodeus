@@ -19,7 +19,8 @@
       <div class="flex items-start gap-3 min-w-0">
         <a
           routerLink="/home/groups"
-          class="p-1.5 mt-0.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors shrink-0"
+          aria-label="Volver a mis grupos"
+          class="p-2 mt-1 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors shrink-0"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -32,11 +33,8 @@
         </a>
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="text-xl sm:text-2xl font-bold text-white truncate">{{ g.name }}</h1>
-            <span
-              class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-              [class]="visibilityClass(g.visibility)"
-            >
+            <h1 class="t-display text-white text-4xl sm:text-5xl truncate">{{ g.name }}</h1>
+            <span class="chip shrink-0" [class]="visibilityClass(g.visibility)">
               {{ visibilityLabel(g.visibility) }}
             </span>
           </div>
@@ -60,6 +58,7 @@
           (click)="shareGroup(g.invite_code, g.name)"
           class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
           title="Compartir grupo"
+          aria-label="Compartir grupo"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -76,6 +75,7 @@
             (click)="activeTab.set('grupo')"
             class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
             title="Configuración del grupo"
+            aria-label="Configuración del grupo"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -97,15 +97,15 @@
     </div>
 
     <!-- ── TABS ── -->
-    <div class="flex gap-1 mb-5 bg-gray-900 border border-gray-800 rounded-xl p-1">
+    <div class="flex gap-1 mb-5 card p-1">
       <button
         type="button"
         (click)="activeTab.set('predicciones')"
-        class="flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors"
+        class="flex-1 py-2 text-sm font-bold rounded-lg transition-colors"
         [class]="
           activeTab() === 'predicciones'
             ? 'bg-blue-600 text-white'
-            : 'text-gray-400 hover:text-white'
+            : 'text-gray-300 hover:text-white'
         "
       >
         Predicciones
@@ -113,9 +113,9 @@
       <button
         type="button"
         (click)="activeTab.set('ranking')"
-        class="flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors"
+        class="flex-1 py-2 text-sm font-bold rounded-lg transition-colors"
         [class]="
-          activeTab() === 'ranking' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
+          activeTab() === 'ranking' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
         "
       >
         Ranking
@@ -123,9 +123,9 @@
       <button
         type="button"
         (click)="activeTab.set('grupo')"
-        class="flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors"
+        class="flex-1 py-2 text-sm font-bold rounded-lg transition-colors"
         [class]="
-          activeTab() === 'grupo' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
+          activeTab() === 'grupo' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
         "
       >
         Grupo
@@ -138,82 +138,35 @@
     @if (activeTab() === 'predicciones') {
       @if (overviewLoading()) {
         <div class="space-y-4">
-          <div class="h-28 bg-gray-900 border border-gray-800 rounded-xl animate-pulse"></div>
+          <div class="h-28 card animate-pulse"></div>
           <div class="grid grid-cols-2 gap-4">
-            <div class="h-40 bg-gray-900 border border-gray-800 rounded-xl animate-pulse"></div>
-            <div class="h-40 bg-gray-900 border border-gray-800 rounded-xl animate-pulse"></div>
+            <div class="h-40 card animate-pulse"></div>
+            <div class="h-40 card animate-pulse"></div>
           </div>
-          <div class="h-16 bg-gray-900 border border-gray-800 rounded-xl animate-pulse"></div>
+          <div class="h-16 card animate-pulse"></div>
         </div>
       } @else {
         <div class="space-y-4">
           <!-- No matches yet -->
           @if (totalMatches() === 0) {
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center">
-              <p class="text-gray-500 text-sm">Todavía no hay partidos cargados en este torneo.</p>
+            <div class="card p-6 text-center">
+              <p class="text-gray-400 text-sm">Todavía no hay partidos cargados en este torneo.</p>
             </div>
           }
 
           <!-- ── CTA banner ── -->
           @if (predictedCount() === 0 && totalMatches() > 0) {
-            <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 flex items-center gap-4">
-              <!-- Illustration -->
-              <div class="shrink-0 w-16 h-16 relative flex items-end justify-center">
-                <svg
-                  class="w-12 h-14 text-blue-500 absolute bottom-0 left-1"
-                  viewBox="0 0 48 56"
-                  fill="none"
-                >
-                  <rect
-                    x="6"
-                    y="4"
-                    width="36"
-                    height="48"
-                    rx="4"
-                    fill="currentColor"
-                    fill-opacity="0.15"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  />
-                  <line
-                    x1="14"
-                    y1="18"
-                    x2="34"
-                    y2="18"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                  />
-                  <line
-                    x1="14"
-                    y1="26"
-                    x2="28"
-                    y2="26"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                  />
-                  <line
-                    x1="14"
-                    y1="34"
-                    x2="24"
-                    y2="34"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                  />
-                  <rect x="16" y="0" width="16" height="8" rx="3" fill="currentColor" />
-                </svg>
-                <span class="text-2xl absolute bottom-0 right-0">⚽</span>
-                <span class="text-base absolute top-0 right-0 text-blue-300">✦</span>
+            <div class="card p-5 flex flex-wrap items-center gap-4">
+              <!-- Marcador vacío -->
+              <div class="shrink-0 hidden sm:flex flex-col items-center gap-1" aria-hidden="true">
+                <span class="scoreboard" style="font-size: 2.5rem; min-width: 3.25rem">0</span>
+                <span class="t-label">de {{ totalMatches() }}</span>
               </div>
               <!-- Text -->
               <div class="flex-1 min-w-0">
-                <p class="text-white font-bold text-base leading-snug">
-                  ¡Aún no cargaste tus predicciones!
-                </p>
+                <p class="t-display text-white text-3xl">Todavía no cargaste predicciones</p>
                 <p class="text-gray-400 text-sm mt-1 leading-snug">
-                  Hacé tus predicciones para empezar a sumar puntos<br class="hidden sm:block" />
+                  Cargalas para empezar a sumar puntos<br class="hidden sm:block" />
                   y competir con tu grupo.
                 </p>
               </div>
@@ -239,7 +192,7 @@
           @if (totalMatches() > 0) {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- Próximo partido -->
-              <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+              <div class="card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-800 flex items-center gap-2">
                   <svg
                     class="w-4 h-4 text-gray-400 shrink-0"
@@ -254,7 +207,7 @@
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
-                  <span class="text-sm font-semibold text-white">Próximo partido</span>
+                  <span class="t-label">Próximo partido</span>
                 </div>
                 @if (nextMatch(); as match) {
                   <div class="px-4 py-4">
@@ -281,7 +234,7 @@
                           match.home_team?.name
                         }}</span>
                       </div>
-                      <span class="text-gray-500 text-sm font-medium shrink-0">vs</span>
+                      <span class="text-gray-400 text-sm font-medium shrink-0">vs</span>
                       <!-- Away -->
                       <div class="flex-1 flex flex-col items-center gap-2">
                         <div
@@ -308,13 +261,13 @@
                   </div>
                 } @else {
                   <div class="px-4 py-8 text-center">
-                    <p class="text-gray-500 text-sm">No hay partidos próximos.</p>
+                    <p class="text-gray-400 text-sm">No hay partidos próximos.</p>
                   </div>
                 }
               </div>
 
               <!-- Tu estado -->
-              <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+              <div class="card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-800 flex items-center gap-2">
                   <svg
                     class="w-4 h-4 text-gray-400 shrink-0"
@@ -329,7 +282,7 @@
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span class="text-sm font-semibold text-white">Tu estado</span>
+                  <span class="t-label">Tu estado</span>
                 </div>
                 <div class="px-4 py-4 flex items-center gap-5">
                   <!-- Clipboard icon -->
@@ -360,9 +313,9 @@
                     </div>
                     <div>
                       <p class="text-white text-sm font-semibold">Puntos actuales</p>
-                      <p class="text-blue-400 text-2xl font-bold tabular-nums leading-tight">
+                      <p class="t-display text-orange-400 text-5xl tabular">
                         {{ myPoints
-                        }}<span class="text-blue-500 text-sm font-medium ml-1">pts</span>
+                        }}<span class="text-gray-400 text-sm font-semibold ml-1">pts</span>
                       </p>
                     </div>
                   </div>
@@ -395,7 +348,7 @@
     ══════════════════════════════════════════ -->
     @if (activeTab() === 'ranking') {
       @if (isLoadingRanking()) {
-        <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="card overflow-hidden">
           <table class="w-full">
             <thead>
               <tr class="border-b border-gray-800">
@@ -438,24 +391,20 @@
         </div>
       } @else if (rankingStore.ranking().length === 0) {
         <div class="text-center py-16">
-          <p class="text-gray-500 text-sm">Aún no hay puntos registrados.</p>
-          <p class="text-gray-600 text-xs mt-1">
-            Los puntos aparecen cuando se cargan resultados de partidos.
+          <p class="t-display text-white text-3xl mb-1">Todavía no hay puntos</p>
+          <p class="text-gray-300 text-sm">
+            La tabla se arma sola cuando se cargan los resultados.
           </p>
         </div>
       } @else {
-        <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="card overflow-hidden">
           <table class="w-full">
             <thead>
               <tr class="border-b border-gray-800">
-                <th class="w-12 px-4 py-3 text-left text-xs font-semibold text-gray-500">#</th>
-                <th class="px-3 py-3 text-left text-xs font-semibold text-gray-500">Miembro</th>
-                <th class="w-20 px-4 py-3 text-right text-xs font-semibold text-gray-500">
-                  Puntos
-                </th>
-                <th class="w-20 px-4 py-3 text-right text-xs font-semibold text-gray-500">
-                  Dif. pts
-                </th>
+                <th class="w-12 px-4 py-3 text-left t-label">#</th>
+                <th class="px-3 py-3 text-left t-label">Miembro</th>
+                <th class="w-20 px-4 py-3 text-right t-label">Puntos</th>
+                <th class="w-20 px-4 py-3 text-right t-label">Dif. pts</th>
               </tr>
             </thead>
             <tbody>
@@ -464,26 +413,19 @@
                   class="border-b border-gray-800 last:border-0 transition-colors"
                   [class]="row.userId === currentUserId ? 'bg-blue-950/50' : ''"
                 >
-                  <!-- Position -->
-                  <td class="px-4 py-3.5">
-                    @if (row.position === 1) {
-                      <span
-                        class="w-7 h-7 rounded-full bg-yellow-500 flex items-center justify-center text-xs font-bold text-gray-900"
-                        >1</span
-                      >
-                    } @else if (row.position === 2) {
-                      <span
-                        class="w-7 h-7 rounded-full bg-gray-400 flex items-center justify-center text-xs font-bold text-gray-900"
-                        >2</span
-                      >
-                    } @else if (row.position === 3) {
-                      <span
-                        class="w-7 h-7 rounded-full bg-orange-700 flex items-center justify-center text-xs font-bold text-white"
-                        >3</span
-                      >
-                    } @else {
-                      <span class="text-sm font-semibold text-gray-500">{{ row.position }}</span>
-                    }
+                  <!-- Posición -->
+                  <td class="px-4 py-3">
+                    <span
+                      class="t-display text-3xl tabular"
+                      [class]="
+                        row.position === 1
+                          ? 'text-orange-400'
+                          : row.position <= 3
+                            ? 'text-white'
+                            : 'text-gray-400'
+                      "
+                      >{{ row.position }}</span
+                    >
                   </td>
 
                   <!-- Member -->
@@ -506,7 +448,7 @@
                       @if (row.userId === currentUserId) {
                         <span
                           class="px-1.5 py-0.5 rounded text-xs bg-blue-800 text-blue-200 font-medium"
-                          >Tú</span
+                          >Vos</span
                         >
                       }
                     </div>
@@ -514,9 +456,7 @@
 
                   <!-- Points -->
                   <td class="px-4 py-3.5 text-right">
-                    <span class="text-white font-bold text-sm tabular-nums">{{
-                      row.totalPoints
-                    }}</span>
+                    <span class="t-display text-white text-2xl tabular">{{ row.totalPoints }}</span>
                   </td>
 
                   <!-- Diff -->
@@ -539,7 +479,7 @@
                         }
                       </span>
                     } @else {
-                      <span class="text-gray-500 text-sm">—</span>
+                      <span class="text-gray-400 text-sm">—</span>
                     }
                   </td>
                 </tr>
@@ -549,7 +489,7 @@
         </div>
 
         <!-- Footer -->
-        <p class="text-gray-500 text-xs mt-3 flex items-center gap-1.5 px-1">
+        <p class="text-gray-400 text-xs mt-3 flex items-center gap-1.5 px-1">
           <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
@@ -569,7 +509,7 @@
     @if (activeTab() === 'grupo') {
       <div class="space-y-4">
         <!-- Invite card -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-4">
+        <div class="card p-4 flex items-center gap-4">
           <!-- Icon -->
           <div
             class="w-12 h-12 rounded-xl bg-indigo-950 border border-indigo-800 flex items-center justify-center shrink-0"
@@ -596,9 +536,7 @@
           <!-- Code + copy -->
           <div class="flex items-center gap-2 shrink-0">
             <div class="border border-dashed border-gray-500 rounded-lg px-3 py-2">
-              <span class="font-mono text-base font-bold text-white tracking-widest">{{
-                g.invite_code
-              }}</span>
+              <span class="t-display text-2xl text-white tracking-widest">{{ g.invite_code }}</span>
             </div>
             <button
               type="button"
@@ -636,12 +574,12 @@
         </div>
 
         <!-- Members list -->
-        <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="card overflow-hidden">
           <!-- Header -->
           <div class="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <svg
-                class="w-4 h-4 text-gray-500"
+                class="w-4 h-4 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -670,7 +608,7 @@
           </div>
 
           @if (store.activeMembers().length === 0) {
-            <div class="px-4 py-8 text-center text-gray-600 text-sm">
+            <div class="px-4 py-8 text-center text-gray-400 text-sm">
               Todavía no hay miembros activos
             </div>
           } @else {
@@ -697,7 +635,7 @@
                     <button
                       type="button"
                       (click)="openRemoveMemberModal(member)"
-                      class="p-1 text-gray-700 hover:text-red-400 rounded transition-colors shrink-0"
+                      class="p-1 text-gray-400 hover:text-red-400 rounded transition-colors shrink-0"
                     >
                       <svg
                         class="w-3.5 h-3.5"
@@ -722,21 +660,19 @@
 
         <!-- Leader settings -->
         @if (isLeader) {
-          <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div class="card overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-800">
-              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Configuración
-              </p>
+              <p class="t-label uppercase tracking-wider">Configuración</p>
             </div>
             <div class="p-4">
               @if (!editing()) {
                 <div class="flex items-center justify-between gap-4 mb-3">
                   <div>
-                    <p class="text-xs text-gray-500 mb-0.5">Nombre del grupo</p>
+                    <p class="text-xs text-gray-400 mb-0.5">Nombre del grupo</p>
                     <p class="text-sm text-white">{{ g.name }}</p>
                   </div>
                   <div>
-                    <p class="text-xs text-gray-500 mb-0.5">Tipo</p>
+                    <p class="text-xs text-gray-400 mb-0.5">Tipo</p>
                     <span
                       class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
                       [class]="visibilityClass(g.visibility)"
@@ -763,7 +699,7 @@
               } @else {
                 <div class="space-y-3">
                   <div>
-                    <label class="text-xs text-gray-500 block mb-1">Nombre del grupo</label>
+                    <label class="text-xs text-gray-400 block mb-1">Nombre del grupo</label>
                     <input
                       type="text"
                       [(ngModel)]="editName"
@@ -771,7 +707,7 @@
                     />
                   </div>
                   <div>
-                    <label class="text-xs text-gray-500 block mb-1">Tipo de grupo</label>
+                    <label class="text-xs text-gray-400 block mb-1">Tipo de grupo</label>
                     <select
                       [(ngModel)]="editVisibility"
                       class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
@@ -824,7 +760,7 @@
           <button
             type="button"
             (click)="openDeleteModal()"
-            class="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-transparent hover:bg-red-950/40 border border-gray-800 hover:border-red-900 text-gray-500 hover:text-red-400 text-sm font-medium rounded-xl transition-colors"
+            class="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-transparent hover:bg-red-950/40 border border-gray-800 hover:border-red-900 text-gray-400 hover:text-red-400 text-sm font-medium rounded-xl transition-colors"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path

@@ -1,65 +1,83 @@
-<div class="p-4 sm:p-8">
-  <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-white">Mis grupos</h1>
+<div class="p-4 sm:p-8 max-w-5xl w-full">
+  <!-- Encabezado -->
+  <header class="flex items-end justify-between gap-3 mb-6">
+    <div>
+      <p class="t-label !text-orange-400">Tus prodes</p>
+      <h1 class="t-display text-white text-4xl sm:text-5xl">Mis grupos</h1>
+    </div>
     <div class="flex items-center gap-2">
       <button
         type="button"
         (click)="showJoinForm.set(!showJoinForm())"
-        class="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+        [attr.aria-expanded]="showJoinForm()"
+        class="flex items-center gap-2 px-3 sm:px-4 py-2.5 text-sm font-semibold text-gray-200 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
       >
-        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          class="w-4 h-4 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            stroke-width="2"
-            d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
           />
         </svg>
-        <span class="hidden sm:inline">Unirme por código</span>
+        <span class="hidden sm:inline">Unirme con código</span>
+        <span class="sm:hidden">Código</span>
       </button>
       <a
         routerLink="/home/groups/new"
-        class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
+        class="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-colors"
       >
-        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"
-          />
+        <svg
+          class="w-4 h-4 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2.5"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
         </svg>
         <span class="hidden sm:inline">Crear grupo</span>
+        <span class="sm:hidden">Crear</span>
       </a>
     </div>
-  </div>
+  </header>
 
-  <!-- Join by code form -->
+  <!-- Unirse con código -->
   @if (showJoinForm()) {
-    <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-6">
-      <p class="text-white font-semibold text-sm mb-3">Ingresar código de invitación</p>
+    <div class="card p-5 mb-6">
+      <label for="join-code" class="text-white font-bold text-sm block mb-3"
+        >Código de invitación</label
+      >
       <div class="flex flex-col sm:flex-row gap-3">
         <input
+          id="join-code"
           type="text"
           [(ngModel)]="joinCodeValue"
           placeholder="Ej: A3F9K2"
           maxlength="6"
+          autocomplete="off"
           (keyup.enter)="onJoin()"
-          class="flex-1 px-4 py-2.5 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+          class="flex-1 px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500 font-bold tracking-[0.3em] text-center sm:text-left focus:outline-none focus:ring-2 focus:ring-orange-400 uppercase"
         />
         <button
           type="button"
           (click)="onJoin()"
           [disabled]="store.isLoading()"
-          class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+          class="px-6 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition-colors"
         >
           Unirme
         </button>
         <button
           type="button"
           (click)="showJoinForm.set(false)"
-          class="px-4 py-2.5 text-gray-400 hover:text-white text-sm transition-colors"
+          class="px-4 py-3 text-gray-300 hover:text-white text-sm font-semibold transition-colors"
         >
           Cancelar
         </button>
@@ -67,39 +85,28 @@
     </div>
   }
 
-  <!-- Skeleton loader -->
+  <!-- Carga -->
   @if (isLoadingGroups()) {
-    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
       @for (i of [1, 2, 3]; track i) {
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div class="h-4 bg-gray-800 rounded animate-pulse w-24 mb-3"></div>
-          <div class="h-5 bg-gray-800 rounded animate-pulse w-40 mb-3"></div>
+        <div class="card p-5">
+          <div class="h-3 bg-gray-800 rounded animate-pulse w-24 mb-4"></div>
+          <div class="h-5 bg-gray-800 rounded animate-pulse w-40 mb-4"></div>
           <div class="h-5 bg-gray-800 rounded-full animate-pulse w-16"></div>
         </div>
       }
     </div>
   }
 
-  <!-- Groups grid -->
   @if (!isLoadingGroups()) {
     @if (store.groups().length === 0) {
-      <div class="text-center py-20">
-        <svg
-          class="w-12 h-12 text-gray-700 mx-auto mb-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="1.5"
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-        <p class="text-gray-400 font-medium mb-1">No participás en ningún grupo todavía</p>
-        <p class="text-gray-600 text-sm">
-          Creá uno nuevo o unite a uno con un código de invitación
+      <div
+        class="pitch-lines border border-dashed border-gray-700 rounded-2xl text-center py-16 px-6"
+      >
+        <p class="t-display text-white text-4xl mb-2">Todavía no tenés grupos</p>
+        <p class="text-gray-300 text-sm max-w-sm mx-auto">
+          Creá uno e invitá a tus amigos, o usá un código de invitación para sumarte al de alguien
+          más.
         </p>
       </div>
     } @else {
@@ -107,41 +114,29 @@
         @for (group of store.groups(); track group.id) {
           <a
             [routerLink]="['/home/groups', group.id]"
-            class="block bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition-colors group/card"
+            class="card block p-5 hover:border-blue-600 transition-colors group/card"
           >
-            <!-- Tournament badge -->
-            <span
-              class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gray-800 text-gray-400 text-xs font-medium mb-3 max-w-full truncate"
-            >
+            <div class="flex items-center gap-1.5 mb-3">
               @if (group.tournament.logo_url) {
                 <img
                   [src]="group.tournament.logo_url"
                   [alt]="group.tournament.name"
-                  class="w-3.5 h-3.5 object-contain rounded-sm shrink-0"
+                  class="w-4 h-4 object-contain rounded-sm shrink-0"
                 />
               }
-              {{ group.tournament.name }}
-            </span>
-            <!-- Group name -->
+              <p class="t-label truncate">{{ group.tournament.name }}</p>
+            </div>
             <p
-              class="text-white font-semibold text-base mb-3 group-hover/card:text-blue-300 transition-colors truncate"
+              class="t-display text-white text-3xl mb-4 group-hover/card:text-blue-300 transition-colors truncate"
             >
               {{ group.name }}
             </p>
-            <!-- Metadata -->
             <div class="flex items-center gap-2">
-              <span
-                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                [class]="visibilityClass(group.visibility)"
-              >
+              <span class="chip" [class]="visibilityClass(group.visibility)">
                 {{ visibilityLabel(group.visibility) }}
               </span>
               @if (group.leader_id === currentUserId) {
-                <span
-                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300"
-                >
-                  Líder
-                </span>
+                <span class="chip bg-orange-950 text-orange-300 border-orange-900">Líder</span>
               }
             </div>
           </a>
@@ -152,13 +147,14 @@
 
   @if (store.error() && !isLoadingGroups()) {
     <div
-      class="mt-4 p-4 rounded-xl bg-red-950 border border-red-900 text-red-400 text-sm flex items-center justify-between gap-3"
+      role="alert"
+      class="mt-6 p-4 rounded-xl bg-red-950 border border-red-900 text-red-300 text-sm flex items-center justify-between gap-3"
     >
       <span>{{ store.error() }}</span>
       <button
         type="button"
         (click)="store.loadMyGroups()"
-        class="shrink-0 px-3 py-1.5 bg-red-900 hover:bg-red-800 text-red-300 text-xs font-medium rounded-lg transition-colors"
+        class="shrink-0 px-3 py-1.5 bg-red-900 hover:bg-red-800 text-red-300 text-xs font-bold rounded-lg transition-colors"
       >
         Reintentar
       </button>

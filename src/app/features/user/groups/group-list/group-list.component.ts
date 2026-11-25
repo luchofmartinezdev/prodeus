@@ -41,7 +41,7 @@ export class GroupListComponent implements OnInit {
 
   visibilityClass(visibility: 'public' | 'private'): string {
     return visibility === 'public'
-      ? 'bg-green-900 text-green-300'
-      : 'bg-yellow-900 text-yellow-300';
+      ? 'bg-green-900 text-green-300 border-green-800'
+      : 'bg-yellow-900 text-yellow-300 border-yellow-800';
   }
 }

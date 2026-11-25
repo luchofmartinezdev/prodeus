@@ -1,8 +1,409 @@
 @import 'tailwindcss';
 @source "./app/**/*.{html,ts}";
 
+/* `dark:` sigue la clase .dark de <html> (la que maneja ThemeService), no la preferencia del SO. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ───────────────────────────────────────────────────────────────────────────
+   PRODEUS · Sistema de diseño "Noche de cancha"
+
+   Idea: un tablero de estadio. Césped profundo de noche, tiza para el texto,
+   luz de sodio (ámbar) para lo que importa: puntos, marcadores, premios.
+   Modo claro = cancha de día: tiza como fondo, tinta verde como texto.
+
+   Las clases gray-* / blue-* de Tailwind pasan a ser TOKENS SEMÁNTICOS:
+     gray-950 fondo de página · gray-900 tarjeta · gray-800 campo/superficie
+     gray-700 superficie elevada/borde · gray-600…300 jerarquía de texto
+     blue-*   acción primaria (verde césped)
+   Los valores viven en variables CSS por tema, así que el modo claro ya no
+   necesita pisar clases con !important.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@theme inline {
+  /* Tipografía */
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Big Shoulders Display', 'Arial Narrow', ui-sans-serif, sans-serif;
+
+  /* Neutros semánticos (verde-gris de cancha) */
+  --color-gray-50: var(--g-50);
+  --color-gray-100: var(--g-100);
+  --color-gray-200: var(--g-200);
+  --color-gray-300: var(--g-300);
+  --color-gray-400: var(--g-400);
+  --color-gray-500: var(--g-500);
+  --color-gray-600: var(--g-600);
+  --color-gray-700: var(--g-700);
+  --color-gray-800: var(--g-800);
+  --color-gray-900: var(--g-900);
+  --color-gray-950: var(--g-950);
+
+  /* Primario: verde césped */
+  --color-blue-50: var(--p-50);
+  --color-blue-100: var(--p-100);
+  --color-blue-200: var(--p-200);
+  --color-blue-300: var(--p-300);
+  --color-blue-400: var(--p-400);
+  --color-blue-500: var(--p-500);
+  --color-blue-600: var(--p-600);
+  --color-blue-700: var(--p-700);
+  --color-blue-800: var(--p-800);
+  --color-blue-900: var(--p-900);
+  --color-blue-950: var(--p-950);
+
+  /* Acento: luz de sodio (ámbar). Rojo = tarjeta roja. Verde = acierto. */
+  --color-orange-300: var(--a-300);
+  --color-orange-400: var(--a-400);
+  --color-orange-500: var(--a-500);
+  --color-orange-700: var(--a-700);
+  --color-orange-800: var(--a-800);
+  --color-orange-900: var(--a-900);
+  --color-orange-950: var(--a-950);
+
+  --color-yellow-300: var(--y-300);
+  --color-yellow-400: var(--y-400);
+  --color-yellow-700: var(--y-700);
+  --color-yellow-800: var(--y-800);
+  --color-yellow-900: var(--y-900);
+  --color-yellow-950: var(--y-950);
+
+  --color-red-300: var(--r-300);
+  --color-red-400: var(--r-400);
+  --color-red-700: var(--r-700);
+  --color-red-800: var(--r-800);
+  --color-red-900: var(--r-900);
+  --color-red-950: var(--r-950);
+
+  --color-green-300: var(--ok-300);
+  --color-green-700: var(--ok-700);
+  --color-green-800: var(--ok-800);
+  --color-green-900: var(--ok-900);
+  --color-green-950: var(--ok-950);
+
+  --color-indigo-400: var(--i-400);
+  --color-indigo-800: var(--i-800);
+  --color-indigo-950: var(--i-950);
+
+  --color-white: var(--ink);
+  --color-chalk: #f4f7ef;
+  --color-sodium: #ffb81c;
+}
+
+/* ── Modo oscuro: noche de cancha ───────────────────────────────────────── */
+:root,
+html.dark {
+  color-scheme: dark;
+  --ink: #f2f6ee; /* tiza */
+
+  --g-50: #f4f8f5;
+  --g-100: #e6efe9;
+  --g-200: #d2e0d7;
+  --g-300: #b9cdc0;
+  --g-400: #91ab9c;
+  --g-500: #6b8b79;
+  --g-600: #3c6650;
+  --g-700: #244a38;
+  --g-800: #173a2c;
+  --g-900: #0f2a20;
+  --g-950: #081d15;
+
+  --p-50: #ecfbf2;
+  --p-100: #d3f5e1;
+  --p-200: #a9eac5;
+  --p-300: #72daa2;
+  --p-400: #3ec47d;
+  --p-500: #22a862;
+  --p-600: #178a50;
+  --p-700: #136e41;
+  --p-800: #115737;
+  --p-900: #0e462e;
+  --p-950: #07271a;
+
+  --a-300: #ffd37a;
+  --a-400: #ffb81c;
+  --a-500: #f59e0b;
+  --a-700: #b45309;
+  --a-800: #92400e;
+  --a-900: #5a3410;
+  --a-950: #2f1c0a;
+
+  --y-300: #fde68a;
+  --y-400: #facc15;
+  --y-700: #a16207;
+  --y-800: #854d0e;
+  --y-900: #4a3a0b;
+  --y-950: #2a2108;
+
+  --r-300: #fca5a5;
+  --r-400: #f87171;
+  --r-700: #b91c1c;
+  --r-800: #991b1b;
+  --r-900: #5c1d1d;
+  --r-950: #35120f;
+
+  --ok-300: #86efac;
+  --ok-700: #15803d;
+  --ok-800: #166534;
+  --ok-900: #124a2a;
+  --ok-950: #0a2e1a;
+
+  --i-400: #818cf8;
+  --i-800: #3730a3;
+  --i-950: #1e1b4b;
+
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.03);
+  --score-ink: #ffb81c;
+}
+
+/* ── Modo claro: cancha de día ──────────────────────────────────────────── */
+html:not(.dark) {
+  color-scheme: light;
+  --ink: #0b2118; /* tinta verde */
+
+  --g-50: #0b2118;
+  --g-100: #12301f;
+  --g-200: #1c3b2c;
+  --g-300: #24493a;
+  --g-400: #3c5b4c;
+  --g-500: #587566;
+  --g-600: #8aa393;
+  --g-700: #d3dfce;
+  --g-800: #e4ecdf;
+  --g-900: #ffffff;
+  --g-950: #f1f5ec; /* tiza */
+
+  --p-50: #0e462e;
+  --p-100: #0e462e;
+  --p-200: #115737;
+  --p-300: #0f6b3f;
+  --p-400: #0f7a46;
+  --p-500: #148a4e;
+  --p-600: #148a4e;
+  --p-700: #136e41;
+  --p-800: #b9e5cb;
+  --p-900: #dcf4e6;
+  --p-950: #eefaf3;
+
+  --a-300: #b45309;
+  --a-400: #c2570a;
+  --a-500: #f59e0b;
+  --a-700: #f5d28a;
+  --a-800: #f8dfa6;
+  --a-900: #fdefcf;
+  --a-950: #fff8e8;
+
+  --y-300: #a16207;
+  --y-400: #b07a06;
+  --y-700: #f3df8a;
+  --y-800: #f3df8a;
+  --y-900: #fdf3c6;
+  --y-950: #fefae6;
+
+  --r-300: #b91c1c;
+  --r-400: #dc2626;
+  --r-700: #fbc7c2;
+  --r-800: #fbc7c2;
+  --r-900: #fde1de;
+  --r-950: #fff1ef;
+
+  --ok-300: #15803d;
+  --ok-700: #bde8cb;
+  --ok-800: #bde8cb;
+  --ok-900: #e1f6e8;
+  --ok-950: #f0fbf4;
+
+  --i-400: #4f46e5;
+  --i-800: #c7d2fe;
+  --i-950: #eef2ff;
+
+  --shadow-card: 0 1px 2px rgb(11 33 24 / 0.06), 0 1px 3px rgb(11 33 24 / 0.05);
+  --score-ink: #8a4306;
+}
+
 @layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background-color: var(--color-gray-950);
+    color: var(--ink);
+  }
   button {
     cursor: pointer;
+  }
+  /* Campos de formulario: en modo claro toman la superficie del tema. */
+  html:not(.dark) :where(input, select, textarea) {
+    background-color: var(--color-gray-800);
+    color: var(--ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-sodium);
+    outline-offset: 2px;
+  }
+  /* Los números de un prode son datos: alineados en columna. */
+  .tabular,
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+  ::selection {
+    background: var(--color-sodium);
+    color: #0b2118;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+/* ── Transición mientras migran las plantillas ──────────────────────────────
+   `text-white` ahora significa "tinta" (blanco en oscuro, verde oscuro en claro).
+   Sobre botones sólidos tiene que seguir siendo blanco real.
+   Se elimina cuando las pantallas pasen a clases semánticas. */
+html:not(.dark) :is(.bg-blue-600, .bg-blue-500, .bg-red-600, .bg-red-500, .bg-green-500, .bg-orange-700).text-white,
+html:not(.dark) :is(.bg-blue-600, .bg-blue-500, .bg-red-600) :is(.text-white) {
+  color: #ffffff;
+}
+
+/* ── Componentes del sistema ─────────────────────────────────────────────── */
+@layer components {
+  /* Titulares con peso de tablero */
+  .t-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  /* Etiqueta chica en mayúsculas (columnas, categorías) */
+  .t-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-gray-400);
+  }
+
+  /* Campo de marcador: el input donde se carga una predicción. */
+  .score-input {
+    width: 3.25rem;
+    height: 3.5rem;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--score-ink);
+    background: var(--color-gray-800);
+    border: 1px solid var(--color-gray-700);
+    border-radius: 0.5rem;
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  .score-input::-webkit-outer-spin-button,
+  .score-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .score-input:focus {
+    outline: none;
+    border-color: var(--color-sodium);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-sodium) 30%, transparent);
+  }
+
+  /* Pastilla de estado/etiqueta */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+  }
+
+  /* Tarjeta base */
+  .card {
+    background: var(--color-gray-900);
+    border: 1px solid var(--color-gray-800);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Marcador de estadio: la firma visual de Prodeus.
+     Dígitos grandes, condensados, en una placa ámbar. */
+  .scoreboard {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    padding: 0.125rem 0.5rem;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.75rem;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: #0b2118;
+    background: var(--color-sodium);
+    border-radius: 0.375rem;
+    box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.18);
+  }
+  .scoreboard-muted {
+    color: var(--color-gray-300);
+    background: var(--color-gray-800);
+    box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.12);
+  }
+
+  /* Marcas de cancha como textura: círculo central + línea de medio campo.
+     Se aplica a secciones grandes (hero, vacíos), nunca a tarjetas con datos. */
+  .pitch-lines {
+    position: relative;
+    isolation: isolate;
+  }
+  .pitch-lines::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.55;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 0 7.5rem, var(--pitch-line) 7.5rem 7.6rem, transparent 7.6rem),
+      linear-gradient(var(--pitch-line), var(--pitch-line)) 50% 0 / 1px 100% no-repeat;
+    --pitch-line: color-mix(in srgb, var(--ink) 9%, transparent);
+  }
+
+  /* Panel de marca: siempre cancha de noche, en los dos temas.
+     Dentro de él los colores son fijos (no pasan por los tokens de tema). */
+  .brand-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    color: #f2f6ee;
+    background:
+      radial-gradient(60rem 30rem at 85% -10%, rgb(255 184 28 / 0.16), transparent 60%),
+      linear-gradient(160deg, #0f4a33 0%, #0a3425 55%, #072419 100%);
+  }
+  .brand-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 0 8rem, rgb(242 246 238 / 0.1) 8rem 8.1rem, transparent 8.1rem),
+      linear-gradient(rgb(242 246 238 / 0.1), rgb(242 246 238 / 0.1)) 50% 0 / 1px 100% no-repeat;
+  }
+  .brand-panel-muted {
+    color: #b9d3c2;
   }
 }
