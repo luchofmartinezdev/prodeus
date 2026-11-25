@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import {
+  GoogleAuthProvider,
   onAuthStateChanged,
+  signInWithCredential,
   signInWithPopup,
   signOut as firebaseSignOut,
   type User as FirebaseUser,
@@ -33,6 +35,11 @@ export class AuthRepository {
     // silencio (getRedirectResult() vuelve null sin error). El popup evita el
     // problema porque usa postMessage entre ventanas, no storage compartido.
     await signInWithPopup(auth, googleProvider);
+  }
+
+  /** Inicia sesión con el token que entrega Google One Tap. */
+  async signInWithGoogleIdToken(idToken: string): Promise<void> {
+    await signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
   }
 
   signOut(): Promise<void> {
