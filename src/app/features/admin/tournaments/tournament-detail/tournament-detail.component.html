@@ -5,7 +5,8 @@
       <div class="flex items-center gap-3">
         <a
           routerLink="/admin/tournaments"
-          class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+          aria-label="Volver a torneos"
+          class="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
@@ -25,11 +26,8 @@
         }
         <div>
           <div class="flex items-center gap-3">
-            <h1 class="t-display text-white text-4xl">{{ t.name }}</h1>
-            <span
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-              [class]="statusClass(t.status)"
-            >
+            <h1 class="t-display text-white text-4xl sm:text-5xl">{{ t.name }}</h1>
+            <span class="chip" [class]="statusClass(t.status)">
               {{ statusLabel(t.status) }}
             </span>
           </div>
@@ -40,7 +38,7 @@
       </div>
       <a
         [routerLink]="['/admin/tournaments', id, 'edit']"
-        class="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+        class="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-200 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
@@ -75,11 +73,11 @@
         <button
           type="button"
           (click)="setTab(tab.key)"
-          class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px"
+          class="px-4 py-2.5 text-sm font-bold border-b-2 transition-colors -mb-px"
           [class]="
             activeTab() === tab.key
-              ? 'border-blue-500 text-white'
-              : 'border-transparent text-gray-400 hover:text-white hover:border-gray-600'
+              ? 'border-orange-400 text-white'
+              : 'border-transparent text-gray-300 hover:text-white hover:border-gray-500'
           "
         >
           {{ tab.label }}
@@ -141,18 +139,18 @@
 
         <!-- Buscar equipo existente / crear nuevo -->
         @if (showAddTeam()) {
-          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-4">
+          <div class="card p-5 mb-4 !border-gray-600">
             @if (!showNewTeamForm()) {
-              <h3 class="text-white font-semibold text-sm mb-3">Agregar equipo</h3>
+              <h3 class="t-display text-white text-2xl mb-3">Agregar equipo</h3>
               <input
                 type="text"
                 [ngModel]="teamSearch()"
                 (ngModelChange)="teamSearch.set($event)"
                 placeholder="Buscar equipo por nombre..."
-                class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                class="field mb-3"
               />
               @if (isLoadingAllTeams()) {
-                <p class="text-gray-400 text-sm py-2">Cargando equipos...</p>
+                <p class="text-gray-400 text-sm py-2">Cargando equipos…</p>
               } @else {
                 <div class="max-h-64 overflow-y-auto space-y-1 mb-3">
                   @for (t of filteredExistingTeams; track t.id) {
@@ -192,15 +190,15 @@
                 </button>
               </div>
             } @else {
-              <h3 class="text-white font-semibold text-sm mb-4">Nuevo equipo</h3>
+              <h3 class="t-display text-white text-2xl mb-4">Nuevo equipo</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label class="block text-xs font-medium text-gray-400 mb-1">Nombre *</label>
+                  <label class="field-label">Nombre *</label>
                   <input
                     type="text"
                     [(ngModel)]="teamName"
                     placeholder="Argentina"
-                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="field"
                     [class.border-red-600]="teamErrors()['name']"
                     [class.border-gray-700]="!teamErrors()['name']"
                   />
@@ -209,24 +207,22 @@
                   }
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-400 mb-1"
-                    >Abreviatura (máx 5)</label
-                  >
+                  <label class="field-label">Abreviatura (máx 5)</label>
                   <input
                     type="text"
                     [(ngModel)]="teamShortName"
                     placeholder="ARG"
                     maxlength="5"
-                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="field"
                   />
                 </div>
                 <div class="col-span-1 sm:col-span-2">
-                  <label class="block text-xs font-medium text-gray-400 mb-1">URL del escudo</label>
+                  <label class="field-label">URL del escudo</label>
                   <input
                     type="url"
                     [(ngModel)]="teamLogoUrl"
                     placeholder="https://..."
-                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="field"
                   />
                 </div>
               </div>
@@ -252,16 +248,16 @@
 
         <!-- Editar equipo (global) -->
         @if (showTeamForm()) {
-          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-4">
-            <h3 class="text-white font-semibold text-sm mb-4">Editar equipo</h3>
+          <div class="card p-5 mb-4 !border-gray-600">
+            <h3 class="t-display text-white text-2xl mb-4">Editar equipo</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1">Nombre *</label>
+                <label class="field-label">Nombre *</label>
                 <input
                   type="text"
                   [(ngModel)]="teamName"
                   placeholder="Argentina"
-                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="field"
                   [class.border-red-600]="teamErrors()['name']"
                   [class.border-gray-700]="!teamErrors()['name']"
                 />
@@ -270,24 +266,22 @@
                 }
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1"
-                  >Abreviatura (máx 5)</label
-                >
+                <label class="field-label">Abreviatura (máx 5)</label>
                 <input
                   type="text"
                   [(ngModel)]="teamShortName"
                   placeholder="ARG"
                   maxlength="5"
-                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="field"
                 />
               </div>
               <div class="col-span-1 sm:col-span-2">
-                <label class="block text-xs font-medium text-gray-400 mb-1">URL del escudo</label>
+                <label class="field-label">URL del escudo</label>
                 <input
                   type="url"
                   [(ngModel)]="teamLogoUrl"
                   placeholder="https://..."
-                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="field"
                 />
               </div>
             </div>
@@ -425,16 +419,16 @@
 
         <!-- Match Form -->
         @if (showMatchForm()) {
-          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 mb-4">
-            <h3 class="text-white font-semibold text-sm mb-4">
+          <div class="card p-5 mb-4 !border-gray-600">
+            <h3 class="t-display text-white text-2xl mb-4">
               {{ editingMatch() ? 'Editar partido' : 'Nuevo partido' }}
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1">Local *</label>
+                <label class="field-label">Local *</label>
                 <select
                   [(ngModel)]="matchHomeTeamId"
-                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="field"
                   [class.border-red-600]="matchErrors()['home']"
                   [class.border-gray-700]="!matchErrors()['home']"
                 >
@@ -448,10 +442,10 @@
                 }
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1">Visitante *</label>
+                <label class="field-label">Visitante *</label>
                 <select
                   [(ngModel)]="matchAwayTeamId"
-                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="field"
                   [class.border-red-600]="matchErrors()['away']"
                   [class.border-gray-700]="!matchErrors()['away']"
                 >
@@ -465,14 +459,12 @@
                 }
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1"
-                  >Fecha del partido *</label
-                >
+                <label class="field-label">Fecha del partido *</label>
                 <input
                   type="datetime-local"
                   [(ngModel)]="matchDate"
                   (change)="onMatchDateChange()"
-                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="field"
                   [class.border-red-600]="matchErrors()['date']"
                   [class.border-gray-700]="!matchErrors()['date']"
                 />
@@ -481,13 +473,13 @@
                 }
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1"
+                <label class="field-label"
                   >Deadline predicción * <span class="text-gray-400">(1 min antes)</span></label
                 >
                 <input
                   type="datetime-local"
                   [(ngModel)]="matchDeadline"
-                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="field"
                   [class.border-red-600]="matchErrors()['deadline']"
                   [class.border-gray-700]="!matchErrors()['deadline']"
                 />
@@ -496,12 +488,12 @@
                 }
               </div>
               <div class="col-span-1 sm:col-span-2">
-                <label class="block text-xs font-medium text-gray-400 mb-1">Jornada / Ronda</label>
+                <label class="field-label">Jornada / Ronda</label>
                 <input
                   type="text"
                   [(ngModel)]="matchRound"
                   placeholder="Ej: Fase de grupos, Semifinal..."
-                  class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="field"
                 />
               </div>
             </div>
@@ -551,7 +543,7 @@
                         <span class="truncate">{{ match.home_team?.name ?? '?' }}</span>
                       </span>
                       @if (match.status === 'finished') {
-                        <span class="text-lg font-black text-white shrink-0"
+                        <span class="scoreboard shrink-0" style="font-size: 1.25rem; min-width: 0"
                           >{{ match.home_score }} – {{ match.away_score }}</span
                         >
                       } @else {
@@ -569,10 +561,7 @@
                         }
                         <span class="truncate">{{ match.away_team?.name ?? '?' }}</span>
                       </span>
-                      <span
-                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0"
-                        [class]="matchStatusClass(match.status)"
-                      >
+                      <span class="chip shrink-0" [class]="matchStatusClass(match.status)">
                         {{ matchStatusLabel(match.status) }}
                       </span>
                     </div>
@@ -644,14 +633,14 @@
                         type="number"
                         [(ngModel)]="resultHome"
                         min="0"
-                        class="w-12 px-1 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        class="score-input !w-14 !h-12 !text-2xl"
                       />
                       <span class="text-gray-400 font-bold">–</span>
                       <input
                         type="number"
                         [(ngModel)]="resultAway"
                         min="0"
-                        class="w-12 px-1 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        class="score-input !w-14 !h-12 !text-2xl"
                       />
                       <span class="text-gray-400 text-xs truncate flex-1">
                         {{ match.away_team?.short_name ?? match.away_team?.name ?? 'Visita' }}

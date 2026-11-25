@@ -1,17 +1,16 @@
-<div class="p-4 sm:p-8">
-  <!-- Header -->
-  <div class="mb-8">
-    <h1 class="t-display text-white text-4xl mb-1">Estadísticas globales</h1>
-    <p class="text-gray-400 text-sm">Resumen general de actividad en la plataforma.</p>
-  </div>
+<div class="p-4 sm:p-8 max-w-5xl">
+  <header class="mb-8">
+    <p class="t-label !text-orange-400 mb-1">Panel de administración</p>
+    <h1 class="t-display text-white text-4xl sm:text-5xl">Estadísticas globales</h1>
+    <p class="text-gray-300 text-sm mt-3">Cómo se está usando Prodeus en este momento.</p>
+  </header>
 
-  <!-- Skeleton loader -->
   @if (isLoading()) {
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8" aria-busy="true">
       @for (i of [1, 2, 3, 4, 5, 6]; track i) {
         <div class="card p-5">
-          <div class="h-3 bg-gray-800 rounded animate-pulse w-24 mb-3"></div>
-          <div class="h-9 bg-gray-800 rounded animate-pulse w-16 mb-2"></div>
+          <div class="h-3 bg-gray-800 rounded animate-pulse w-24 mb-4"></div>
+          <div class="h-12 bg-gray-800 rounded animate-pulse w-20 mb-3"></div>
           <div class="h-3 bg-gray-800 rounded animate-pulse w-32"></div>
         </div>
       }
@@ -19,85 +18,91 @@
   }
 
   @if (!isLoading() && stats(); as s) {
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-      <div class="card p-5">
-        <p class="text-gray-400 text-xs font-medium uppercase tracking-wider mb-2">
-          Grupos activos
-        </p>
-        <p class="text-3xl font-black text-white">{{ s.activeGroups }}</p>
-        <p class="text-gray-400 text-xs mt-1">de {{ s.totalGroups }} en total</p>
-      </div>
-
-      <div class="card p-5">
-        <p class="text-gray-400 text-xs font-medium uppercase tracking-wider mb-2">
-          Predicciones cargadas
-        </p>
-        <p class="text-3xl font-black text-white">{{ s.totalPredictions }}</p>
-        <p class="text-gray-400 text-xs mt-1">en todos los torneos</p>
-      </div>
-
-      <div class="card p-5">
-        <p class="text-gray-400 text-xs font-medium uppercase tracking-wider mb-2">
-          Miembros activos
-        </p>
-        <p class="text-3xl font-black text-white">{{ s.activeMembers }}</p>
-        <p class="text-gray-400 text-xs mt-1">participaciones en grupos</p>
-      </div>
-
-      <div class="card p-5">
-        <p class="text-gray-400 text-xs font-medium uppercase tracking-wider mb-2">
-          Usuarios registrados
-        </p>
-        <p class="text-3xl font-black text-blue-400">{{ s.registeredUsers }}</p>
-        <p class="text-gray-400 text-xs mt-1">cuentas en la plataforma</p>
-      </div>
-
-      <div class="card p-5">
-        <p class="text-gray-400 text-xs font-medium uppercase tracking-wider mb-2">
-          Torneos activos
-        </p>
-        <p class="text-3xl font-black text-green-400">{{ s.tournamentsByStatus.active }}</p>
-        <p class="text-gray-400 text-xs mt-1">en curso ahora</p>
-      </div>
-
-      <div class="card p-5">
-        <p class="text-gray-400 text-xs font-medium uppercase tracking-wider mb-2">
-          Torneos cerrados
-        </p>
-        <p class="text-3xl font-black text-gray-400">{{ s.tournamentsByStatus.closed }}</p>
-        <p class="text-gray-400 text-xs mt-1">finalizados</p>
-      </div>
-    </div>
-
-    <!-- Tournaments breakdown -->
-    <div class="card p-6 w-full sm:max-w-sm">
-      <p class="text-gray-400 text-sm font-semibold mb-4">Estado de torneos</p>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-green-400"></span>
-            <span class="text-gray-300 text-sm">Activos</span>
-          </div>
-          <span class="text-white font-bold text-sm">{{ s.tournamentsByStatus.active }}</span>
+    <!-- Personas -->
+    <section class="mb-8">
+      <h2 class="t-label mb-3">Personas</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="card p-5">
+          <p class="text-gray-300 text-sm font-semibold">Usuarios registrados</p>
+          <p class="t-display text-orange-400 text-7xl mt-1 tabular">{{ s.registeredUsers }}</p>
+          <p class="text-gray-400 text-xs mt-1">Cuentas creadas en la plataforma</p>
         </div>
-
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-gray-500"></span>
-            <span class="text-gray-300 text-sm">Borrador</span>
-          </div>
-          <span class="text-white font-bold text-sm">{{ s.tournamentsByStatus.draft }}</span>
-        </div>
-
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-red-400"></span>
-            <span class="text-gray-300 text-sm">Cerrados</span>
-          </div>
-          <span class="text-white font-bold text-sm">{{ s.tournamentsByStatus.closed }}</span>
+        <div class="card p-5">
+          <p class="text-gray-300 text-sm font-semibold">Miembros activos</p>
+          <p class="t-display text-white text-7xl mt-1 tabular">{{ s.activeMembers }}</p>
+          <p class="text-gray-400 text-xs mt-1">Participaciones en grupos</p>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- Actividad -->
+    <section class="mb-8">
+      <h2 class="t-label mb-3">Actividad</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="card p-5">
+          <p class="text-gray-300 text-sm font-semibold">Grupos activos</p>
+          <p class="t-display text-white text-6xl mt-1 tabular">
+            {{ s.activeGroups }}<span class="text-gray-400 text-2xl"> / {{ s.totalGroups }}</span>
+          </p>
+          <p class="text-gray-400 text-xs mt-1">Activos sobre el total creado</p>
+        </div>
+        <div class="card p-5">
+          <p class="text-gray-300 text-sm font-semibold">Predicciones cargadas</p>
+          <p class="t-display text-white text-6xl mt-1 tabular">{{ s.totalPredictions }}</p>
+          <p class="text-gray-400 text-xs mt-1">En todos los torneos</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Torneos -->
+    <section>
+      <h2 class="t-label mb-3">Torneos</h2>
+      <div class="card p-5 sm:p-6">
+        @let active = s.tournamentsByStatus.active;
+        @let draft = s.tournamentsByStatus.draft;
+        @let closed = s.tournamentsByStatus.closed;
+        @let total = active + draft + closed;
+
+        @if (total === 0) {
+          <p class="text-gray-300 text-sm">Todavía no hay torneos creados.</p>
+        } @else {
+          <div
+            class="flex h-3 rounded-full overflow-hidden bg-gray-800 mb-5"
+            role="img"
+            [attr.aria-label]="
+              active + ' activos, ' + draft + ' en borrador, ' + closed + ' cerrados'
+            "
+          >
+            <div class="bg-green-300" [style.width.%]="(active / total) * 100"></div>
+            <div class="bg-gray-500" [style.width.%]="(draft / total) * 100"></div>
+            <div class="bg-red-400" [style.width.%]="(closed / total) * 100"></div>
+          </div>
+
+          <dl class="grid grid-cols-3 gap-4">
+            <div>
+              <dt class="flex items-center gap-2 text-gray-300 text-sm">
+                <span class="w-2.5 h-2.5 rounded-full bg-green-300"></span>Activos
+              </dt>
+              <dd class="t-display text-white text-5xl mt-1 tabular">{{ active }}</dd>
+              <p class="text-gray-400 text-xs">En curso ahora</p>
+            </div>
+            <div>
+              <dt class="flex items-center gap-2 text-gray-300 text-sm">
+                <span class="w-2.5 h-2.5 rounded-full bg-gray-500"></span>Borrador
+              </dt>
+              <dd class="t-display text-white text-5xl mt-1 tabular">{{ draft }}</dd>
+              <p class="text-gray-400 text-xs">Sin publicar</p>
+            </div>
+            <div>
+              <dt class="flex items-center gap-2 text-gray-300 text-sm">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>Cerrados
+              </dt>
+              <dd class="t-display text-white text-5xl mt-1 tabular">{{ closed }}</dd>
+              <p class="text-gray-400 text-xs">Finalizados</p>
+            </div>
+          </dl>
+        }
+      </div>
+    </section>
   }
 </div>

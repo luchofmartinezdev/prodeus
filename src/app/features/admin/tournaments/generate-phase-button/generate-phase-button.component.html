@@ -2,15 +2,13 @@
   <div class="flex items-center gap-3 px-4 py-3 card">
     <!-- Estado de fase -->
     <div class="flex-1 min-w-0">
-      <p class="text-xs font-medium text-gray-400">
-        Fase actual:
-        <span class="text-white">{{ s.currentPhase }}</span>
+      <p class="t-label">
+        Fase actual
+        <span class="t-display text-white text-xl normal-case tracking-normal ml-1.5">{{
+          s.currentPhase
+        }}</span>
         @if (s.currentPhaseComplete) {
-          <span
-            class="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-900 text-green-300"
-          >
-            completa
-          </span>
+          <span class="chip ml-1.5 bg-green-900 text-green-300 border-green-800"> completa </span>
         }
       </p>
 
@@ -35,7 +33,7 @@
         type="button"
         (click)="openConfirmModal()"
         [disabled]="!canGenerate || isGenerating()"
-        class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         [class]="
           canGenerate && !isGenerating()
             ? 'bg-blue-600 hover:bg-blue-500 text-white'
@@ -58,7 +56,7 @@
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          <span>Calculando...</span>
+          <span>Calculando…</span>
         } @else {
           <span>Calcular {{ s.nextPhase }} →</span>
         }
