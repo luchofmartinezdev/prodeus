@@ -5,12 +5,10 @@ import { AuthStore } from './auth.store';
 import { AuthRepository } from '../data/repositories/auth.repository';
 
 const mockAuthRepo = {
-  getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
-  onAuthStateChange: vi.fn().mockReturnValue({
-    data: { subscription: { unsubscribe: vi.fn() } },
-  }),
+  onAuthStateChange: vi.fn().mockReturnValue({ unsubscribe: vi.fn() }),
   getProfile: vi.fn().mockResolvedValue({ data: null }),
-  signOut: vi.fn().mockResolvedValue({}),
+  updateProfile: vi.fn().mockResolvedValue({ data: null }),
+  signOut: vi.fn().mockResolvedValue(undefined),
   signInWithGoogle: vi.fn(),
 };
 
@@ -20,11 +18,6 @@ describe('AuthStore', () => {
   let store: InstanceType<typeof AuthStore>;
 
   beforeEach(() => {
-    // Clear localStorage before each test
-    Object.keys(localStorage)
-      .filter((k) => k.startsWith('sb-'))
-      .forEach((k) => localStorage.removeItem(k));
-
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
@@ -69,16 +62,6 @@ describe('AuthStore', () => {
   it('signOut() navigates to root', () => {
     store.signOut();
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
-  });
-
-  it('signOut() clears sb- keys from localStorage', () => {
-    localStorage.setItem('sb-auth-token', 'some-token');
-    localStorage.setItem('sb-refresh-token', 'some-refresh');
-    localStorage.setItem('other-key', 'stays');
-    store.signOut();
-    expect(localStorage.getItem('sb-auth-token')).toBeNull();
-    expect(localStorage.getItem('sb-refresh-token')).toBeNull();
-    expect(localStorage.getItem('other-key')).toBe('stays');
   });
 
   it('signOut() calls authRepo.signOut() (fire-and-forget)', () => {

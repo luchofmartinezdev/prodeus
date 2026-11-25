@@ -8,7 +8,7 @@ import { AuthStore } from '../../../state/auth.store';
 import { ToastService } from '../../../core/services/toast.service';
 import { RouterLink } from '@angular/router';
 import type { Prediction } from '../../../data/database.types';
-import type { User } from '@supabase/supabase-js';
+import type { AuthUser as User } from '../../../state/auth.store';
 
 const mockPredictionService = { getByGroup: vi.fn(), save: vi.fn() };
 const mockMatchService = { getByTournament: vi.fn() };

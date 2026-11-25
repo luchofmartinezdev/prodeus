@@ -68,6 +68,24 @@ export const TournamentStore = signalStore(
         }
       },
 
+      /** Para contextos de usuario no-admin (p.ej. crear grupo) — ver nota en el repo. */
+      async loadActive(): Promise<void> {
+        if (store.tournaments().length > 0) return;
+        patchState(store, { isLoading: true, error: null });
+        try {
+          const { data, error } = await repo.findActive();
+          if (error) {
+            toast.error('No se pudieron cargar los torneos');
+          } else {
+            patchState(store, { tournaments: data ?? [] });
+          }
+        } catch {
+          toast.error('No se pudieron cargar los torneos');
+        } finally {
+          patchState(store, { isLoading: false });
+        }
+      },
+
       async loadOne(id: string): Promise<void> {
         patchState(store, { isLoading: true, error: null, selected: null });
         const { data, error } = await repo.findOne(id);
@@ -87,10 +105,11 @@ export const TournamentStore = signalStore(
           toast.error('No se pudo crear el torneo');
           return null;
         }
-        await repo.createDefaultRules(data.id);
-        patchState(store, { tournaments: [data, ...store.tournaments()], isLoading: false });
+        // Reglas de puntuación: son globales (no por torneo) desde la Fase 2 de la
+        // migración a Firebase — no hace falta crear nada al dar de alta un torneo.
+        patchState(store, { tournaments: [data!, ...store.tournaments()], isLoading: false });
         toast.success('Torneo creado exitosamente');
-        return data.id;
+        return data!.id;
       },
 
       async update(id: string, dto: Partial<TournamentDto>): Promise<boolean> {
@@ -102,8 +121,8 @@ export const TournamentStore = signalStore(
           return false;
         }
         patchState(store, {
-          tournaments: store.tournaments().map((t) => (t.id === id ? data : t)),
-          selected: store.selected()?.id === id ? data : store.selected(),
+          tournaments: store.tournaments().map((t) => (t.id === id ? data! : t)),
+          selected: store.selected()?.id === id ? data! : store.selected(),
           isLoading: false,
         });
         toast.success('Torneo actualizado');
@@ -117,8 +136,8 @@ export const TournamentStore = signalStore(
           return;
         }
         patchState(store, {
-          tournaments: store.tournaments().map((t) => (t.id === id ? data : t)),
-          selected: store.selected()?.id === id ? data : store.selected(),
+          tournaments: store.tournaments().map((t) => (t.id === id ? data! : t)),
+          selected: store.selected()?.id === id ? data! : store.selected(),
         });
         const label = { draft: 'Borrador', active: 'Activo', closed: 'Cerrado' }[status];
         toast.success(`Estado cambiado a ${label}`);

@@ -5,7 +5,15 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "target": "es2022",
-    "types": ["vitest/globals", "node"]
+    "types": ["vitest/globals", "node"],
+    "paths": {
+      "@core/*": ["./src/app/core/*"],
+      "@shared/*": ["./src/app/shared/*"],
+      "@features/*": ["./src/app/features/*"],
+      "@data/*": ["./src/app/data/*"],
+      "@state/*": ["./src/app/state/*"],
+      "@env/*": ["./src/environments/*"]
+    }
   },
   "files": ["src/test-setup.ts"],
   "include": ["src/**/*.d.ts", "src/**/*.spec.ts"]

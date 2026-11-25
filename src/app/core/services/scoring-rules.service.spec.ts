@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ScoringRulesService } from './scoring-rules.service';
 import { ScoringRulesRepository } from '../../data/repositories/scoring-rules.repository';
-import type { ScoringRule } from '../../data/database.types';
+import type { ScoringRule } from '../../data/repositories/scoring-rules.repository';
 
 const mockRepo = {
   findAll: vi.fn(),
@@ -13,9 +13,9 @@ const mockRepo = {
 const fakeRule = (overrides: Partial<ScoringRule> = {}): ScoringRule =>
   ({
     id: 'rule-1',
-    rule_key: 'exact_score',
-    points_value: 5,
-    description: 'Exacto',
+    rule_key: 'correct_outcome',
+    points_value: 3,
+    description: 'Resultado',
     created_at: new Date().toISOString(),
     ...overrides,
   }) as unknown as ScoringRule;
@@ -42,10 +42,7 @@ describe('ScoringRulesService', () => {
   // ─── getAll ──────────────────────────────────────────────────
 
   it('getAll() returns rules on success', async () => {
-    const rules = [
-      fakeRule(),
-      fakeRule({ id: 'rule-2', rule_key: 'correct_winner', points_value: 3 }),
-    ];
+    const rules = [fakeRule(), fakeRule({ id: 'rule-2', rule_key: 'home_goals', points_value: 1 })];
     mockRepo.findAll.mockResolvedValue({ data: rules, error: null });
     const result = await service.getAll();
     expect(result).toEqual(rules);

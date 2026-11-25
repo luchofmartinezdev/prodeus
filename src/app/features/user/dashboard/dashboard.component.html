@@ -18,7 +18,7 @@
   <!-- Stats -->
   <div class="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-3">
     <a
-      routerLink="/app/groups"
+      routerLink="/home/groups"
       class="bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition-colors group/stat"
     >
       <p class="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">Grupos</p>
@@ -60,7 +60,9 @@
   @if (!isLoadingGroups()) {
     <!-- Empty state -->
     @if (groupStore.groups().length === 0) {
-      <div class="bg-gray-900 border border-dashed border-gray-700 rounded-2xl p-12 text-center">
+      <div
+        class="bg-gray-900 border border-dashed border-gray-700 rounded-2xl p-12 text-center mb-8"
+      >
         <svg
           class="w-12 h-12 text-gray-700 mx-auto mb-4"
           fill="none"
@@ -82,13 +84,13 @@
         </p>
         <div class="flex items-center justify-center gap-3">
           <a
-            routerLink="/app/groups/new"
+            routerLink="/home/groups/new"
             class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors"
           >
             Crear grupo
           </a>
           <a
-            routerLink="/app/groups"
+            routerLink="/home/groups"
             class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium rounded-lg transition-colors"
           >
             Unirme por código
@@ -104,7 +106,7 @@
           <h2 class="text-lg font-bold text-white">Mis grupos</h2>
           @if (groupStore.groups().length > 4) {
             <a
-              routerLink="/app/groups"
+              routerLink="/home/groups"
               class="text-blue-400 hover:text-blue-300 text-sm transition-colors"
             >
               Ver todos ({{ groupStore.groups().length }})
@@ -114,10 +116,19 @@
         <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           @for (group of previewGroups; track group.id) {
             <a
-              [routerLink]="['/app/groups', group.id]"
+              [routerLink]="['/home/groups', group.id]"
               class="block bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-4 transition-colors group/card"
             >
-              <p class="text-xs text-gray-500 mb-1 truncate">{{ group.tournament.name }}</p>
+              <div class="flex items-center gap-1.5 mb-1">
+                @if (group.tournament.logo_url) {
+                  <img
+                    [src]="group.tournament.logo_url"
+                    [alt]="group.tournament.name"
+                    class="w-3.5 h-3.5 object-contain rounded-sm shrink-0"
+                  />
+                }
+                <p class="text-xs text-gray-500 truncate">{{ group.tournament.name }}</p>
+              </div>
               <p
                 class="text-white font-semibold text-sm group-hover/card:text-blue-300 transition-colors truncate"
               >
@@ -126,18 +137,18 @@
               <span
                 class="mt-2 inline-block text-xs px-1.5 py-0.5 rounded"
                 [class]="
-                  group.join_mode === 'open'
+                  group.visibility === 'public'
                     ? 'bg-green-900 text-green-400'
                     : 'bg-yellow-900 text-yellow-400'
                 "
               >
-                {{ group.join_mode === 'open' ? 'Abierto' : 'Cerrado' }}
+                {{ group.visibility === 'public' ? 'Público' : 'Privado' }}
               </span>
             </a>
           }
           <!-- Add group card -->
           <a
-            routerLink="/app/groups/new"
+            routerLink="/home/groups/new"
             class="flex flex-col items-center justify-center border border-dashed border-gray-700 hover:border-blue-600 rounded-xl p-4 text-gray-600 hover:text-blue-400 transition-colors min-h-[90px]"
           >
             <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -150,6 +161,52 @@
             </svg>
             <span class="text-xs font-medium">Crear grupo</span>
           </a>
+        </div>
+      </section>
+    }
+
+    <!-- Grupos públicos (descubrir) -->
+    @if (groupStore.isLoadingPublic()) {
+      <section class="mb-8">
+        <div class="h-6 bg-gray-800 rounded animate-pulse w-40 mb-4"></div>
+        <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+              <div class="h-3 bg-gray-800 rounded animate-pulse w-24 mb-2"></div>
+              <div class="h-4 bg-gray-800 rounded animate-pulse w-36 mb-2"></div>
+            </div>
+          }
+        </div>
+      </section>
+    } @else if (discoverableGroups.length > 0) {
+      <section class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-white">Grupos públicos</h2>
+        </div>
+        <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          @for (group of discoverableGroups; track group.id) {
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+              <div class="flex items-center gap-1.5 mb-1">
+                @if (group.tournament.logo_url) {
+                  <img
+                    [src]="group.tournament.logo_url"
+                    [alt]="group.tournament.name"
+                    class="w-3.5 h-3.5 object-contain rounded-sm shrink-0"
+                  />
+                }
+                <p class="text-xs text-gray-500 truncate">{{ group.tournament.name }}</p>
+              </div>
+              <p class="text-white font-semibold text-sm truncate mb-2">{{ group.name }}</p>
+              <button
+                type="button"
+                (click)="onJoinPublic(group.id)"
+                [disabled]="groupStore.isLoading()"
+                class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+              >
+                Unirme
+              </button>
+            </div>
+          }
         </div>
       </section>
     }
@@ -200,7 +257,7 @@
                       <img
                         [src]="match.home_team!.logo_url"
                         [alt]="match.home_team!.name"
-                        class="w-6 h-4 object-cover rounded-sm shrink-0"
+                        class="w-5 h-5 object-contain shrink-0"
                       />
                     } @else if (getFlag(match.home_team?.name)) {
                       <span>{{ getFlag(match.home_team?.name) }}</span>
@@ -215,7 +272,7 @@
                       <img
                         [src]="match.away_team!.logo_url"
                         [alt]="match.away_team!.name"
-                        class="w-6 h-4 object-cover rounded-sm shrink-0"
+                        class="w-5 h-5 object-contain shrink-0"
                       />
                     } @else if (getFlag(match.away_team?.name)) {
                       <span>{{ getFlag(match.away_team?.name) }}</span>

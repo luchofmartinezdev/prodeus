@@ -33,7 +33,7 @@
     @if (s.nextPhase) {
       <button
         type="button"
-        (click)="generate()"
+        (click)="openConfirmModal()"
         [disabled]="!canGenerate || isGenerating()"
         class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         [class]="
@@ -65,4 +65,19 @@
       </button>
     }
   </div>
+}
+
+@if (showConfirmModal()) {
+  <app-confirm-modal
+    title="Calcular fase"
+    [message]="
+      '¿Calcular ' +
+      nextPhaseLabel +
+      '? Esta acción actualizará los partidos con los equipos clasificados.'
+    "
+    confirmLabel="Calcular"
+    variant="primary"
+    (confirmed)="generate()"
+    (cancelled)="closeConfirmModal()"
+  />
 }

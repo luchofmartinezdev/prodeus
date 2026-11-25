@@ -7,9 +7,9 @@ import type { GroupWithTournament } from '../../data/repositories/group.reposito
 const mockRepo = {
   findByUser: vi.fn(),
   findOne: vi.fn(),
+  findPublicGroups: vi.fn(),
   findMembers: vi.fn(),
   create: vi.fn(),
-  addMember: vi.fn(),
   update: vi.fn(),
   remove: vi.fn(),
   findByInviteCode: vi.fn(),
@@ -21,9 +21,9 @@ const fakeGroup = (overrides: Partial<GroupWithTournament> = {}): GroupWithTourn
   ({
     id: 'group-1',
     name: 'Los cracks',
-    join_mode: 'open',
+    visibility: 'public',
     leader_id: 'user-1',
-    invite_code: 'ABC12345',
+    invite_code: 'A3F9K2',
     tournament_id: 'tour-1',
     tournament: { id: 'tour-1', name: 'Liga 2025', status: 'active' },
     created_at: new Date().toISOString(),
@@ -51,50 +51,46 @@ describe('GroupService', () => {
 
   // ─── getMyGroups ─────────────────────────────────────────────
 
-  it('getMyGroups() returns empty array when RLS error with no data', async () => {
-    mockRepo.findByUser.mockResolvedValue({ data: [], error: { message: 'RLS' } });
-    const result = await service.getMyGroups('user-1');
-    expect(result).toEqual([]);
-  });
-
-  it('getMyGroups() returns empty array when data is null and error', async () => {
-    mockRepo.findByUser.mockResolvedValue({ data: null, error: { message: 'RLS' } });
-    const result = await service.getMyGroups('user-1');
-    expect(result).toEqual([]);
-  });
-
-  it('getMyGroups() throws when error with non-empty data', async () => {
-    mockRepo.findByUser.mockResolvedValue({
-      data: [{ groups: fakeGroup() }],
-      error: { message: 'real error' },
-    });
+  it('getMyGroups() throws on error', async () => {
+    mockRepo.findByUser.mockResolvedValue({ data: null, error: { message: 'firestore error' } });
     await expect(service.getMyGroups('user-1')).rejects.toThrow('No se pudieron cargar tus grupos');
   });
 
-  it('getMyGroups() maps nested groups structure correctly', async () => {
+  it('getMyGroups() returns the groups from the repository', async () => {
     const group = fakeGroup();
-    mockRepo.findByUser.mockResolvedValue({
-      data: [{ groups: group }],
-      error: null,
-    });
+    mockRepo.findByUser.mockResolvedValue({ data: [group], error: null });
     const result = await service.getMyGroups('user-1');
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('group-1');
   });
 
-  it('getMyGroups() filters out null groups', async () => {
-    mockRepo.findByUser.mockResolvedValue({
-      data: [{ groups: fakeGroup() }, { groups: null }],
-      error: null,
-    });
+  it('getMyGroups() returns empty array when data is null', async () => {
+    mockRepo.findByUser.mockResolvedValue({ data: null, error: null });
     const result = await service.getMyGroups('user-1');
+    expect(result).toEqual([]);
+  });
+
+  // ─── getPublicGroups ─────────────────────────────────────────
+
+  it('getPublicGroups() throws on error', async () => {
+    mockRepo.findPublicGroups.mockResolvedValue({ data: null, error: { message: 'fail' } });
+    await expect(service.getPublicGroups()).rejects.toThrow(
+      'No se pudieron cargar los grupos públicos',
+    );
+  });
+
+  it('getPublicGroups() returns the groups from the repository', async () => {
+    const group = fakeGroup({ id: 'public-1' });
+    mockRepo.findPublicGroups.mockResolvedValue({ data: [group], error: null });
+    const result = await service.getPublicGroups();
     expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('public-1');
   });
 
   // ─── joinByCode ──────────────────────────────────────────────
 
   it('joinByCode() throws when invite code is invalid', async () => {
-    mockRepo.findByInviteCode.mockResolvedValue({ data: null, error: { message: 'no rows' } });
+    mockRepo.findByInviteCode.mockResolvedValue({ data: null, error: { message: 'not-found' } });
     await expect(service.joinByCode('INVALID', 'user-1')).rejects.toThrow(
       'Código de invitación inválido',
     );
@@ -105,107 +101,80 @@ describe('GroupService', () => {
       data: fakeGroup({ tournament: { id: 'tour-1', name: 'Liga', status: 'closed' } }),
       error: null,
     });
-    await expect(service.joinByCode('ABC12345', 'user-1')).rejects.toThrow(
+    await expect(service.joinByCode('A3F9K2', 'user-1')).rejects.toThrow(
       'El torneo de este grupo no está activo',
     );
   });
 
-  it('joinByCode() returns status active for open join_mode', async () => {
+  it('joinByCode() joins directly regardless of visibility (no approval flow)', async () => {
     mockRepo.findByInviteCode.mockResolvedValue({
-      data: fakeGroup({ join_mode: 'open' }),
+      data: fakeGroup({ visibility: 'private' }),
       error: null,
     });
     mockRepo.joinGroup.mockResolvedValue({ error: null });
-    const result = await service.joinByCode('ABC12345', 'user-2');
-    expect(result.status).toBe('active');
+    const result = await service.joinByCode('A3F9K2', 'user-2');
+    expect(result.id).toBe('group-1');
+    expect(mockRepo.joinGroup).toHaveBeenCalledWith('group-1', 'user-2');
   });
 
-  it('joinByCode() returns status pending for closed join_mode', async () => {
-    mockRepo.findByInviteCode.mockResolvedValue({
-      data: fakeGroup({ join_mode: 'closed' }),
-      error: null,
-    });
-    mockRepo.joinGroup.mockResolvedValue({ error: null });
-    const result = await service.joinByCode('ABC12345', 'user-2');
-    expect(result.status).toBe('pending');
-  });
-
-  it('joinByCode() returns the group', async () => {
-    const group = fakeGroup();
-    mockRepo.findByInviteCode.mockResolvedValue({ data: group, error: null });
-    mockRepo.joinGroup.mockResolvedValue({ error: null });
-    const result = await service.joinByCode('ABC12345', 'user-2');
-    expect(result.group.id).toBe('group-1');
-  });
-
-  it('joinByCode() throws friendly message when already a member (23505)', async () => {
+  it('joinByCode() throws on join error', async () => {
     mockRepo.findByInviteCode.mockResolvedValue({ data: fakeGroup(), error: null });
-    mockRepo.joinGroup.mockResolvedValue({ error: { code: '23505' } });
-    await expect(service.joinByCode('ABC12345', 'user-1')).rejects.toThrow(
-      'Ya sos miembro de este grupo',
-    );
-  });
-
-  it('joinByCode() throws generic error on other join errors', async () => {
-    mockRepo.findByInviteCode.mockResolvedValue({ data: fakeGroup(), error: null });
-    mockRepo.joinGroup.mockResolvedValue({ error: { code: '99999', message: 'other' } });
-    await expect(service.joinByCode('ABC12345', 'user-2')).rejects.toThrow(
+    mockRepo.joinGroup.mockResolvedValue({ error: { code: 'unknown', message: 'other' } });
+    await expect(service.joinByCode('A3F9K2', 'user-2')).rejects.toThrow(
       'No se pudo unir al grupo',
     );
   });
 
+  // ─── joinById ────────────────────────────────────────────────
+
+  it('joinById() joins a known public group directly', async () => {
+    mockRepo.findOne.mockResolvedValue({ data: fakeGroup(), error: null });
+    mockRepo.joinGroup.mockResolvedValue({ error: null });
+    const result = await service.joinById('group-1', 'user-2');
+    expect(result.id).toBe('group-1');
+    expect(mockRepo.joinGroup).toHaveBeenCalledWith('group-1', 'user-2');
+  });
+
   // ─── create ──────────────────────────────────────────────────
+  // El alta del líder como miembro activo la hace la Cloud Function
+  // onGroupCreate (trigger) — el repo ya devuelve el grupo completo, no hace
+  // falta un paso addMember + getOne del lado del cliente.
 
-  it('create() throws friendly message on duplicate group (23505)', async () => {
-    mockRepo.create.mockResolvedValue({ data: null, error: { code: '23505' } });
+  it('create() throws on error', async () => {
+    mockRepo.create.mockResolvedValue({ data: null, error: { message: 'fail' } });
     await expect(
-      service.create({ name: 'G', tournament_id: 't', join_mode: 'open' }, 'user-1'),
-    ).rejects.toThrow('Ya tenés un grupo en este torneo');
+      service.create({ name: 'G', tournament_id: 't', visibility: 'public' }, 'user-1'),
+    ).rejects.toThrow('No se pudo crear el grupo');
   });
 
-  it('create() calls addMember then getOne steps', async () => {
-    const created = { id: 'new-group-id' };
-    const fullGroup = fakeGroup({ id: 'new-group-id' });
-    mockRepo.create.mockResolvedValue({ data: created, error: null });
-    mockRepo.addMember.mockResolvedValue({ error: null });
-    mockRepo.findOne.mockResolvedValue({ data: fullGroup, error: null });
+  it('create() returns the group from the repository', async () => {
+    const group = fakeGroup({ id: 'new-group-id' });
+    mockRepo.create.mockResolvedValue({ data: group, error: null });
 
-    await service.create({ name: 'G', tournament_id: 't', join_mode: 'open' }, 'user-1');
-
-    expect(mockRepo.addMember).toHaveBeenCalledWith('new-group-id', 'user-1', 'active');
-    expect(mockRepo.findOne).toHaveBeenCalledWith('new-group-id');
-  });
-
-  // ─── approveMember / rejectMember / removeMember ─────────────
-
-  it('approveMember() throws on error', async () => {
-    mockRepo.updateMemberStatus.mockResolvedValue({ error: { message: 'fail' } });
-    await expect(service.approveMember('member-1')).rejects.toThrow(
-      'No se pudo aprobar el miembro',
+    const result = await service.create(
+      { name: 'G', tournament_id: 't', visibility: 'public' },
+      'user-1',
     );
+
+    expect(mockRepo.create).toHaveBeenCalledWith(
+      { name: 'G', tournament_id: 't', visibility: 'public' },
+      'user-1',
+    );
+    expect(result.id).toBe('new-group-id');
   });
 
-  it('rejectMember() throws on error', async () => {
-    mockRepo.updateMemberStatus.mockResolvedValue({ error: { message: 'fail' } });
-    await expect(service.rejectMember('member-1')).rejects.toThrow(
-      'No se pudo rechazar el miembro',
-    );
-  });
+  // ─── removeMember ────────────────────────────────────────────
 
   it('removeMember() throws on error', async () => {
     mockRepo.updateMemberStatus.mockResolvedValue({ error: { message: 'fail' } });
-    await expect(service.removeMember('member-1')).rejects.toThrow('No se pudo remover el miembro');
+    await expect(service.removeMember('member-1', 'group-1')).rejects.toThrow(
+      'No se pudo remover el miembro',
+    );
   });
 
-  it('approveMember() calls updateMemberStatus with active', async () => {
+  it('removeMember() calls updateMemberStatus with removed', async () => {
     mockRepo.updateMemberStatus.mockResolvedValue({ error: null });
-    await service.approveMember('member-1');
-    expect(mockRepo.updateMemberStatus).toHaveBeenCalledWith('member-1', 'active');
-  });
-
-  it('rejectMember() calls updateMemberStatus with removed', async () => {
-    mockRepo.updateMemberStatus.mockResolvedValue({ error: null });
-    await service.rejectMember('member-1');
-    expect(mockRepo.updateMemberStatus).toHaveBeenCalledWith('member-1', 'removed');
+    await service.removeMember('member-1', 'group-1');
+    expect(mockRepo.updateMemberStatus).toHaveBeenCalledWith('group-1', 'member-1', 'removed');
   });
 });

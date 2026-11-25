@@ -10,18 +10,22 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import type { Match, Team, Tournament } from '../../../../data/database.types';
 import { MatchService } from '../../../../core/services/match.service';
 import { TeamService } from '../../../../core/services/team.service';
+import { TournamentTeamService } from '../../../../core/services/tournament-team.service';
 import type { MatchWithTeams } from '../../../../data/repositories/match.repository';
 import { TournamentStore } from '../../../../state/tournament.store';
 import { GeneratePhaseButtonComponent } from '../generate-phase-button/generate-phase-button.component';
 
 type DetailTab = 'teams' | 'matches';
 
+type DeleteTarget = { kind: 'team'; team: Team } | { kind: 'match'; match: MatchWithTeams };
+
 @Component({
   selector: 'app-tournament-detail',
-  imports: [RouterLink, FormsModule, GeneratePhaseButtonComponent],
+  imports: [RouterLink, FormsModule, GeneratePhaseButtonComponent, ConfirmModalComponent],
   templateUrl: './tournament-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -30,6 +34,7 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
 
   protected readonly store = inject(TournamentStore);
   private readonly teamService = inject(TeamService);
+  private readonly tournamentTeamService = inject(TournamentTeamService);
   private readonly matchService = inject(MatchService);
 
   // ─── Tabs ────────────────────────────────────────────────────
@@ -43,8 +48,9 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
   readonly isLoadingDetail = signal(true);
   readonly isLoadingTab = signal(false);
   readonly tabError = signal<string | null>(null);
+  readonly deleteTarget = signal<DeleteTarget | null>(null);
 
-  // ─── Teams ──────────────────────────────────────────────────
+  // ─── Teams (roster del torneo) ─────────────────────────────
   readonly teams = signal<Team[]>([]);
   readonly showTeamForm = signal(false);
   readonly editingTeam = signal<Team | null>(null);
@@ -52,6 +58,21 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
   teamName = '';
   teamShortName = '';
   teamLogoUrl = '';
+
+  // ─── Agregar equipo: buscar existente (global) o crear nuevo ──
+  readonly showAddTeam = signal(false);
+  readonly allTeams = signal<Team[]>([]);
+  readonly isLoadingAllTeams = signal(false);
+  readonly teamSearch = signal('');
+  readonly showNewTeamForm = signal(false);
+
+  get filteredExistingTeams(): Team[] {
+    const q = this.teamSearch().trim().toLowerCase();
+    const rosterIds = new Set(this.teams().map((t) => t.id));
+    const pool = this.allTeams().filter((t) => !rosterIds.has(t.id));
+    if (!q) return pool.slice(0, 8);
+    return pool.filter((t) => t.name.toLowerCase().includes(q)).slice(0, 8);
+  }
 
   // ─── Matches ────────────────────────────────────────────────
   readonly matches = signal<MatchWithTeams[]>([]);
@@ -89,6 +110,7 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
     this.activeTab.set(tab);
     this.tabError.set(null);
     this.showTeamForm.set(false);
+    this.closeAddTeam();
     this.showMatchForm.set(false);
     this.resultMatchId.set(null);
     await this.loadTab(tab);
@@ -99,7 +121,7 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
     this.tabError.set(null);
     try {
       if (tab === 'teams') {
-        this.teams.set(await this.teamService.getByTournament(this.id));
+        this.teams.set(await this.tournamentTeamService.getByTournament(this.id));
       } else if (tab === 'matches') {
         this.matches.set(await this.matchService.getByTournament(this.id));
       }
@@ -165,13 +187,13 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
     });
   }
 
-  // ─── Teams CRUD ──────────────────────────────────────────────
+  // ─── Editar equipo (global) ────────────────────────────────
 
-  openTeamForm(team?: Team): void {
-    this.editingTeam.set(team ?? null);
-    this.teamName = team?.name ?? '';
-    this.teamShortName = team?.short_name ?? '';
-    this.teamLogoUrl = team?.logo_url ?? '';
+  openTeamForm(team: Team): void {
+    this.editingTeam.set(team);
+    this.teamName = team.name;
+    this.teamShortName = team.short_name ?? '';
+    this.teamLogoUrl = team.logo_url ?? '';
     this.teamErrors.set({});
     this.showTeamForm.set(true);
   }
@@ -192,49 +214,105 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
       return;
     }
 
+    const editing = this.editingTeam();
+    if (!editing) return;
+
     try {
-      const editing = this.editingTeam();
-      if (editing) {
-        const updated = {
-          name: this.teamName.trim(),
-          short_name: this.teamShortName || undefined,
-          logo_url: this.teamLogoUrl || undefined,
-        };
-        await this.teamService.update(editing.id, updated);
-        this.teams.set(
-          this.teams().map((t) =>
-            t.id === editing.id
-              ? {
-                  ...t,
-                  name: updated.name,
-                  short_name: updated.short_name ?? null,
-                  logo_url: updated.logo_url ?? null,
-                }
-              : t,
-          ),
-        );
-      } else {
-        await this.teamService.create({
-          tournament_id: this.id,
-          name: this.teamName.trim(),
-          short_name: this.teamShortName || undefined,
-          logo_url: this.teamLogoUrl || undefined,
-        });
-        this.teams.set(await this.teamService.getByTournament(this.id));
-      }
+      const updated = {
+        name: this.teamName.trim(),
+        short_name: this.teamShortName || undefined,
+        logo_url: this.teamLogoUrl || undefined,
+      };
+      await this.teamService.update(editing.id, updated);
+      this.teams.set(
+        this.teams().map((t) =>
+          t.id === editing.id
+            ? {
+                ...t,
+                name: updated.name,
+                short_name: updated.short_name ?? null,
+                logo_url: updated.logo_url ?? null,
+              }
+            : t,
+        ),
+      );
       this.cancelTeamForm();
     } catch (e: unknown) {
       this.tabError.set(e instanceof Error ? e.message : 'Error al guardar');
     }
   }
 
-  async deleteTeam(team: Team): Promise<void> {
-    if (!confirm(`¿Eliminar equipo "${team.name}"?`)) return;
+  /** Quita el equipo del roster de este torneo — no lo borra globalmente
+   *  (sigue existiendo para otros torneos y sus partidos pasados). */
+  deleteTeam(team: Team): void {
+    this.deleteTarget.set({ kind: 'team', team });
+  }
+
+  // ─── Agregar equipo: buscar existente o crear nuevo ─────────
+
+  async openAddTeam(): Promise<void> {
+    this.showAddTeam.set(true);
+    this.showNewTeamForm.set(false);
+    this.teamSearch.set('');
+    if (this.allTeams().length === 0) {
+      this.isLoadingAllTeams.set(true);
+      try {
+        this.allTeams.set(await this.teamService.getAll());
+      } catch (e: unknown) {
+        this.tabError.set(e instanceof Error ? e.message : 'Error al cargar equipos');
+      } finally {
+        this.isLoadingAllTeams.set(false);
+      }
+    }
+  }
+
+  closeAddTeam(): void {
+    this.showAddTeam.set(false);
+    this.showNewTeamForm.set(false);
+    this.teamSearch.set('');
+    this.teamErrors.set({});
+  }
+
+  async selectExistingTeam(team: Team): Promise<void> {
     try {
-      await this.teamService.remove(team.id);
-      this.teams.set(this.teams().filter((t) => t.id !== team.id));
+      await this.tournamentTeamService.add(this.id, team.id);
+      this.teams.set([...this.teams(), team].sort((a, b) => a.name.localeCompare(b.name)));
+      this.closeAddTeam();
     } catch (e: unknown) {
-      this.tabError.set(e instanceof Error ? e.message : 'Error al eliminar');
+      this.tabError.set(e instanceof Error ? e.message : 'Error al agregar equipo');
+    }
+  }
+
+  openNewTeamForm(): void {
+    this.showNewTeamForm.set(true);
+    this.teamName = this.teamSearch();
+    this.teamShortName = '';
+    this.teamLogoUrl = '';
+    this.teamErrors.set({});
+  }
+
+  async submitNewTeamForm(): Promise<void> {
+    const errors: Record<string, string> = {};
+    if (!this.teamName.trim()) errors['name'] = 'El nombre es requerido';
+    if (this.teamShortName && this.teamShortName.length > 5)
+      errors['short_name'] = 'Máximo 5 caracteres';
+    if (Object.keys(errors).length) {
+      this.teamErrors.set(errors);
+      return;
+    }
+
+    try {
+      const created = await this.teamService.create({
+        name: this.teamName.trim(),
+        short_name: this.teamShortName || undefined,
+        logo_url: this.teamLogoUrl || undefined,
+      });
+      await this.tournamentTeamService.add(this.id, created.id);
+      this.teams.set([...this.teams(), created].sort((a, b) => a.name.localeCompare(b.name)));
+      this.allTeams.set([...this.allTeams(), created]);
+      this.closeAddTeam();
+    } catch (e: unknown) {
+      this.tabError.set(e instanceof Error ? e.message : 'Error al crear el equipo');
     }
   }
 
@@ -257,9 +335,9 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
       this.matchDeadline = '';
       return;
     }
-    // Calculate deadline as 5 minutes before match_date
+    // Cada partido se puede modificar hasta el minuto anterior en que empieza.
     const matchDateTime = new Date(this.matchDate);
-    const deadlineDateTime = new Date(matchDateTime.getTime() - 5 * 60 * 1000);
+    const deadlineDateTime = new Date(matchDateTime.getTime() - 60 * 1000);
     this.matchDeadline = this.toDatetimeLocal(deadlineDateTime.toISOString());
   }
 
@@ -361,13 +439,42 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
     }
   }
 
-  async deleteMatch(match: MatchWithTeams): Promise<void> {
-    const home = match.home_team?.short_name ?? match.home_team?.name ?? '?';
-    const away = match.away_team?.short_name ?? match.away_team?.name ?? '?';
-    if (!confirm(`¿Eliminar el partido ${home} vs ${away}?`)) return;
+  deleteMatch(match: MatchWithTeams): void {
+    this.deleteTarget.set({ kind: 'match', match });
+  }
+
+  // ─── Modal de borrado (equipo o partido) ───────────────────────
+
+  get deleteModalMessage(): string {
+    const target = this.deleteTarget();
+    if (!target) return '';
+    if (target.kind === 'team')
+      return `¿Quitar a "${target.team.name}" de este torneo? El equipo sigue existiendo para otros torneos y sus partidos ya jugados.`;
+    const home = target.match.home_team?.short_name ?? target.match.home_team?.name ?? '?';
+    const away = target.match.away_team?.short_name ?? target.match.away_team?.name ?? '?';
+    return `¿Eliminar el partido ${home} vs ${away}?`;
+  }
+
+  get deleteModalConfirmLabel(): string {
+    return this.deleteTarget()?.kind === 'team' ? 'Quitar del torneo' : 'Eliminar';
+  }
+
+  closeDeleteModal(): void {
+    this.deleteTarget.set(null);
+  }
+
+  async confirmDeleteTarget(): Promise<void> {
+    const target = this.deleteTarget();
+    if (!target) return;
+    this.closeDeleteModal();
     try {
-      await this.matchService.remove(match.id);
-      this.matches.set(this.matches().filter((m) => m.id !== match.id));
+      if (target.kind === 'team') {
+        await this.tournamentTeamService.remove(this.id, target.team.id);
+        this.teams.set(this.teams().filter((t) => t.id !== target.team.id));
+      } else {
+        await this.matchService.remove(target.match.id);
+        this.matches.set(this.matches().filter((m) => m.id !== target.match.id));
+      }
     } catch (e: unknown) {
       this.tabError.set(e instanceof Error ? e.message : 'Error al eliminar');
     }

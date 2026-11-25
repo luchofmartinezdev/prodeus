@@ -25,7 +25,12 @@ import { Component, input, output } from '@angular/core';
           <button
             type="button"
             (click)="confirmed.emit()"
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-500 transition-colors"
+            class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
+            [class]="
+              variant() === 'danger'
+                ? 'bg-red-600 hover:bg-red-500'
+                : 'bg-blue-600 hover:bg-blue-500'
+            "
           >
             {{ confirmLabel() }}
           </button>
@@ -38,6 +43,8 @@ export class ConfirmModalComponent {
   readonly title = input<string>('¿Estás seguro?');
   readonly message = input<string>('');
   readonly confirmLabel = input<string>('Confirmar');
+  /** 'danger' (default, rojo) para acciones destructivas; 'primary' (azul) para el resto. */
+  readonly variant = input<'danger' | 'primary'>('danger');
 
   readonly confirmed = output<void>();
   readonly cancelled = output<void>();

@@ -1,6 +1,20 @@
 import { Injectable } from '@angular/core';
 import { z } from 'zod';
-import { supabase } from '../supabase.client';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+} from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions } from '../firebase.client';
+import { isoToTs, mapFirestoreError, tsToIso, type RepoResult } from '../firestore-helpers';
 
 // ─── Schemas ──────────────────────────────────────────────────
 
@@ -26,10 +40,6 @@ export const matchResultSchema = z.object({
 export type MatchDto = z.infer<typeof matchSchema>;
 export type MatchResultDto = z.infer<typeof matchResultSchema>;
 
-// ─── Tipo extendido con datos de equipos para visualización ───
-// home_team / away_team son null en partidos placeholder (bracket sin equipos
-// resueltos todavía).
-
 export interface MatchWithTeams {
   id: string;
   tournament_id: string;
@@ -41,7 +51,6 @@ export interface MatchWithTeams {
   home_score: number | null;
   away_score: number | null;
   round: string | null;
-  // Bracket fields (null for group-stage matches)
   bracket_id: string | null;
   home_source_match_id: string | null;
   away_source_match_id: string | null;
@@ -51,7 +60,6 @@ export interface MatchWithTeams {
   away_source_position: '1st' | '2nd' | '3rd' | null;
   home_source_groups: string | null;
   away_source_groups: string | null;
-  // Joined team data — null when team not yet resolved
   home_team: {
     id: string;
     name: string;
@@ -64,75 +72,177 @@ export interface MatchWithTeams {
     short_name: string | null;
     logo_url: string | null;
   } | null;
-  // Computed helpers
   isPlaceholder: boolean;
+}
+
+// ─── Row mapping ──────────────────────────────────────────────
+
+interface TeamSnapshot {
+  id: string;
+  name: string;
+  shortName: string | null;
+  logoUrl: string | null;
+}
+
+function toTeamRow(t: TeamSnapshot | null) {
+  if (!t) return null;
+  return { id: t.id, name: t.name, short_name: t.shortName ?? null, logo_url: t.logoUrl ?? null };
+}
+
+function toRow(id: string, d: Record<string, unknown>): MatchWithTeams {
+  const homeTeamId = (d['homeTeamId'] as string | null) ?? null;
+  const awayTeamId = (d['awayTeamId'] as string | null) ?? null;
+  return {
+    id,
+    tournament_id: d['tournamentId'] as string,
+    home_team_id: homeTeamId,
+    away_team_id: awayTeamId,
+    match_date: tsToIso(d['matchDate']),
+    prediction_deadline: tsToIso(d['predictionDeadline']),
+    status: d['status'] as MatchWithTeams['status'],
+    home_score: (d['homeScore'] as number | null) ?? null,
+    away_score: (d['awayScore'] as number | null) ?? null,
+    round: (d['round'] as string | null) ?? null,
+    bracket_id: (d['bracketId'] as string | null) ?? null,
+    home_source_match_id: (d['homeSourceMatchId'] as string | null) ?? null,
+    away_source_match_id: (d['awaySourceMatchId'] as string | null) ?? null,
+    home_source_result: (d['homeSourceResult'] as MatchWithTeams['home_source_result']) ?? null,
+    away_source_result: (d['awaySourceResult'] as MatchWithTeams['away_source_result']) ?? null,
+    home_source_position:
+      (d['homeSourcePosition'] as MatchWithTeams['home_source_position']) ?? null,
+    away_source_position:
+      (d['awaySourcePosition'] as MatchWithTeams['away_source_position']) ?? null,
+    home_source_groups: (d['homeSourceGroups'] as string | null) ?? null,
+    away_source_groups: (d['awaySourceGroups'] as string | null) ?? null,
+    home_team: toTeamRow((d['homeTeam'] as TeamSnapshot | null) ?? null),
+    away_team: toTeamRow((d['awayTeam'] as TeamSnapshot | null) ?? null),
+    isPlaceholder: !homeTeamId || !awayTeamId,
+  };
+}
+
+/** Snapshot desnormalizado de equipo — ver docs/firebase/01-firestore-schema.md */
+async function teamSnapshot(teamId: string): Promise<TeamSnapshot | null> {
+  const snap = await getDoc(doc(db, 'teams', teamId));
+  if (!snap.exists()) return null;
+  const t = snap.data();
+  return {
+    id: snap.id,
+    name: t['name'],
+    shortName: t['shortName'] ?? null,
+    logoUrl: t['logoUrl'] ?? null,
+  };
 }
 
 // ─── Repository ───────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
 export class MatchRepository {
-  findByTournament(tournamentId: string) {
-    return supabase
-      .from('matches')
-      .select(
-        `
-        *,
-        home_team:teams!matches_home_team_id_fkey(id, name, short_name, logo_url),
-        away_team:teams!matches_away_team_id_fkey(id, name, short_name, logo_url)
-      `,
-      )
-      .eq('tournament_id', tournamentId)
-      .order('match_date', { ascending: true });
+  async findByTournament(tournamentId: string): Promise<RepoResult<MatchWithTeams[]>> {
+    try {
+      const q = query(
+        collection(db, 'matches'),
+        where('tournamentId', '==', tournamentId),
+        orderBy('matchDate', 'asc'),
+      );
+      const snap = await getDocs(q);
+      return { data: snap.docs.map((d) => toRow(d.id, d.data())), error: null };
+    } catch (e) {
+      return { data: null, error: mapFirestoreError(e) };
+    }
   }
 
-  create(dto: MatchDto) {
+  async create(dto: MatchDto): Promise<RepoResult<MatchWithTeams>> {
     const validated = matchSchema.parse(dto);
-    return supabase
-      .from('matches')
-      .insert({
-        ...validated,
+    try {
+      const [homeTeam, awayTeam] = await Promise.all([
+        teamSnapshot(validated.home_team_id),
+        teamSnapshot(validated.away_team_id),
+      ]);
+      const ref = await addDoc(collection(db, 'matches'), {
+        tournamentId: validated.tournament_id,
+        homeTeamId: validated.home_team_id,
+        awayTeamId: validated.away_team_id,
+        homeTeam,
+        awayTeam,
+        matchDate: isoToTs(new Date(validated.match_date).toISOString()),
+        predictionDeadline: isoToTs(new Date(validated.prediction_deadline).toISOString()),
+        status: 'scheduled',
+        homeScore: null,
+        awayScore: null,
         round: validated.round || null,
-        match_date: new Date(validated.match_date).toISOString(),
-        prediction_deadline: new Date(validated.prediction_deadline).toISOString(),
-      })
-      .select()
-      .single();
+        requiresTiebreak: false,
+      });
+      const snap = await getDoc(ref);
+      return { data: toRow(ref.id, snap.data()!), error: null };
+    } catch (e) {
+      return { data: null, error: mapFirestoreError(e) };
+    }
   }
 
-  update(id: string, dto: Partial<Omit<MatchDto, 'tournament_id'>>) {
-    return supabase
-      .from('matches')
-      .update({
-        ...dto,
-        round: dto.round || null,
-        ...(dto.match_date && { match_date: new Date(dto.match_date).toISOString() }),
-        ...(dto.prediction_deadline && {
-          prediction_deadline: new Date(dto.prediction_deadline).toISOString(),
-        }),
-      })
-      .eq('id', id)
-      .select()
-      .single();
+  async update(
+    id: string,
+    dto: Partial<Omit<MatchDto, 'tournament_id'>>,
+  ): Promise<RepoResult<MatchWithTeams>> {
+    try {
+      const patch: Record<string, unknown> = {};
+      if (dto.home_team_id !== undefined) {
+        patch['homeTeamId'] = dto.home_team_id;
+        patch['homeTeam'] = await teamSnapshot(dto.home_team_id);
+      }
+      if (dto.away_team_id !== undefined) {
+        patch['awayTeamId'] = dto.away_team_id;
+        patch['awayTeam'] = await teamSnapshot(dto.away_team_id);
+      }
+      if (dto.match_date !== undefined) {
+        patch['matchDate'] = isoToTs(new Date(dto.match_date).toISOString());
+      }
+      if (dto.prediction_deadline !== undefined) {
+        patch['predictionDeadline'] = isoToTs(new Date(dto.prediction_deadline).toISOString());
+      }
+      if (dto.round !== undefined) patch['round'] = dto.round || null;
+
+      const ref = doc(db, 'matches', id);
+      await updateDoc(ref, patch);
+      const snap = await getDoc(ref);
+      return { data: toRow(id, snap.data()!), error: null };
+    } catch (e) {
+      return { data: null, error: mapFirestoreError(e) };
+    }
   }
 
-  loadResult(id: string, dto: MatchResultDto) {
+  async loadResult(id: string, dto: MatchResultDto): Promise<RepoResult<MatchWithTeams>> {
     const validated = matchResultSchema.parse(dto);
-    return supabase
-      .from('matches')
-      .update({ ...validated, status: 'finished' })
-      .eq('id', id)
-      .select()
-      .single();
+    try {
+      const ref = doc(db, 'matches', id);
+      await updateDoc(ref, {
+        homeScore: validated.home_score,
+        awayScore: validated.away_score,
+        status: 'finished',
+      });
+      const snap = await getDoc(ref);
+      return { data: toRow(id, snap.data()!), error: null };
+    } catch (e) {
+      return { data: null, error: mapFirestoreError(e) };
+    }
   }
 
-  remove(id: string) {
-    return supabase.from('matches').delete().eq('id', id);
+  async remove(id: string): Promise<{ error: RepoResult<never>['error'] }> {
+    try {
+      await deleteDoc(doc(db, 'matches', id));
+      return { error: null };
+    } catch (e) {
+      return { error: mapFirestoreError(e) };
+    }
   }
 
-  scoreMatch(matchId: string) {
-    return supabase.functions.invoke('score-match', {
-      body: { match_id: matchId },
-    });
+  /** Invoca la Cloud Function scoreMatch (ex Edge Function score-match) */
+  async scoreMatch(matchId: string): Promise<{ error: RepoResult<never>['error'] }> {
+    try {
+      const call = httpsCallable(functions, 'scoreMatch');
+      await call({ matchId });
+      return { error: null };
+    } catch (e) {
+      return { error: mapFirestoreError(e) };
+    }
   }
 }

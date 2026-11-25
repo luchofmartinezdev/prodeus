@@ -5,7 +5,8 @@ import { TeamRepository } from '../../data/repositories/team.repository';
 import type { Team } from '../../data/database.types';
 
 const mockRepo = {
-  findByTournament: vi.fn(),
+  findAll: vi.fn(),
+  findByIds: vi.fn(),
   create: vi.fn(),
   update: vi.fn(),
   remove: vi.fn(),
@@ -13,11 +14,10 @@ const mockRepo = {
 
 const fakeTeam: Team = {
   id: 'team-1',
-  tournament_id: 'tour-1',
   name: 'Argentina',
   short_name: 'ARG',
   logo_url: null,
-  created_at: new Date().toISOString(),
+  country: 'Argentina',
 } as unknown as Team;
 
 describe('TeamService', () => {
@@ -39,45 +39,36 @@ describe('TeamService', () => {
     vi.clearAllMocks();
   });
 
-  // ─── getByTournament ─────────────────────────────────────────
+  // ─── getAll ──────────────────────────────────────────────────
 
-  it('getByTournament() returns teams on success', async () => {
-    mockRepo.findByTournament.mockResolvedValue({ data: [fakeTeam], error: null });
-    const result = await service.getByTournament('tour-1');
+  it('getAll() returns teams on success', async () => {
+    mockRepo.findAll.mockResolvedValue({ data: [fakeTeam], error: null });
+    const result = await service.getAll();
     expect(result).toEqual([fakeTeam]);
   });
 
-  it('getByTournament() returns empty array when data is null', async () => {
-    mockRepo.findByTournament.mockResolvedValue({ data: null, error: null });
-    const result = await service.getByTournament('tour-1');
+  it('getAll() returns empty array when data is null', async () => {
+    mockRepo.findAll.mockResolvedValue({ data: null, error: null });
+    const result = await service.getAll();
     expect(result).toEqual([]);
   });
 
-  it('getByTournament() throws on error', async () => {
-    mockRepo.findByTournament.mockResolvedValue({ data: null, error: { message: 'fail' } });
-    await expect(service.getByTournament('tour-1')).rejects.toThrow(
-      'No se pudieron cargar los equipos',
-    );
+  it('getAll() throws on error', async () => {
+    mockRepo.findAll.mockResolvedValue({ data: null, error: { message: 'fail' } });
+    await expect(service.getAll()).rejects.toThrow('No se pudieron cargar los equipos');
   });
 
   // ─── create ──────────────────────────────────────────────────
 
   it('create() returns team on success', async () => {
     mockRepo.create.mockResolvedValue({ data: fakeTeam, error: null });
-    const result = await service.create({ tournament_id: 'tour-1', name: 'Argentina' });
+    const result = await service.create({ name: 'Argentina' });
     expect(result).toEqual(fakeTeam);
   });
 
-  it('create() throws friendly message on duplicate name (23505)', async () => {
-    mockRepo.create.mockResolvedValue({ data: null, error: { code: '23505' } });
-    await expect(service.create({ tournament_id: 'tour-1', name: 'Argentina' })).rejects.toThrow(
-      'Ya existe un equipo con ese nombre en el torneo',
-    );
-  });
-
-  it('create() throws generic error on other DB errors', async () => {
+  it('create() throws generic error on failure', async () => {
     mockRepo.create.mockResolvedValue({ data: null, error: { code: '99999', message: 'Other' } });
-    await expect(service.create({ tournament_id: 'tour-1', name: 'Argentina' })).rejects.toThrow(
+    await expect(service.create({ name: 'Argentina' })).rejects.toThrow(
       'No se pudo crear el equipo',
     );
   });

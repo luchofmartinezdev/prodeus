@@ -42,7 +42,7 @@ export class CallbackComponent implements OnInit {
     await this.waitForAuthentication();
 
     if (this.authStore.isAuthenticated()) {
-      this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/app']);
+      this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/home']);
     } else {
       this.router.navigate(['/auth/login']);
     }

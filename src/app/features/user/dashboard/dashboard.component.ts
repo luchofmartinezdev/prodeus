@@ -27,6 +27,16 @@ export class DashboardComponent implements OnInit {
       .loadMyGroups()
       .then(() => this.loadUpcomingMatches())
       .finally(() => this.isLoadingGroups.set(false));
+    this.groupStore.loadPublicGroups();
+  }
+
+  async onJoinPublic(groupId: string): Promise<void> {
+    await this.groupStore.joinPublicGroup(groupId);
+  }
+
+  get discoverableGroups(): GroupWithTournament[] {
+    const myIds = new Set(this.groupStore.groups().map((g) => g.id));
+    return this.groupStore.publicGroups().filter((g) => !myIds.has(g.id));
   }
 
   private async loadUpcomingMatches(): Promise<void> {

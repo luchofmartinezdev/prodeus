@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, Input, OnInit, signal } from '@angular/core';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import type { PhaseStatus } from '../../../../data/database.types';
 import { TournamentService } from '../../../../core/services/tournament.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-generate-phase-button',
-  imports: [],
+  imports: [ConfirmModalComponent],
   templateUrl: './generate-phase-button.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -18,6 +19,7 @@ export class GeneratePhaseButtonComponent implements OnInit {
   readonly status = signal<PhaseStatus | null>(null);
   readonly isLoading = signal(false);
   readonly isGenerating = signal(false);
+  readonly showConfirmModal = signal(false);
 
   async ngOnInit(): Promise<void> {
     await this.refresh();
@@ -39,18 +41,26 @@ export class GeneratePhaseButtonComponent implements OnInit {
     return !!s && s.currentPhaseComplete && !!s.nextPhase;
   }
 
+  get nextPhaseLabel(): string {
+    return this.status()?.nextPhase ?? '';
+  }
+
+  openConfirmModal(): void {
+    const s = this.status();
+    if (!s?.nextPhase || !s.currentPhaseComplete) return;
+    this.showConfirmModal.set(true);
+  }
+
+  closeConfirmModal(): void {
+    this.showConfirmModal.set(false);
+  }
+
   async generate(): Promise<void> {
     const s = this.status();
+    this.closeConfirmModal();
     if (!s?.nextPhase || !s.currentPhaseComplete) return;
 
     const label = s.nextPhase;
-    if (
-      !confirm(
-        `¿Calcular ${label}? Esta acción actualizará los partidos con los equipos clasificados.`,
-      )
-    )
-      return;
-
     this.isGenerating.set(true);
     try {
       const result = await this.tournamentService.generateNextPhase(this.tournamentId, label);

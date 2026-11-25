@@ -1,3 +1,8 @@
+// Snapshot congelado del schema de Supabase (backend decomisionado — ver
+// docs/firebase/). Los repositorios de src/app/data/repositories/*.ts siguen
+// importando estos tipos como DTOs de la capa de datos, traducidos puertas
+// adentro desde/hacia Firestore. Ya no se regenera (`db:types` fue removido
+// de package.json); si hace falta un tipo nuevo, agregalo a mano acá.
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
@@ -52,7 +57,7 @@ export interface Database {
           created_at: string;
           id: string;
           invite_code: string;
-          join_mode: Database['public']['Enums']['join_mode'];
+          visibility: Database['public']['Enums']['group_visibility'];
           leader_id: string;
           name: string;
           tournament_id: string;
@@ -61,7 +66,7 @@ export interface Database {
           created_at?: string;
           id?: string;
           invite_code?: string;
-          join_mode?: Database['public']['Enums']['join_mode'];
+          visibility?: Database['public']['Enums']['group_visibility'];
           leader_id: string;
           name: string;
           tournament_id: string;
@@ -70,7 +75,7 @@ export interface Database {
           created_at?: string;
           id?: string;
           invite_code?: string;
-          join_mode?: Database['public']['Enums']['join_mode'];
+          visibility?: Database['public']['Enums']['group_visibility'];
           leader_id?: string;
           name?: string;
           tournament_id?: string;
@@ -477,34 +482,66 @@ export interface Database {
           },
         ];
       };
+      // Entidad global — un club existe una sola vez y participa en N
+      // torneos vía `tournament_teams` (join), no vía una FK directa acá.
       teams: {
         Row: {
           id: string;
           logo_url: string | null;
           name: string;
           short_name: string | null;
-          tournament_id: string;
+          country: string | null;
         };
         Insert: {
           id?: string;
           logo_url?: string | null;
           name: string;
           short_name?: string | null;
-          tournament_id: string;
+          country?: string | null;
         };
         Update: {
           id?: string;
           logo_url?: string | null;
           name?: string;
           short_name?: string | null;
+          country?: string | null;
+        };
+        Relationships: [];
+      };
+      // Join torneo↔equipo: el "roster" de un torneo para una temporada.
+      // Doc ID = `${tournament_id}_${team_id}`.
+      tournament_teams: {
+        Row: {
+          id: string;
+          tournament_id: string;
+          team_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tournament_id: string;
+          team_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
           tournament_id?: string;
+          team_id?: string;
+          created_at?: string;
         };
         Relationships: [
           {
-            foreignKeyName: 'teams_tournament_id_fkey';
+            foreignKeyName: 'tournament_teams_tournament_id_fkey';
             columns: ['tournament_id'];
             isOneToOne: false;
             referencedRelation: 'tournaments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tournament_teams_team_id_fkey';
+            columns: ['team_id'];
+            isOneToOne: false;
+            referencedRelation: 'teams';
             referencedColumns: ['id'];
           },
         ];
@@ -612,10 +649,10 @@ export interface Database {
       is_superadmin: { Args: never; Returns: boolean };
     };
     Enums: {
-      join_mode: 'open' | 'closed';
+      group_visibility: 'public' | 'private';
       match_status: 'scheduled' | 'in_progress' | 'finished';
-      member_status: 'pending' | 'active' | 'removed';
-      scoring_rule_key: 'exact_score' | 'correct_winner' | 'correct_goals_only' | 'no_match';
+      member_status: 'active' | 'removed';
+      scoring_rule_key: 'correct_outcome' | 'home_goals' | 'away_goals';
       tournament_status: 'draft' | 'active' | 'closed';
       user_role: 'user' | 'superadmin';
     };
@@ -741,10 +778,10 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      join_mode: ['open', 'closed'],
+      group_visibility: ['public', 'private'],
       match_status: ['scheduled', 'in_progress', 'finished'],
-      member_status: ['pending', 'active', 'removed'],
-      scoring_rule_key: ['exact_score', 'correct_winner', 'correct_goals_only', 'no_match'],
+      member_status: ['active', 'removed'],
+      scoring_rule_key: ['correct_outcome', 'home_goals', 'away_goals'],
       tournament_status: ['draft', 'active', 'closed'],
       user_role: ['user', 'superadmin'],
     },
@@ -756,6 +793,7 @@ export const Constants = {
 export type Profile = Tables<'profiles'>;
 export type Tournament = Tables<'tournaments'>;
 export type Team = Tables<'teams'>;
+export type TournamentTeam = Tables<'tournament_teams'>;
 export type Match = Tables<'matches'>;
 export type ScoringRule = Tables<'scoring_rules'>;
 export type Group = Tables<'groups'>;

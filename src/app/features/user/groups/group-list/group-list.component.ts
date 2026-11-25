@@ -24,8 +24,8 @@ export class GroupListComponent implements OnInit {
 
   async onJoin(): Promise<void> {
     if (!this.joinCodeValue.trim()) return;
-    const status = await this.store.joinByCode(this.joinCodeValue.trim());
-    if (status) {
+    const ok = await this.store.joinByCode(this.joinCodeValue.trim());
+    if (ok) {
       this.joinCodeValue = '';
       this.showJoinForm.set(false);
     }
@@ -35,11 +35,13 @@ export class GroupListComponent implements OnInit {
     return this.authStore.user()?.id;
   }
 
-  joinModeLabel(mode: 'open' | 'closed'): string {
-    return mode === 'open' ? 'Abierto' : 'Cerrado';
+  visibilityLabel(visibility: 'public' | 'private'): string {
+    return visibility === 'public' ? 'Público' : 'Privado';
   }
 
-  joinModeClass(mode: 'open' | 'closed'): string {
-    return mode === 'open' ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300';
+  visibilityClass(visibility: 'public' | 'private'): string {
+    return visibility === 'public'
+      ? 'bg-green-900 text-green-300'
+      : 'bg-yellow-900 text-yellow-300';
   }
 }

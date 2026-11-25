@@ -30,7 +30,7 @@ import { AuthStore } from '../../../state/auth.store';
         <!-- Nav -->
         <nav class="flex-1 px-3 py-4 space-y-1">
           <a
-            routerLink="/app"
+            routerLink="/home"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: true }"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
@@ -46,7 +46,7 @@ import { AuthStore } from '../../../state/auth.store';
             Inicio
           </a>
           <a
-            routerLink="/app/groups"
+            routerLink="/home/groups"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: false }"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
@@ -62,7 +62,7 @@ import { AuthStore } from '../../../state/auth.store';
             Mis grupos
           </a>
           <a
-            routerLink="/app/rules"
+            routerLink="/home/rules"
             routerLinkActive="bg-blue-600 text-white"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
@@ -77,7 +77,7 @@ import { AuthStore } from '../../../state/auth.store';
             Reglas
           </a>
           <a
-            routerLink="/app/profile"
+            routerLink="/home/profile"
             routerLinkActive="bg-blue-600 text-white"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
@@ -172,7 +172,7 @@ import { AuthStore } from '../../../state/auth.store';
         <!-- Nav -->
         <nav class="flex-1 px-3 py-4 space-y-1">
           <a
-            routerLink="/app"
+            routerLink="/home"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: true }"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
@@ -188,7 +188,7 @@ import { AuthStore } from '../../../state/auth.store';
             Inicio
           </a>
           <a
-            routerLink="/app/groups"
+            routerLink="/home/groups"
             routerLinkActive="bg-blue-600 text-white"
             [routerLinkActiveOptions]="{ exact: false }"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
@@ -204,7 +204,7 @@ import { AuthStore } from '../../../state/auth.store';
             Mis grupos
           </a>
           <a
-            routerLink="/app/rules"
+            routerLink="/home/rules"
             routerLinkActive="bg-blue-600 text-white"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
@@ -219,7 +219,7 @@ import { AuthStore } from '../../../state/auth.store';
             Reglas
           </a>
           <a
-            routerLink="/app/profile"
+            routerLink="/home/profile"
             routerLinkActive="bg-blue-600 text-white"
             class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
@@ -289,7 +289,7 @@ import { AuthStore } from '../../../state/auth.store';
         class="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex items-stretch z-50"
       >
         <a
-          routerLink="/app"
+          routerLink="/home"
           routerLinkActive="text-blue-400"
           [routerLinkActiveOptions]="{ exact: true }"
           class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-500 hover:text-white transition-colors"
@@ -305,7 +305,7 @@ import { AuthStore } from '../../../state/auth.store';
           <span class="text-xs font-medium">Inicio</span>
         </a>
         <a
-          routerLink="/app/groups"
+          routerLink="/home/groups"
           routerLinkActive="text-blue-400"
           [routerLinkActiveOptions]="{ exact: false }"
           class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-gray-500 hover:text-white transition-colors"

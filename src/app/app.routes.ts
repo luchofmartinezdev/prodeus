@@ -19,13 +19,13 @@ export const routes: Routes = [
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },
   {
-    path: 'app',
+    path: 'home',
     canActivate: [authGuard],
     // Fase 5+: loadChildren apuntará al módulo usuario completo
     loadChildren: () => import('./features/user/user.routes').then((m) => m.USER_ROUTES),
   },
   {
     path: '**',
-    redirectTo: 'app',
+    redirectTo: 'home',
   },
 ];

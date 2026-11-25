@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { supabase } from '../data/supabase.client';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../data/firebase.client';
 import {
   RankingRepository,
   type HistorialRow,
@@ -31,7 +32,7 @@ export const RankingStore = signalStore(
 
   withMethods((store) => {
     const repo = inject(RankingRepository);
-    let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
+    let unsubscribeSnapshot: (() => void) | null = null;
 
     return {
       async loadRanking(groupId: string): Promise<void> {
@@ -58,30 +59,20 @@ export const RankingStore = signalStore(
         }
       },
 
+      /** Reemplaza el canal Realtime de Supabase (`postgres_changes` sobre `scores`) por onSnapshot. */
       subscribeToGroup(groupId: string): void {
-        // Clean up previous subscription if any
-        if (realtimeChannel) {
-          supabase.removeChannel(realtimeChannel);
-        }
+        unsubscribeSnapshot?.();
 
-        realtimeChannel = supabase
-          .channel(`scores:group:${groupId}`)
-          .on(
-            'postgres_changes',
-            { event: '*', schema: 'public', table: 'scores', filter: `group_id=eq.${groupId}` },
-            async () => {
-              const ranking = await repo.getGroupRanking(groupId);
-              patchState(store, { ranking });
-            },
-          )
-          .subscribe();
+        const q = query(collection(db, 'scores'), where('groupId', '==', groupId));
+        unsubscribeSnapshot = onSnapshot(q, async () => {
+          const ranking = await repo.getGroupRanking(groupId);
+          patchState(store, { ranking });
+        });
       },
 
       unsubscribe(): void {
-        if (realtimeChannel) {
-          supabase.removeChannel(realtimeChannel);
-          realtimeChannel = null;
-        }
+        unsubscribeSnapshot?.();
+        unsubscribeSnapshot = null;
       },
 
       clearError(): void {
