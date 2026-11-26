@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { inviteGuard } from './core/guards/invite.guard';
 import { superadminGuard } from './core/guards/superadmin.guard';
 
 export const routes: Routes = [
@@ -23,6 +24,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
     // Fase 5+: loadChildren apuntará al módulo usuario completo
     loadChildren: () => import('./features/user/user.routes').then((m) => m.USER_ROUTES),
+  },
+  {
+    path: 'unirse/:code',
+    canActivate: [inviteGuard],
+    loadComponent: () =>
+      import('./features/invite/join-invite.component').then((m) => m.JoinInviteComponent),
   },
   {
     path: '**',

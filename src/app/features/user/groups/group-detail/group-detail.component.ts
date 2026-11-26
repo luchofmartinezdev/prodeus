@@ -13,6 +13,8 @@ import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../../state/auth.store';
 import { GroupStore } from '../../../../state/group.store';
 import { RankingStore } from '../../../../state/ranking.store';
+import { PendingInviteService } from '../../../../core/services/pending-invite.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { MatchService } from '../../../../core/services/match.service';
 import { PredictionService } from '../../../../core/services/prediction.service';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
@@ -35,6 +37,8 @@ export class GroupDetailComponent implements OnInit, OnChanges {
   protected readonly authStore = inject(AuthStore);
   protected readonly rankingStore = inject(RankingStore);
   private readonly matchService = inject(MatchService);
+  private readonly pendingInvite = inject(PendingInviteService);
+  private readonly toast = inject(ToastService);
   private readonly predictionService = inject(PredictionService);
 
   readonly activeTab = signal<'predicciones' | 'ranking' | 'grupo'>('predicciones');
@@ -161,16 +165,26 @@ export class GroupDetailComponent implements OnInit, OnChanges {
     setTimeout(() => this.copied.set(false), 2000);
   }
 
+  async copyInviteLink(code: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.pendingInvite.buildLink(code));
+      this.toast.success('Link de invitación copiado');
+    } catch {
+      this.toast.error('No se pudo copiar el link');
+    }
+  }
+
   async shareGroup(code: string, groupName: string): Promise<void> {
-    const text = `Unite a "${groupName}" en Prodeus con el código: ${code}`;
+    const text = `Unite a "${groupName}" en Prodeus`;
+    const url = this.pendingInvite.buildLink(code);
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Prodeus', text });
+        await navigator.share({ title: 'Prodeus', text, url });
       } catch {
         // user cancelled share
       }
     } else {
-      await this.copyInviteCode(code);
+      await this.copyInviteLink(code);
     }
   }
 

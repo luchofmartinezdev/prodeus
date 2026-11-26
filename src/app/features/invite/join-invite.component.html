@@ -1,0 +1,65 @@
+<main class="pitch-lines min-h-screen bg-gray-950 flex flex-col items-center justify-center p-5">
+  <a routerLink="/home" class="flex items-center gap-2.5 mb-8" aria-label="Ir al inicio">
+    <img src="assets/images/prodeus.png" alt="" class="w-9 h-9 object-contain" />
+    <span class="t-display text-2xl text-white">Prodeus</span>
+  </a>
+
+  <div class="w-full max-w-sm" aria-live="polite">
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card p-6" aria-busy="true" aria-label="Cargando invitación">
+          <div class="h-3 bg-gray-800 rounded animate-pulse w-24 mb-4"></div>
+          <div class="h-10 bg-gray-800 rounded animate-pulse w-56 mb-4"></div>
+          <div class="h-4 bg-gray-800 rounded animate-pulse w-40"></div>
+        </div>
+      }
+      @case ('invalid') {
+        <div class="card p-6 text-center">
+          <h1 class="t-display text-white text-3xl mb-2">Invitación no válida</h1>
+          <p class="text-gray-300 text-sm">
+            No encontramos un grupo con ese código. Pedile a quien te invitó que te mande el link de
+            nuevo.
+          </p>
+        </div>
+      }
+      @default {
+        @if (group(); as g) {
+          <div class="brand-panel rounded-2xl p-6">
+            <p class="t-label !text-[#ffb81c] mb-2">Te invitaron a un grupo</p>
+            <h1 class="t-display text-5xl leading-none break-words">{{ g.name }}</h1>
+            @if (g.tournament; as t) {
+              <div class="flex items-center gap-2.5 mt-5">
+                @if (t.logo_url) {
+                  <img [src]="t.logo_url" alt="" class="w-8 h-8 object-contain shrink-0" />
+                }
+                <span class="text-sm font-semibold">{{ t.name }}</span>
+              </div>
+            }
+          </div>
+
+          @if (status() === 'ready') {
+            <button
+              type="button"
+              (click)="join()"
+              [disabled]="isJoining()"
+              class="w-full mt-4 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold rounded-xl transition-colors"
+            >
+              {{ isJoining() ? 'Uniéndote…' : 'Unirme al grupo' }}
+            </button>
+          } @else {
+            <p class="card mt-4 p-4 text-gray-300 text-sm text-center">
+              El torneo de este grupo no está activo, así que por ahora no se pueden sumar personas.
+            </p>
+          }
+        }
+      }
+    }
+
+    <a
+      routerLink="/home/groups"
+      class="block mt-4 text-center text-sm font-semibold text-gray-300 hover:text-white transition-colors"
+    >
+      Ir a mis grupos
+    </a>
+  </div>
+</main>

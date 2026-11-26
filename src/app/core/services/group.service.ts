@@ -56,6 +56,13 @@ export class GroupService {
     if (error) throw new Error('No se pudo eliminar el grupo');
   }
 
+  /** Busca un grupo por su código, sin unirse. */
+  async findByCode(code: string): Promise<GroupWithTournament> {
+    const { data: group, error } = await this.repo.findByInviteCode(code);
+    if (error || !group) throw new Error('Código de invitación inválido');
+    return group;
+  }
+
   /** Unirse por código de invitación (6 caracteres) — grupo público o privado. */
   async joinByCode(code: string, userId: string): Promise<GroupWithTournament> {
     const { data: group, error: findError } = await this.repo.findByInviteCode(code);

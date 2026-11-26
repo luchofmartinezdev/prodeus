@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { GoogleOneTapService } from '../../../core/services/google-one-tap.service';
+import { PendingInviteService } from '../../../core/services/pending-invite.service';
 import { AuthStore } from '../../../state/auth.store';
 
 @Component({
@@ -13,10 +14,17 @@ export class LoginComponent {
   protected readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
   private readonly oneTap = inject(GoogleOneTapService);
+  private readonly pendingInvite = inject(PendingInviteService);
 
   constructor() {
     effect(() => {
       if (this.authStore.isAuthenticated()) {
+        // Si llegó desde un link de invitación, vuelve a la invitación
+        const code = this.pendingInvite.get();
+        if (code) {
+          this.router.navigate(['/unirse', code]);
+          return;
+        }
         this.router.navigate([this.authStore.isSuperadmin() ? '/admin' : '/home']);
       }
     });

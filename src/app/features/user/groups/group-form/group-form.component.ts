@@ -24,9 +24,10 @@ export class GroupFormComponent implements OnInit {
   readonly fieldErrors = signal<Record<string, string>>({});
   readonly isLoadingTournaments = signal(true);
 
-  // ─── Combobox de torneo ───────────────────────────────────────
+  // ─── Selector de torneo ───────────────────────────────────────
+  /** A partir de esta cantidad de torneos se ofrece el buscador. */
+  readonly searchThreshold = 6;
   readonly tournamentSearch = signal('');
-  readonly isTournamentDropdownOpen = signal(false);
 
   readonly filteredTournaments = computed(() => {
     const term = this.tournamentSearch().trim().toLowerCase();
@@ -37,34 +38,15 @@ export class GroupFormComponent implements OnInit {
 
   readonly tournamentId = signal('');
 
-  readonly selectedTournamentName = computed(() => {
-    const selected = this.tournamentStore
-      .activeTournaments()
-      .find((t) => t.id === this.tournamentId());
-    return selected?.name ?? '';
-  });
+  readonly selectedTournament = computed(() =>
+    this.tournamentStore.activeTournaments().find((t) => t.id === this.tournamentId()),
+  );
 
   name = '';
   visibility: 'public' | 'private' = 'public';
 
   ngOnInit(): void {
     this.tournamentStore.loadActive().finally(() => this.isLoadingTournaments.set(false));
-  }
-
-  openTournamentDropdown(): void {
-    this.tournamentSearch.set('');
-    this.isTournamentDropdownOpen.set(true);
-  }
-
-  closeTournamentDropdown(): void {
-    // Delay para que el click en una opción se registre antes de cerrar por blur
-    setTimeout(() => this.isTournamentDropdownOpen.set(false), 150);
-  }
-
-  selectTournament(id: string): void {
-    this.tournamentId.set(id);
-    this.isTournamentDropdownOpen.set(false);
-    this.tournamentSearch.set('');
   }
 
   async onSubmit(): Promise<void> {
