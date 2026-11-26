@@ -1,35 +1,38 @@
-<div class="p-4 sm:p-8 max-w-2xl mx-auto">
-  <!-- Header -->
-  <header class="flex items-center gap-3 mb-6">
+<div class="p-4 sm:p-8 max-w-5xl mx-auto">
+  <!-- Encabezado -->
+  <header class="mb-8">
     <a
       routerLink="/home/groups"
-      aria-label="Volver a mis grupos"
-      class="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+      class="inline-flex items-center gap-1.5 mb-4 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
     >
-      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2.5"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
       </svg>
+      Mis grupos
     </a>
-    <div>
-      <p class="t-label !text-orange-400">Nuevo prode</p>
-      <h1 class="t-display text-white text-4xl sm:text-5xl">Crear grupo</h1>
-    </div>
+    <p class="t-label !text-orange-400 mb-1">Nuevo prode</p>
+    <h1 class="t-display text-white text-5xl sm:text-6xl">Armá tu grupo</h1>
+    <p class="text-gray-300 text-sm mt-3 max-w-md">
+      Ponele nombre, elegí el torneo y compartí el código para que tus amigos se sumen.
+    </p>
   </header>
-  <p class="text-gray-300 text-sm mb-5">
-    Elegí un nombre y un torneo. Después compartís el código y tus amigos se suman.
-  </p>
 
-  <form (ngSubmit)="onSubmit()" novalidate>
-    <div class="card p-5 sm:p-6 space-y-6">
+  <div class="grid lg:grid-cols-[minmax(0,1fr)_20rem] gap-8 items-start">
+    <form (ngSubmit)="onSubmit()" novalidate class="space-y-8 min-w-0">
       <!-- Nombre -->
       <div>
-        <div class="flex items-center justify-between mb-1.5">
-          <label for="group-name" class="text-sm font-bold text-gray-200">
-            Nombre del grupo <span class="text-red-400">*</span>
-          </label>
+        <div class="flex items-baseline justify-between mb-2">
+          <label for="group-name" class="t-display text-white text-2xl">Nombre del grupo</label>
           <span
-            class="text-xs tabular-nums transition-colors"
-            [class]="name.length > 50 ? 'text-red-400' : 'text-gray-400'"
+            class="text-xs tabular"
+            [class]="name.length >= 60 ? 'text-red-400' : 'text-gray-400'"
           >
             {{ name.length }}/60
           </span>
@@ -40,24 +43,175 @@
           name="name"
           [(ngModel)]="name"
           maxlength="60"
+          required
+          autocomplete="off"
           placeholder="Los Cracks del Prode"
-          class="w-full px-4 py-2.5 rounded-xl bg-gray-800 border text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors"
-          [class.border-red-600]="fieldErrors()['name']"
-          [class.border-gray-700]="!fieldErrors()['name']"
+          class="field !text-lg !py-3.5 !px-4 font-semibold"
+          [class.!border-red-600]="fieldErrors()['name']"
+          [attr.aria-invalid]="!!fieldErrors()['name']"
+          [attr.aria-describedby]="fieldErrors()['name'] ? 'group-name-error' : null"
         />
         @if (fieldErrors()['name']) {
-          <p class="mt-1 text-xs text-red-400">{{ fieldErrors()['name'] }}</p>
+          <p id="group-name-error" class="mt-1.5 text-xs text-red-400">
+            {{ fieldErrors()['name'] }}
+          </p>
         }
       </div>
 
       <!-- Torneo -->
-      <div>
-        <label for="group-tournament" class="block text-sm font-bold text-gray-200 mb-1.5">
-          Torneo <span class="text-red-400">*</span>
-        </label>
+      <fieldset class="min-w-0">
+        <legend class="t-display text-white text-2xl mb-2">Torneo</legend>
+
         @if (isLoadingTournaments()) {
-          <div class="flex items-center gap-2 text-gray-400 text-sm py-2">
-            <svg class="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+          <div class="grid sm:grid-cols-2 gap-3" aria-busy="true" aria-label="Cargando torneos">
+            @for (i of [1, 2]; track i) {
+              <div
+                class="h-[4.5rem] rounded-xl bg-gray-900 border border-gray-800 animate-pulse"
+              ></div>
+            }
+          </div>
+        } @else if (tournamentStore.activeTournaments().length === 0) {
+          <p class="card p-5 text-gray-300 text-sm">
+            No hay torneos activos por ahora. Vas a poder crear el grupo cuando se publique uno.
+          </p>
+        } @else {
+          @if (tournamentStore.activeTournaments().length > searchThreshold) {
+            <input
+              type="search"
+              name="tournamentSearch"
+              [ngModel]="tournamentSearch()"
+              (ngModelChange)="tournamentSearch.set($event)"
+              (keydown.enter)="$event.preventDefault()"
+              placeholder="Buscar torneo…"
+              aria-label="Buscar torneo"
+              autocomplete="off"
+              class="field mb-3"
+            />
+          }
+
+          <div class="grid sm:grid-cols-2 gap-3 max-h-[19rem] overflow-y-auto p-0.5">
+            @for (t of filteredTournaments(); track t.id) {
+              <label
+                class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-orange-400"
+                [class]="
+                  tournamentId() === t.id
+                    ? 'border-orange-400 bg-gray-800'
+                    : 'border-gray-800 bg-gray-900 hover:border-gray-600'
+                "
+              >
+                <input
+                  type="radio"
+                  name="tournament"
+                  class="sr-only"
+                  [value]="t.id"
+                  [checked]="tournamentId() === t.id"
+                  (change)="tournamentId.set(t.id)"
+                />
+                <span
+                  class="w-11 h-11 rounded-lg bg-gray-800 flex items-center justify-center shrink-0 overflow-hidden"
+                >
+                  @if (t.logo_url) {
+                    <img [src]="t.logo_url" alt="" class="w-full h-full object-contain p-1" />
+                  } @else {
+                    <span class="t-display text-xl text-gray-400">{{
+                      t.name.charAt(0).toUpperCase()
+                    }}</span>
+                  }
+                </span>
+                <span class="flex-1 min-w-0 text-sm font-bold text-white leading-snug">{{
+                  t.name
+                }}</span>
+                @if (tournamentId() === t.id) {
+                  <svg
+                    class="w-5 h-5 shrink-0 text-orange-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    aria-hidden="true"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                }
+              </label>
+            } @empty {
+              <p class="text-sm text-gray-400 py-2">Ningún torneo coincide con la búsqueda.</p>
+            }
+          </div>
+
+          @if (fieldErrors()['tournament']) {
+            <p role="alert" class="mt-1.5 text-xs text-red-400">
+              {{ fieldErrors()['tournament'] }}
+            </p>
+          }
+        }
+      </fieldset>
+
+      <!-- Quién puede unirse -->
+      <fieldset>
+        <legend class="t-display text-white text-2xl mb-2">Quién puede unirse</legend>
+        <div class="card overflow-hidden">
+          <label
+            class="flex items-start gap-3 p-4 cursor-pointer border-b border-gray-800 transition-colors"
+            [class.bg-gray-800]="visibility === 'public'"
+          >
+            <input
+              type="radio"
+              name="visibility"
+              [(ngModel)]="visibility"
+              value="public"
+              class="mt-0.5 w-4 h-4 accent-[#ffb81c]"
+            />
+            <span>
+              <span class="block text-sm font-bold text-white">Público</span>
+              <span class="block text-xs text-gray-300 mt-0.5">
+                Aparece listado en el inicio para que cualquiera se una.
+              </span>
+            </span>
+          </label>
+          <label
+            class="flex items-start gap-3 p-4 cursor-pointer transition-colors"
+            [class.bg-gray-800]="visibility === 'private'"
+          >
+            <input
+              type="radio"
+              name="visibility"
+              [(ngModel)]="visibility"
+              value="private"
+              class="mt-0.5 w-4 h-4 accent-[#ffb81c]"
+            />
+            <span>
+              <span class="block text-sm font-bold text-white">Privado</span>
+              <span class="block text-xs text-gray-300 mt-0.5">
+                Solo se une quien tenga el código de invitación.
+              </span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Error del servidor -->
+      @if (store.error()) {
+        <div
+          role="alert"
+          class="px-4 py-3 bg-red-950 border border-red-800 rounded-xl text-sm text-red-300"
+        >
+          {{ store.error() }}
+        </div>
+      }
+
+      <div class="flex items-center gap-3">
+        <button
+          type="submit"
+          [disabled]="
+            store.isLoading() ||
+            isLoadingTournaments() ||
+            tournamentStore.activeTournaments().length === 0
+          "
+          class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold rounded-xl transition-colors"
+        >
+          @if (store.isLoading()) {
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24" aria-hidden="true">
               <circle
                 class="opacity-25"
                 cx="12"
@@ -72,225 +226,55 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
               />
             </svg>
-            Cargando torneos…
-          </div>
-        } @else if (tournamentStore.activeTournaments().length === 0) {
-          <p class="text-gray-400 text-sm py-2">No hay torneos activos disponibles.</p>
-        } @else {
-          <div class="relative">
-            <div class="relative">
-              <svg
-                class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                type="text"
-                [ngModel]="
-                  isTournamentDropdownOpen() ? tournamentSearch() : selectedTournamentName()
-                "
-                (ngModelChange)="tournamentSearch.set($event)"
-                (focus)="openTournamentDropdown()"
-                (blur)="closeTournamentDropdown()"
-                id="group-tournament"
-                name="tournamentSearch"
-                placeholder="Buscar torneo..."
-                autocomplete="off"
-                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-800 border text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors"
-                [class.border-red-600]="fieldErrors()['tournament']"
-                [class.border-gray-700]="!fieldErrors()['tournament']"
-              />
-            </div>
-
-            @if (isTournamentDropdownOpen()) {
-              <div
-                class="absolute z-10 mt-1.5 w-full max-h-[200px] overflow-y-auto rounded-lg border border-gray-700 bg-gray-800 shadow-xl"
-              >
-                @if (filteredTournaments().length === 0) {
-                  <p class="px-4 py-3 text-sm text-gray-400">Sin resultados</p>
-                } @else {
-                  @for (t of filteredTournaments(); track t.id) {
-                    <button
-                      type="button"
-                      (mousedown)="selectTournament(t.id)"
-                      class="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-left transition-colors"
-                      [class]="
-                        tournamentId() === t.id
-                          ? 'bg-blue-950 text-white'
-                          : 'text-gray-300 hover:bg-gray-700'
-                      "
-                    >
-                      @if (t.logo_url) {
-                        <img
-                          [src]="t.logo_url"
-                          [alt]="t.name"
-                          class="w-4 h-4 object-contain rounded-sm shrink-0"
-                        />
-                      }
-                      <span class="flex-1 truncate min-w-0">{{ t.name }}</span>
-                      @if (tournamentId() === t.id) {
-                        <svg
-                          class="w-4 h-4 shrink-0 text-blue-400"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                      }
-                    </button>
-                  }
-                }
-              </div>
-            }
-          </div>
-          @if (fieldErrors()['tournament']) {
-            <p class="mt-1 text-xs text-red-400">{{ fieldErrors()['tournament'] }}</p>
+            Creando…
+          } @else {
+            Crear grupo
           }
-        }
+        </button>
+        <a
+          routerLink="/home/groups"
+          class="px-5 py-3 text-gray-300 hover:text-white text-sm font-semibold transition-colors"
+        >
+          Cancelar
+        </a>
       </div>
+    </form>
 
-      <!-- Tipo de grupo -->
-      <div>
-        <p class="block text-sm font-bold text-gray-200 mb-1.5">Tipo de grupo</p>
-        <div class="grid grid-cols-2 gap-3">
-          <!-- Público -->
-          <label class="cursor-pointer">
-            <input
-              type="radio"
-              name="visibility"
-              [(ngModel)]="visibility"
-              value="public"
-              class="sr-only"
-            />
-            <div
-              class="h-full px-4 py-4 rounded-xl border-2 text-sm transition-colors"
-              [class]="
-                visibility === 'public'
-                  ? 'border-blue-500 bg-blue-950 text-white'
-                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
-              "
-            >
-              <svg
-                class="w-5 h-5 mb-1.5"
-                [class]="visibility === 'public' ? 'text-blue-400' : 'text-gray-400'"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
-                />
-              </svg>
-              <p class="font-bold mb-0.5">Público</p>
-              <p class="text-xs text-gray-300">
-                Aparece listado en el inicio para que cualquiera se una
-              </p>
-            </div>
-          </label>
-          <!-- Privado -->
-          <label class="cursor-pointer">
-            <input
-              type="radio"
-              name="visibility"
-              [(ngModel)]="visibility"
-              value="private"
-              class="sr-only"
-            />
-            <div
-              class="h-full px-4 py-4 rounded-xl border-2 text-sm transition-colors"
-              [class]="
-                visibility === 'private'
-                  ? 'border-blue-500 bg-blue-950 text-white'
-                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
-              "
-            >
-              <svg
-                class="w-5 h-5 mb-1.5"
-                [class]="visibility === 'private' ? 'text-blue-400' : 'text-gray-400'"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-              <p class="font-bold mb-0.5">Privado</p>
-              <p class="text-xs text-gray-300">Solo se une quien tenga el código de invitación</p>
-            </div>
-          </label>
+    <!-- Vista previa: se arma mientras se completa el formulario -->
+    <aside class="lg:sticky lg:top-8" aria-label="Vista previa del grupo">
+      <p class="t-label mb-2">Así va a quedar</p>
+      <div class="brand-panel rounded-2xl p-5">
+        <p class="t-label !text-[#ffb81c] mb-2">
+          Grupo {{ visibility === 'public' ? 'público' : 'privado' }}
+        </p>
+        <p class="t-display text-4xl leading-none break-words" [class.opacity-40]="!name.trim()">
+          {{ name.trim() || 'Tu grupo' }}
+        </p>
+
+        <div class="flex items-center gap-2.5 mt-4 min-h-8">
+          @if (selectedTournament(); as t) {
+            @if (t.logo_url) {
+              <img [src]="t.logo_url" alt="" class="w-8 h-8 object-contain shrink-0" />
+            }
+            <span class="text-sm font-semibold">{{ t.name }}</span>
+          } @else {
+            <span class="brand-panel-muted text-sm">Falta elegir el torneo</span>
+          }
+        </div>
+
+        <div class="mt-5 pt-4 border-t border-[#f2f6ee]/15 flex items-center gap-3 tabular">
+          <span class="t-display text-xl text-[#ffb81c]">1</span>
+          <span class="flex-1 text-sm font-semibold">Vos</span>
+          <span class="t-display text-xl">0</span>
+          <span class="brand-panel-muted text-xs">pts</span>
+        </div>
+
+        <div class="mt-4 rounded-xl border border-dashed border-[#f2f6ee]/25 px-4 py-3">
+          <p class="brand-panel-muted text-xs">Código de invitación</p>
+          <p class="t-display text-2xl tracking-widest opacity-60">••••••</p>
+          <p class="brand-panel-muted text-xs">Se genera al crear el grupo</p>
         </div>
       </div>
-    </div>
-
-    <!-- Error del servidor -->
-    @if (store.error()) {
-      <div
-        role="alert"
-        class="mt-4 flex items-center gap-2 px-4 py-3 bg-red-950 border border-red-800 rounded-xl text-sm text-red-300"
-      >
-        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        {{ store.error() }}
-      </div>
-    }
-
-    <!-- Actions -->
-    <div class="flex items-center gap-3 mt-5">
-      <button
-        type="submit"
-        [disabled]="store.isLoading()"
-        class="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-sm rounded-xl transition-colors"
-      >
-        @if (store.isLoading()) {
-          <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            />
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-        }
-        Crear grupo
-      </button>
-      <a
-        routerLink="/home/groups"
-        class="px-5 py-3 text-gray-300 hover:text-white text-sm font-semibold transition-colors"
-      >
-        Cancelar
-      </a>
-    </div>
-  </form>
+    </aside>
+  </div>
 </div>
